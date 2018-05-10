@@ -37,7 +37,7 @@ module Encounters {
     export type Node = IfNode | OpNode | CallNode | VarNode | IntNode;
 
     function tokenizeCond(data: string): Token[] {
-        var tokensRe: { [re: string]: number } = {
+        const tokensRe: { [re: string]: number } = {
             "if": Tok.IF,
             "and": Tok.OP,
             "[a-z_]+": Tok.IDENT,
@@ -48,18 +48,18 @@ module Encounters {
         };
 
         function match(str: string): Token|null {
-            for(var re in tokensRe) {
-                var m = str.match(new RegExp("^\\s*(" + re + ")\\s*"));
+            for(let re in tokensRe) {
+                const m = str.match(new RegExp("^\\s*(" + re + ")\\s*"));
                 if(m !== null)
                     return [tokensRe[re], m[1], m[0].length]
             }
             return null
         }
 
-        var acc = data;
-        var toks: Token[] = [];
+        let acc = data;
+        const toks: Token[] = [];
         while(acc.length > 0) {
-            var m = match(acc);
+            const m = match(acc);
             if(m === null)
                 throw "error parsing condition: '" + data + "': choked on '" + acc + "'";
             toks.push(m[0] === Tok.INT ? [Tok.INT, m[1], parseInt(m[1])] : m);
@@ -71,8 +71,8 @@ module Encounters {
 
     function parseCond(data: string) {
         data = data.replace("%", ""); // percentages don't really matter
-        var tokens = tokenizeCond(data);
-        var curTok = 0;
+        const tokens = tokenizeCond(data);
+        let curTok = 0;
 
         function expect(t: Tok) {
             if(tokens[curTok++][0] !== t)
@@ -92,27 +92,27 @@ module Encounters {
 
         function call(name: string): Node {
             expect(Tok.LPAREN);
-            var arg = expr();
+            const arg = expr();
             expect(Tok.RPAREN);
             return {type: 'call', name, arg}
         }
 
         function checkOp(node: Node): Node {
-            var t = peek();
+            const t = peek();
             if(t === null || t[0] !== Tok.OP)
                 return node;
 
             curTok++;
-            var rhs = checkOp(expr());
+            const rhs = checkOp(expr());
             return {type: 'op', op: t[1], lhs: node, rhs: rhs}
         }
 
         function expr(): Node {
-            var t = next();
+            const t = next();
             switch(t[0]) {
                 case Tok.IF:
                     expect(Tok.LPAREN);
-                    var cond = expr();
+                    const cond = expr();
                     expect(Tok.RPAREN);
                     return checkOp({type: 'if', cond: cond});
                 case Tok.IDENT:
@@ -133,8 +133,8 @@ module Encounters {
         // conditions are formed by conjunctions, so
         // x AND y AND z can just be collapsed to [x, y, z] here
 
-        var cond = parseCond(data);
-        var out: Node[] = [];
+        const cond = parseCond(data);
+        const out: Node[] = [];
 
         function visit(node: Node) {
             if(node.type === "op" && node.op === "and") {
@@ -201,9 +201,9 @@ module Encounters {
                 }
             case "int": return node.value;
             case "op":
-                var lhs = evalCond(node.lhs);
-                var rhs = evalCond(node.rhs);
-                var op: { [op: string]: (l: boolean|number, r: boolean|number) => boolean|number } =  {
+                const lhs = evalCond(node.lhs);
+                const rhs = evalCond(node.rhs);
+                const op: { [op: string]: (l: boolean | number, r: boolean | number) => boolean | number } = {
                     "<": (l, r) => l < r,
                     ">": (l, r) => l > r,
                     "and": (l, r) => l && r
@@ -218,7 +218,7 @@ module Encounters {
 
     function evalConds(conds: Node[]): boolean {
         // TODO: Array.every
-        for(var i = 0; i < conds.length; i++) {
+        for(let i = 0; i < conds.length; i++) {
             if(evalCond(conds[i]) === false)
                 return false
         }
@@ -226,10 +226,10 @@ module Encounters {
     }
 
     function evalEncounterCritter(critter: Worldmap.EncounterCritter): Worldmap.EncounterCritter {
-        var items = [];
-        for(var i = 0; i < critter.items.length; i++) {
-            var item = critter.items[i];
-            var amount = 1;
+        const items = [];
+        for(let i = 0; i < critter.items.length; i++) {
+            const item = critter.items[i];
+            let amount = 1;
 
             if(item.range !== null) {
                 amount = getRandomInt(item.range.start, item.range.end)
@@ -243,10 +243,10 @@ module Encounters {
     }
 
     function evalEncounterCritters(count: number, group: Worldmap.EncounterGroup): Worldmap.EncounterCritter[] {
-        var critters: Worldmap.EncounterCritter[] = [];
+        const critters: Worldmap.EncounterCritter[] = [];
 
-        for(var i = 0; i < group.critters.length; i++) {
-            var critter = group.critters[i];
+        for(let i = 0; i < group.critters.length; i++) {
+            const critter = group.critters[i];
 
             if(critter.cond !== null) {
                 if(!evalConds(critter.cond)) {
@@ -260,10 +260,10 @@ module Encounters {
             if(critter.ratio === null)
                 critters.push(evalEncounterCritter(critter));
             else {
-                var num = Math.ceil(critter.ratio/100 * count);
+                const num = Math.ceil(critter.ratio / 100 * count);
                 // TODO: better distribution (might be +1 now)
                 console.log("critter nums: %d (%d% of %d)", num, critter.ratio, count);
-                for(var j = 0; j < num; j++)
+                for(let j = 0; j < num; j++)
                     critters.push(evalEncounterCritter(critter))
             }
         }
@@ -274,19 +274,21 @@ module Encounters {
     function pickEncounter(encounters: Worldmap.Encounter[]) {
         // Pick an encounter from an encounter list based on a roll
 
-        var succEncounters = encounters.filter(function(enc) {
+        const succEncounters = encounters.filter(function (enc) {
             return (enc.cond !== null) ? evalConds(enc.cond) : true
         });
-        var numEncounters = succEncounters.length;
-        var totalChance = succEncounters.reduce(function(sum, x) { return x.chance + sum }, 0);
+        const numEncounters = succEncounters.length;
+        const totalChance = succEncounters.reduce(function (sum, x) {
+            return x.chance + sum
+        }, 0);
 
         if(numEncounters === 0)
             throw "pickEncounter: There were no successfully-conditioned encounters";
 
         console.log("pickEncounter: num: %d, chance: %d, encounters: %o", numEncounters, totalChance, succEncounters);
 
-        var luck = critterGetStat(player, "LUK");
-        var roll = getRandomInt(0, totalChance) + (luck - 5);
+        const luck = critterGetStat(player, "LUK");
+        const roll = getRandomInt(0, totalChance) + (luck - 5);
 
         // TODO: Adjust roll for difficulty (easy +5, hard -5),
         // perks (Scout +1, Ranger +1, Explorer +2)
@@ -295,10 +297,10 @@ module Encounters {
         // If our roll does *not* run out (i.e., its value exceeds totalChance), then
         // we will choose the last encounter in the list.
 
-        var acc = roll;
-        var idx = 0;
+        let acc = roll;
+        let idx = 0;
         for(; idx < succEncounters.length; idx++) {
-            var chance = succEncounters[idx].chance;
+            const chance = succEncounters[idx].chance;
             if(acc < chance)
                 break;
 
@@ -313,15 +315,15 @@ module Encounters {
         // set up critters' positions in their formations
 
         groups.forEach(function(group) {
-            var dir = getRandomInt(0, 5);
-            var formation = group.position.type;
-            var pos: Point|null = null;
+            let dir = getRandomInt(0, 5);
+            const formation = group.position.type;
+            let pos: Point | null = null;
 
             if(formation === "surrounding")
                 pos = {x: playerPos.x, y: playerPos.y};
             else {
                 // choose a random starting point from the map
-                var randomPoint = map.randomStartPoints[getRandomInt(0, map.randomStartPoints.length - 1)];
+                const randomPoint = map.randomStartPoints[getRandomInt(0, map.randomStartPoints.length - 1)];
                 pos = fromTileNum(randomPoint.tileNum)
             }
 
@@ -336,7 +338,7 @@ module Encounters {
                         pos = hexInDirectionDistance(pos, dir, group.position.spacing);
                         break;
                     case "surrounding":
-                        var roll = critterGetStat(player, "PER") + getRandomInt(-2, 2);
+                        let roll = critterGetStat(player, "PER") + getRandomInt(-2, 2);
                         // TODO: if have Cautious Nature perk, roll += 3
 
                         if(roll < 0)
@@ -348,8 +350,8 @@ module Encounters {
                         if(dir >= 6)
                             dir = 0;
 
-                        var rndSpacing = getRandomInt(0, Math.floor(roll / 2));
-                        var rndDir = getRandomInt(0, 5);
+                        const rndSpacing = getRandomInt(0, Math.floor(roll / 2));
+                        const rndDir = getRandomInt(0, 5);
                         pos = hexInDirectionDistance(pos, (rndDir + dir) % 6, rndSpacing);
 
                         critter.position = {x: pos.x, y: pos.y};
@@ -373,11 +375,11 @@ module Encounters {
     }
 
     export function evalEncounter(encTable: Worldmap.EncounterTable) {
-        var mapIndex = getRandomInt(0, encTable.maps.length - 1);
-        var mapLookupName = encTable.maps[mapIndex];
-        var mapName = lookupMapNameFromLookup(mapLookupName);
-        var groups: Worldmap.EncounterGroup[] = [];
-        var encounter = pickEncounter(encTable.encounters);
+        const mapIndex = getRandomInt(0, encTable.maps.length - 1);
+        let mapLookupName = encTable.maps[mapIndex];
+        let mapName = lookupMapNameFromLookup(mapLookupName);
+        const groups: Worldmap.EncounterGroup[] = [];
+        const encounter = pickEncounter(encTable.encounters);
 
         if(encounter.special !== null) {
             // special encounter: use specific map
@@ -394,32 +396,32 @@ module Encounters {
             // player ambush
             console.log("(player ambush)");
 
-            var party = encounter.enc.party;
-            var group = Worldmap.getEncounterGroup(party.name);
-            var position = group.position;
+            const party = encounter.enc.party;
+            const group = Worldmap.getEncounterGroup(party.name);
+            const position = group.position;
 
             console.log("party: %d-%d of %s", party.start, party.end, party.name);
             console.log("encounter group: %o", group);
             console.log("position:", position);
 
-            var critterCount = getRandomInt(party.start, party.end);
-            var critters = evalEncounterCritters(critterCount, group);
+            const critterCount = getRandomInt(party.start, party.end);
+            const critters = evalEncounterCritters(critterCount, group);
             groups.push({critters: critters, position: position, target: "player"})
         }
         else if(encounter.enc.type === "fighting") {
             // two factions fighting
-            var firstParty = encounter.enc.firstParty;
-            var secondParty = encounter.enc.secondParty;
+            const firstParty = encounter.enc.firstParty;
+            const secondParty = encounter.enc.secondParty;
             console.log("two factions: %o vs %o", firstParty, secondParty);
 
-            var firstGroup = Worldmap.getEncounterGroup(firstParty.name);
-            var firstCritterCount = getRandomInt(firstParty.start, firstParty.end);
+            const firstGroup = Worldmap.getEncounterGroup(firstParty.name);
+            const firstCritterCount = getRandomInt(firstParty.start, firstParty.end);
             groups.push({critters: evalEncounterCritters(firstCritterCount, firstGroup), target: 1, position: firstGroup.position});
 
             // one-party fighting? TODO: check what all is allowed with `fighting`
             if(secondParty.name !== undefined) {
-                var secondGroup = Worldmap.getEncounterGroup(secondParty.name);
-                var secondCritterCount = getRandomInt(secondParty.start, secondParty.end);
+                const secondGroup = Worldmap.getEncounterGroup(secondParty.name);
+                const secondCritterCount = getRandomInt(secondParty.start, secondParty.end);
                 groups.push({critters: evalEncounterCritters(secondCritterCount, secondGroup), target: 0, position: secondGroup.position})
             }
         }

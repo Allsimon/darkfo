@@ -82,13 +82,13 @@ interface AttackInfo {
 }
 
 function parseAttack(weapon: WeaponObj): {first: AttackInfo; second: AttackInfo} {
-	var attackModes = weapon.pro.extra['attackMode'];
-	var modeOne = attackMode[attackModes & 0xf] as number;
-	var modeTwo = attackMode[(attackModes >> 4) & 0xf] as number;
-	var attackOne: AttackInfo = {mode: modeOne, APCost: 0, maxRange: 0};
-	var attackTwo: AttackInfo = {mode: modeTwo, APCost: 0, maxRange: 0};
-	
-	if(modeOne !== attackMode.none) {
+    const attackModes = weapon.pro.extra['attackMode'];
+    const modeOne = attackMode[attackModes & 0xf] as number;
+    const modeTwo = attackMode[(attackModes >> 4) & 0xf] as number;
+    const attackOne: AttackInfo = {mode: modeOne, APCost: 0, maxRange: 0};
+    const attackTwo: AttackInfo = {mode: modeTwo, APCost: 0, maxRange: 0};
+
+    if(modeOne !== attackMode.none) {
 		attackOne.APCost = weapon.pro.extra.APCost1;
 		attackOne.maxRange = weapon.pro.extra.maxRange1
 	}
@@ -137,11 +137,11 @@ class Weapon {
 			this.type = 'gun';
 			this.minDmg = weapon.pro.extra.minDmg;
 			this.maxDmg = weapon.pro.extra.maxDmg;
-			var s = weapon.art.split('/');
-			this.name = s[s.length-1];
-			
-			var attacks = parseAttack(weapon);
-			this.attackOne = attacks.first;
+            const s = weapon.art.split('/');
+            this.name = s[s.length-1];
+
+            const attacks = parseAttack(weapon);
+            this.attackOne = attacks.first;
 			this.attackTwo = attacks.second;
 
 			this.weaponSkillType = weaponSkillMap[this.name];
@@ -224,13 +224,13 @@ class Weapon {
 		if(weaponAnims[this.name] && weaponAnims[this.name][anim])
 			return weaponAnims[this.name][anim];
 
-		var wep = this.getSkin() || 'a';
-		switch(anim) {
+        const wep = this.getSkin() || 'a';
+        switch(anim) {
 			case 'idle': return wep + 'a';
 			case 'walk': return wep + 'b';
 			case 'attack':
-				var attackSkin = this.getAttackSkin();
-				return wep + attackSkin;
+                const attackSkin = this.getAttackSkin();
+                return wep + attackSkin;
 			default: return null // let something else handle it
 		}
 	}
@@ -259,18 +259,18 @@ function critterGetEquippedWeapon(obj: Critter): WeaponObj|null {
 }
 
 function critterGetAnim(obj: Critter, anim: string): string {
-	var base = critterGetBase(obj);
+    const base = critterGetBase(obj);
 
-	// try weapon animation first
-	var weaponObj = critterGetEquippedWeapon(obj);
-	if(weaponObj !== null && Config.engine.doUseWeaponModel === true) {
-		var wepAnim = weaponObj.weapon.getAnim(anim);
-		if(wepAnim)
+    // try weapon animation first
+    const weaponObj = critterGetEquippedWeapon(obj);
+    if(weaponObj !== null && Config.engine.doUseWeaponModel === true) {
+        const wepAnim = weaponObj.weapon.getAnim(anim);
+        if(wepAnim)
 			return base + wepAnim
 	}
 
-	var wep = 'a';
-	switch(anim) {
+    const wep = 'a';
+    switch(anim) {
 		case "attack":
 			console.log("default attack animation instead of weapon animation.");
 			return base + wep + 'a';
@@ -309,14 +309,14 @@ function critterGetKillType(obj: Critter): number {
 }
 
 function getAnimDistance(art: string): number {
-	var info = imageInfo[art];
-	if(info === undefined)
+    const info = imageInfo[art];
+    if(info === undefined)
 		throw "no image info for " + art;
 
-	var firstShift = info.frameOffsets[0][0].ox;
-	var lastShift = info.frameOffsets[1][info.numFrames-1].ox;
+    const firstShift = info.frameOffsets[0][0].ox;
+    const lastShift = info.frameOffsets[1][info.numFrames - 1].ox;
 
-	// distance = (shift x of last frame) - (shift x of first frame(?) + 16) / 32
+    // distance = (shift x of last frame) - (shift x of first frame(?) + 16) / 32
 	return Math.floor((lastShift - firstShift + 16) / 32)
 }
 
@@ -338,8 +338,8 @@ function critterStaticAnim(obj: Critter, anim: string, callback: () => void, wai
 }
 
 function getDirectionalOffset(obj: Critter): Point {
-	var info = imageInfo[obj.art];
-	if(info === undefined)
+    const info = imageInfo[obj.art];
+    if(info === undefined)
 		throw "No image map info for: " + obj.art;
 	return info.directionOffsets[obj.orientation]
 }
@@ -362,10 +362,10 @@ function getAnimPartialActions(art: string, anim: string): { movement: number, a
 	if(numPartials === 0)
 		numPartials = 1;
 
-	var delta = Math.floor(imageInfo[art].numFrames / numPartials);
-	var startFrame = 0;
-	var endFrame = delta;
-	for(var i = 0; i < numPartials; i++) {
+    const delta = Math.floor(imageInfo[art].numFrames / numPartials);
+    let startFrame = 0;
+    let endFrame = delta;
+    for(let i = 0; i < numPartials; i++) {
 		partialActions.actions.push({startFrame: startFrame,
 									 endFrame: endFrame,
 									 step: i});
@@ -529,8 +529,8 @@ class Critter extends Obj {
 		// initialize weapons
 		this.inventory.forEach(inv => {
 			if(inv.subtype === "weapon") {
-				var w = <WeaponObj>inv;
-				if(this.leftHand === undefined) {
+                const w = <WeaponObj>inv;
+                if(this.leftHand === undefined) {
 					if(w.weapon.canEquip(this))
 						this.leftHand = w
 				}
@@ -553,8 +553,8 @@ class Critter extends Obj {
 	}
 
 	updateStaticAnim(): void {
-		var time = heart.timer.getTime();
-		var fps = 8; // todo: get FPS from image info
+        const time = heart.timer.getTime();
+        const fps = 8; // todo: get FPS from image info
 
 		if(time - this.lastFrameTime >= 1000/fps) {
 			this.frame++;
@@ -572,14 +572,14 @@ class Critter extends Obj {
 		if(!this.anim || this.anim === "idle") return;
 		if(animInfo[this.anim].type === "static") return this.updateStaticAnim();
 
-		var time = heart.timer.getTime();
-		var fps = imageInfo[this.art].fps;
-		var targetScreen = hexToScreen(this.path.target.x, this.path.target.y);
+        const time = heart.timer.getTime();
+        const fps = imageInfo[this.art].fps;
+        const targetScreen = hexToScreen(this.path.target.x, this.path.target.y);
 
-		var partials = getAnimPartialActions(this.art, this.anim);
-		var currentPartial = partials.actions[this.path.partial];
+        const partials = getAnimPartialActions(this.art, this.anim);
+        const currentPartial = partials.actions[this.path.partial];
 
-		if(time - this.lastFrameTime >= 1000/fps) {
+        if(time - this.lastFrameTime >= 1000/fps) {
 			// advance frame
 			this.lastFrameTime = time;
 
@@ -599,8 +599,8 @@ class Critter extends Obj {
 				// we're already on its startFrame which coincides with the current endFrame,
 				// so we add one to get to the next frame.
 				// unless we're the first one, in which case just 0.
-				var nextFrame = partials.actions[this.path.partial].startFrame + 1;
-				if(this.path.partial === 0)
+                let nextFrame = partials.actions[this.path.partial].startFrame + 1;
+                if(this.path.partial === 0)
 					nextFrame = 0;
 				this.frame = nextFrame;
 
@@ -608,10 +608,10 @@ class Critter extends Obj {
 				this.shift = {x: 0, y: 0};
 
 				// move to new path hex
-				var pos = this.path.path[this.path.index++];
-				var hex = {x: pos[0], y: pos[1]};
+                let pos = this.path.path[this.path.index++];
+                const hex = {x: pos[0], y: pos[1]};
 
-				if(!this.move(hex))
+                if(!this.move(hex))
 					return;
 				if(!this.path) // it's possible for move() to have side effects which can clear the anim
 					return;
@@ -625,13 +625,13 @@ class Critter extends Obj {
 				// advance frame
 				this.frame++;
 
-				var info = imageInfo[this.art];
-				if(info === undefined)
+                const info = imageInfo[this.art];
+                if(info === undefined)
 					throw "No image map info for: " + this.art;
 
 				// add the new frame's offset to our shift
-				var frameInfo = info.frameOffsets[this.orientation][this.frame];
-				this.shift.x += frameInfo.x;
+                const frameInfo = info.frameOffsets[this.orientation][this.frame];
+                this.shift.x += frameInfo.x;
 				this.shift.y += frameInfo.y
 			}
 
@@ -640,8 +640,8 @@ class Critter extends Obj {
 				// TODO: better logging system
 				//console.log("target reached")
 
-				var callback = this.animCallback;
-				this.clearAnim();
+                const callback = this.animCallback;
+                this.clearAnim();
 
 				if(callback)
 					callback()
@@ -662,10 +662,10 @@ class Critter extends Obj {
 			return false;
 
 		if(Config.engine.doSpatials !== false) {
-			var hitSpatials = hitSpatialTrigger(position);
-			for(var i = 0; i < hitSpatials.length; i++) {
-				var spatial = hitSpatials[i];
-				console.log("triggered spatial " + spatial.script + " (" + spatial.range + ") @ " +
+            const hitSpatials = hitSpatialTrigger(position);
+            for(let i = 0; i < hitSpatials.length; i++) {
+                const spatial = hitSpatials[i];
+                console.log("triggered spatial " + spatial.script + " (" + spatial.range + ") @ " +
 					        spatial.position.x + ", " + spatial.position.y);
 				Scripting.spatial(spatial, this)
 			}
@@ -713,8 +713,8 @@ class Critter extends Obj {
 			running = false;
 
 		// set up animation properties
-		var actualTarget = {x: path[path.length-1][0], y: path[path.length-1][1]};
-		this.path = {path: path, index: 1, target: actualTarget, partial: 0};
+        const actualTarget = {x: path[path.length - 1][0], y: path[path.length - 1][1]};
+        this.path = {path: path, index: 1, target: actualTarget, partial: 0};
 		this.anim = running ? "run" : "walk";
 		this.art = critterGetAnim(this, this.anim);
 		this.animCallback = callback || (() => this.clearAnim());
@@ -728,8 +728,8 @@ class Critter extends Obj {
 	}
 
 	walkInFrontOf(targetPos: Point, callback?: () => void): boolean {
-		var path = recalcPath(this.position, targetPos, false);
-		if(path.length === 0) // invalid path
+        const path = recalcPath(this.position, targetPos, false);
+        if(path.length === 0) // invalid path
 			return false;
 		else if(path.length <= 2) { // we're already infront of or on it
 			if(callback)
@@ -738,11 +738,11 @@ class Critter extends Obj {
 		}
 		path.pop(); // we don't want targetPos in the path
 
-		var target = path[path.length - 1];
-		targetPos = {x: target[0], y: target[1]};
+        const target = path[path.length - 1];
+        targetPos = {x: target[0], y: target[1]};
 
-		var running = Config.engine.doAlwaysRun;
-		if(hexDistance(this.position, targetPos) > 5)
+        let running = Config.engine.doAlwaysRun;
+        if(hexDistance(this.position, targetPos) > 5)
 			running = true;
 
 		//console.log("path: %o, callback %o", path, callback)

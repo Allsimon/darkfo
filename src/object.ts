@@ -22,7 +22,7 @@ let _lastObjectUID = 0;
 
 function objectGetMoney(obj: Obj): number {
 	const MONEY_PID = 41;
-	for(var i = 0; i < obj.inventory.length; i++) {
+	for(let i = 0; i < obj.inventory.length; i++) {
 		if(obj.inventory[i].pid === MONEY_PID) {
 			return obj.inventory[i].amount
 		}
@@ -80,7 +80,7 @@ function objectIsExplosive(obj: Obj): boolean {
 }
 
 function objectFindItemIndex(obj: Obj, item: Obj): number {
-	for(var i = 0; i < obj.inventory.length; i++) {
+	for(let i = 0; i < obj.inventory.length; i++) {
 		if(obj.inventory[i].pid === item.pid)
 			return i
 	}
@@ -93,8 +93,8 @@ function objectSwapItem(a: Obj, item: Obj, b: Obj, amount: number) {
 	// swap item from a -> b
 	if(amount === 0) return;
 
-	var idx = objectFindItemIndex(a, item);
-	if(idx === -1)
+    const idx = objectFindItemIndex(a, item);
+    if(idx === -1)
 		throw "item (" + item + ") does not exist in a";
 	if(amount !== undefined && amount < item.amount) {
 		// just deduct amount from a and give amount to b
@@ -114,9 +114,9 @@ function objectGetDamageType(obj: any): string { // TODO: any (where does dmgTyp
 }
 
 function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): void {
-	var damage = maxDmg;
-	var explosion = createObjectWithPID(makePID(5 /* misc */, 14 /* Explosion */), -1);
-	explosion.position.x = obj.position.x;
+    const damage = maxDmg;
+    const explosion = createObjectWithPID(makePID(5 /* misc */, 14 /* Explosion */), -1);
+    explosion.position.x = obj.position.x;
 	explosion.position.y = obj.position.y;
 	(<any>obj).dmgType = "explosion"; // TODO: any (WeaponObj?)
 
@@ -128,10 +128,10 @@ function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): v
 			gMap.destroyObject(explosion);
 
 			// damage critters in a radius
-			var hexes = hexesInRadius(obj.position, 8 /* explosion radius */); // TODO: radius
-			for(var i = 0; i < hexes.length; i++) {
-				var objs = objectsAtPosition(hexes[i]);
-				for(var j = 0; j < objs.length; j++) {
+            const hexes = hexesInRadius(obj.position, 8 /* explosion radius */); // TODO: radius
+			for(let i = 0; i < hexes.length; i++) {
+                const objs = objectsAtPosition(hexes[i]);
+                for(let j = 0; j < objs.length; j++) {
 					if(objs[j].type === "critter")
 						console.log("todo: damage", (<Critter>objs[j]).name);
 
@@ -147,13 +147,13 @@ function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): v
 
 function useExplosive(obj: Obj, source: Critter): void {
 	if(source.isPlayer !== true) return; // ?
-	var mins, secs;
+    let mins, secs;
 
-	while(true) {
-		var time = prompt("Time to detonate?", "1:00");
-		if(time === null) return; // cancel
-		var s = time.split(':');
-		if(s.length !== 2) continue;
+    while(true) {
+        const time = prompt("Time to detonate?", "1:00");
+        if(time === null) return; // cancel
+        const s = time.split(':');
+        if(s.length !== 2) continue;
 
 		mins = parseInt(s[0]);
 		secs = parseInt(s[1]);
@@ -164,7 +164,7 @@ function useExplosive(obj: Obj, source: Critter): void {
 
 	// TODO: skill rolls
 
-	var ticks = (mins*60*10) + secs*10; // game ticks until detonation
+    const ticks = (mins * 60 * 10) + secs * 10; // game ticks until detonation
 
 	console.log("arming explosive for " + ticks + " ticks");
 
@@ -237,9 +237,9 @@ function useObject(obj: Obj, source?: Critter, useScript?: boolean): boolean {
 	}
 	else if(objectIsStairs(obj)) {
 		var destTile = fromTileNum(obj.extra.destination & 0xffff);
-		var destElev = ((obj.extra.destination >> 28) & 0xf) >> 1;
+        const destElev = ((obj.extra.destination >> 28) & 0xf) >> 1;
 
-		if(obj.extra.destinationMap === -1 && obj.extra.destination !== -1) {
+        if(obj.extra.destinationMap === -1 && obj.extra.destination !== -1) {
 			// same map, new destination
 			console.log("stairs: tile: " + destTile.x + ", " + destTile.y + ", elev: " + destElev);
 
@@ -253,9 +253,9 @@ function useObject(obj: Obj, source?: Critter, useScript?: boolean): boolean {
 		}
 	}
 	else if(objectIsLadder(obj)) {
-		var isTop = (obj.pro.extra.subType === 4);
-		var level = isTop ? currentElevation + 1 : currentElevation - 1;
-		var destTile = fromTileNum(obj.extra.destination & 0xffff);
+        const isTop = (obj.pro.extra.subType === 4);
+        const level = isTop ? currentElevation + 1 : currentElevation - 1;
+        var destTile = fromTileNum(obj.extra.destination & 0xffff);
 		// TODO: destination also supposedly contains elevation and map
 		console.log("ladder (" + (isTop ? "top" : "bottom") + " -> level " + level + ")");
 		player.position = destTile;
@@ -273,13 +273,13 @@ function objectFindIndex(obj: Obj): number {
 }
 
 function objectZCompare(a: Obj, b: Obj): number {
-	var aY = a.position.y;
-	var bY = b.position.y;
+    const aY = a.position.y;
+    const bY = b.position.y;
 
-	var aX = a.position.x;
-	var bX = b.position.x;
+    const aX = a.position.x;
+    const bX = b.position.x;
 
-	if(aY === bY) {
+    if(aY === bY) {
 		if(aX < bX) return -1;
 		else if(aX > bX) return 1;
 		else if(aX === bX) {
@@ -295,21 +295,21 @@ function objectZCompare(a: Obj, b: Obj): number {
 }
 
 function objectZOrder(obj: Obj, index: number): void {
-	var oldIdx = (index !== undefined) ? index : objectFindIndex(obj);
-	if(oldIdx === -1) {
+    const oldIdx = (index !== undefined) ? index : objectFindIndex(obj);
+    if(oldIdx === -1) {
 		console.log("objectZOrder: no such object...");
 		return
 	}
 
 	// TOOD: mutable/potentially unsafe usage of getObjects
-	var objects = gMap.getObjects();
+    const objects = gMap.getObjects();
 
-	objects.splice(oldIdx, 1); // remove the object...
+    objects.splice(oldIdx, 1); // remove the object...
 
-	var inserted = false;
-	for(var i = 0; i < objects.length; i++) {
-		var zc = objectZCompare(obj, objects[i]);
-		if(zc === -1) {
+    let inserted = false;
+    for(let i = 0; i < objects.length; i++) {
+        const zc = objectZCompare(obj, objects[i]);
+        if(zc === -1) {
 			objects.splice(i, 0, obj); // insert at new index
 			inserted = true;
 			break
@@ -333,14 +333,14 @@ function useElevator(): void {
 
 	console.log("[elevator]");
 
-	var center = player.position;
-	var hexes = hexesInRadius(center, 11);
-	var elevatorStub = null;
-	for(var i = 0; i < hexes.length; i++) {
-		var objs = objectsAtPosition(hexes[i]);
-		for(var j = 0; j < objs.length; j++) {
-			var obj = objs[j];
-			if(obj.type === "scenery" && obj.pidID === 1293) {
+    const center = player.position;
+    const hexes = hexesInRadius(center, 11);
+    let elevatorStub = null;
+    for(let i = 0; i < hexes.length; i++) {
+        const objs = objectsAtPosition(hexes[i]);
+        for(let j = 0; j < objs.length; j++) {
+            const obj = objs[j];
+            if(obj.type === "scenery" && obj.pidID === 1293) {
 				console.log("elevator stub @ " + hexes[i].x +
 					        ", " + hexes[i].y);
 				elevatorStub = obj;
@@ -355,8 +355,8 @@ function useElevator(): void {
 	console.log("elevator type: " + elevatorStub.extra.type + ", " +
 		        "level: " + elevatorStub.extra.level);
 
-	var elevator = getElevator(elevatorStub.extra.type);
-	if(!elevator)
+    let elevator = getElevator(elevatorStub.extra.type);
+    if(!elevator)
 		throw "no elevator: " + elevatorStub.extra.type;
 	
 	uiElevator(elevator)
@@ -447,10 +447,10 @@ class Obj {
 
 	static fromPID_<T extends Obj>(obj: T, pid: number, sid?: number): T {
 		console.log(`fromPID: pid=${pid}, sid=${sid}`);
-		var pidType = (pid >> 24) & 0xff;
-		var pidID = pid & 0xffff;
+        const pidType = (pid >> 24) & 0xff;
+        const pidID = pid & 0xffff;
 
-		var pro: any = loadPRO(pid, pidID); // TODO: any
+        const pro: any = loadPRO(pid, pidID); // TODO: any
 		obj.type = getPROTypeName(pidType);
 		obj.pid = pid;
 		obj.pro = pro;
@@ -461,8 +461,8 @@ class Obj {
 			obj.subtype = getPROSubTypeName(pro.extra.subtype);
 			obj.name = getMessage("pro_item", pro.textID);
 
-			var invPID = pro.extra.invFRM & 0xffff;
-			console.log(`invPID: ${invPID}, pid=${pid}`);
+            const invPID = pro.extra.invFRM & 0xffff;
+            console.log(`invPID: ${invPID}, pid=${pid}`);
 			if(invPID !== 0xffff)
 				obj.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
 		}
@@ -533,9 +533,9 @@ class Obj {
 	}
 
 	loadScript(sid:number=-1): void {
-		var scriptName = null;
+        let scriptName = null;
 
-		if(sid >= 0)
+        if(sid >= 0)
 			scriptName = lookupScriptName(sid);
 		else if(this.script)
 			scriptName = this.script;
@@ -554,8 +554,8 @@ class Obj {
 			if(Config.engine.doLogScriptLoads)
 				console.log("loadScript: loading %s (sid=%d)", scriptName, sid);
 			// console.trace();
-			var script = Scripting.loadScript(scriptName);
-			if(!script) {
+            let script = Scripting.loadScript(scriptName);
+            if(!script) {
 				console.log("loadScript: load script failed for %s (sid=%d)", scriptName, sid)
 			} else {
 				this.script = scriptName;
@@ -601,9 +601,9 @@ class Obj {
 
 	updateAnim(): void {
 		if(!this.anim) return;
-		var time = heart.timer.getTime();
-		var fps = imageInfo[this.art].fps;
-		if(fps === 0) fps = 10; // XXX: ?
+        const time = heart.timer.getTime();
+        let fps = imageInfo[this.art].fps;
+        if(fps === 0) fps = 10; // XXX: ?
 
 		if(time - this.lastFrameTime >= 1000/fps) {
 			if(this.anim === "reverse") this.frame--;
@@ -656,10 +656,10 @@ class Obj {
 		// object without the script, and then re-load it for a new instance.
 		if(this._script) {
 			console.log("cloning an object with a script: %o", this);
-			var _script = this._script;
-			this._script = null;
-			var obj = deepClone(this);
-			this._script = _script;
+            const _script = this._script;
+            this._script = null;
+            const obj = deepClone(this);
+            this._script = _script;
 			obj.loadScript(); // load new copy of the script
 			return obj
 
@@ -670,7 +670,7 @@ class Obj {
 	}
 
 	addInventoryItem(item: Obj, count: number=1): void {
-		for(var i = 0; i < this.inventory.length; i++) {
+		for(let i = 0; i < this.inventory.length; i++) {
 			if(this.inventory[i].approxEq(item)) {
 				this.inventory[i].amount += count;
 				return
@@ -745,8 +745,8 @@ class Item extends Obj {
 			return;
 		this.name = getMessage("pro_item", this.pro.textID);
 
-		var invPID = this.pro.extra.invFRM & 0xffff;
-		if(invPID !== 0xffff)
+        const invPID = this.pro.extra.invFRM & 0xffff;
+        if(invPID !== 0xffff)
 			this.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
 	}
 }
@@ -808,8 +808,8 @@ class Door extends Scenery {
 
 // Creates an object of a relevant type from a Prototype ID and an optional Script ID
 function createObjectWithPID(pid: number, sid?: number) {
-	var pidType = (pid >> 24) & 0xff;
-	if(pidType == 1) // critter
+    const pidType = (pid >> 24) & 0xff;
+    if(pidType == 1) // critter
 		return Critter.fromPID(pid, sid);
 	else if(pidType == 0) { // item
 		var pro = loadPRO(pid, pid & 0xffff);
@@ -830,10 +830,10 @@ function createObjectWithPID(pid: number, sid?: number) {
 }
 
 function objFromMapObject(mobj: any, deserializing: boolean=false) {
-	var pid = mobj.pid;
-	var pidType = (pid >> 24) & 0xff;
+    const pid = mobj.pid;
+    const pidType = (pid >> 24) & 0xff;
 
-	if(pidType == 1) // critter
+    if(pidType == 1) // critter
 		return Critter.fromMapObject(mobj, deserializing);
 	else if(pidType == 0) { // item
 		var pro = mobj.pro || loadPRO(pid, pid & 0xffff);

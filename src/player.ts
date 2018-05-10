@@ -59,15 +59,15 @@ class Player extends Critter {
 			Events.emit("playerMoved", position);
 
 		// check if the player has entered an exit grid
-		var objs = objectsAtPosition(this.position);
-		for(var i = 0; i < objs.length; i++) {
+        const objs = objectsAtPosition(this.position);
+        for(let i = 0; i < objs.length; i++) {
 			if(objs[i].type === "misc" && objs[i].extra && objs[i].extra.exitMapID !== undefined) {
 				// walking on an exit grid
 				// todo: exit grids are likely multi-hex (maybe have a set?)
-				var exitMapID = objs[i].extra.exitMapID;
-				var startingPosition = fromTileNum(objs[i].extra.startingPosition);
-				var startingElevation = objs[i].extra.startingElevation;
-				this.clearAnim();
+                const exitMapID = objs[i].extra.exitMapID;
+                const startingPosition = fromTileNum(objs[i].extra.startingPosition);
+                const startingElevation = objs[i].extra.startingElevation;
+                this.clearAnim();
 
 				if(startingPosition.x === -1 || startingPosition.y === -1 ||
 				   exitMapID < 0) { // world map

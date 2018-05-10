@@ -53,10 +53,10 @@ function makePID(type: number, pid: number) {
 
 function getCritterArtPath(frmPID: number) {
 	console.log("FRM PID: " + frmPID);
-	var idx = (frmPID & 0x00000fff);
-	var id1 = (frmPID & 0x0000f000) >> 12;
-	var id2 = (frmPID & 0x00ff0000) >> 16;
-	//var id3 = (frmPID & 0x70000000) >> 28
+    const idx = (frmPID & 0x00000fff);
+    const id1 = (frmPID & 0x0000f000) >> 12;
+    const id2 = (frmPID & 0x00ff0000) >> 16;
+    //var id3 = (frmPID & 0x70000000) >> 28
 
 	if (id2 == 0x1b || id2 == 0x1d ||
 			id2 == 0x1e || id2 == 0x37 ||
@@ -65,9 +65,9 @@ function getCritterArtPath(frmPID: number) {
 		throw "reindex(?)"
 	}
 
-	var path = "art/critters/" + getLstId("art/critters/critters", idx).split(',')[0].toLowerCase();
+    let path = "art/critters/" + getLstId("art/critters/critters", idx).split(',')[0].toLowerCase();
 
-	if(id1 >= 0x0b)
+    if(id1 >= 0x0b)
 		throw "?";
 
 	if(id2 >= 0x26 && id2 <= 0x2f)
@@ -109,17 +109,18 @@ function lookupInterfaceArt(idx: number) {
 }
 
 function lookupArt(frmPID: number) {
-	var type = getPROType(frmPID);
-	var pidID = frmPID & 0xffff;
+    const type = getPROType(frmPID);
+    const pidID = frmPID & 0xffff;
 
     if(type === "critters")
     	return getCritterArtPath(frmPID);
 
-	var lsts: { [lst: string]: string } = {
-		        "items": "art/items/items",
-                "scenery": "art/scenery/scenery", "misc": "art/misc/misc"};
-	var path = "art/" + type + "/" + getLstId(lsts[type], pidID).split('.')[0];
+    const lsts: { [lst: string]: string } = {
+        "items": "art/items/items",
+        "scenery": "art/scenery/scenery", "misc": "art/misc/misc"
+    };
+    const path = "art/" + type + "/" + getLstId(lsts[type], pidID).split('.')[0];
 
-	// console.log("LOOKUP ART: " + path)
+    // console.log("LOOKUP ART: " + path)
 	return path.toLowerCase()
 }

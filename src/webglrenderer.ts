@@ -24,9 +24,9 @@ class WebGLRenderer extends Renderer {
 	textures: {[key: string]: any} = {}; // WebGL texture cache
 
 	newTexture(key: string, img: any, doCache: boolean=true): any {
-		var gl = this.gl;
-		var texture = this.gl.createTexture();
-		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        const gl = this.gl;
+        const texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
 		// Set the parameters so we can render any size image.
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -43,8 +43,8 @@ class WebGLRenderer extends Renderer {
 	}
 
 	getTexture(name: string): any {
-		var texture = this.textures[name];
-		if(texture !== undefined)
+        const texture = this.textures[name];
+        if(texture !== undefined)
 			return texture;
 		return null
 	}
@@ -64,14 +64,14 @@ class WebGLRenderer extends Renderer {
 	// create a texture from an array-like thing into a 3-component Float32Array using only the R component
 	// TODO: find a better format to store data in textures
 	textureFromArray(arr: any, size: number=256): any {
-		var buf = new Float32Array(size*size*4);
-		for(var i = 0; i < arr.length; i++) {
+        const buf = new Float32Array(size * size * 4);
+        for(let i = 0; i < arr.length; i++) {
 			buf[i*4] = arr[i]
 		}
 
-		var gl = this.gl;
-		var texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
+        const gl = this.gl;
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -82,9 +82,9 @@ class WebGLRenderer extends Renderer {
 
 	// create a texture from a Uint8Array with RGB components
 	textureFromColorArray(arr: any, width: number): any {
-		var gl = this.gl;
-		var texture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, texture);
+        const gl = this.gl;
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -101,8 +101,8 @@ class WebGLRenderer extends Renderer {
 	    heart.ctx = null;
 	    heart._bg = null;
 
-	    var gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
-	    if(!gl) {
+        let gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
+        if(!gl) {
 	    	alert("error getting WebGL context");
 	    	return
 	    }
@@ -128,8 +128,8 @@ class WebGLRenderer extends Renderer {
 	    this.positionLocation = gl.getAttribLocation(this.tileShader, "a_position");
 	    this.offsetLocation = gl.getUniformLocation(this.tileShader, "u_offset");
 
-	    var resolutionLocation = gl.getUniformLocation(this.tileShader, "u_resolution");
-	    gl.uniform2f(resolutionLocation, this.canvas.width, this.canvas.height);
+        const resolutionLocation = gl.getUniformLocation(this.tileShader, "u_resolution");
+        gl.uniform2f(resolutionLocation, this.canvas.width, this.canvas.height);
 
 	    this.texCoordLocation = gl.getAttribLocation(this.tileShader, "a_texCoord");
 	    this.uNumFramesLocation = gl.getUniformLocation(this.tileShader, "u_numFrames");
@@ -166,13 +166,13 @@ class WebGLRenderer extends Renderer {
     	    this.litOffsetLocation = gl.getUniformLocation(this.floorLightShader, "u_offset");
     	    this.litScaleLocation = gl.getUniformLocation(this.floorLightShader, "u_scale");
     	    this.uLightBuffer = gl.getUniformLocation(this.floorLightShader, "u_lightBuffer");
-    	    var litResolutionLocation = gl.getUniformLocation(this.floorLightShader, "u_resolution");
-    	    var litPositionLocation = gl.getAttribLocation(this.floorLightShader, "a_position");
+            const litResolutionLocation = gl.getUniformLocation(this.floorLightShader, "u_resolution");
+            const litPositionLocation = gl.getAttribLocation(this.floorLightShader, "a_position");
 
-	    	gl.uniform2f(litResolutionLocation, this.canvas.width, this.canvas.height);
+            gl.uniform2f(litResolutionLocation, this.canvas.width, this.canvas.height);
 
-		    var litTexCoordLocation = gl.getAttribLocation(this.floorLightShader, "a_texCoord");
-		    gl.enableVertexAttribArray(litTexCoordLocation);
+            const litTexCoordLocation = gl.getAttribLocation(this.floorLightShader, "a_texCoord");
+            gl.enableVertexAttribArray(litTexCoordLocation);
 		    gl.vertexAttribPointer(litTexCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
 		    gl.enableVertexAttribArray(litPositionLocation);
@@ -186,24 +186,24 @@ class WebGLRenderer extends Renderer {
 
     	    // upload color tables
     	    // TODO: have it in a typed array anyway
-    	    var _colorTable = getFileJSON("colorTable.json");
-    	    gl.activeTexture(gl.TEXTURE2);
+            const _colorTable = getFileJSON("colorTable.json");
+            gl.activeTexture(gl.TEXTURE2);
     	    this.textureFromArray(_colorTable);
     	    gl.uniform1i(this.u_colorTable, 2);
 
     	    // intensityColorTable
-    	    var _intensityColorTable = Lighting.intensityColorTable;
-    	    var intensityColorTable = new Uint8Array(65536);
-    	    for(var i = 0; i < 65536; i++)
+            const _intensityColorTable = Lighting.intensityColorTable;
+            const intensityColorTable = new Uint8Array(65536);
+            for(let i = 0; i < 65536; i++)
     	    	intensityColorTable[i] = _intensityColorTable[i]
     	    gl.activeTexture(gl.TEXTURE3);
     	    this.textureFromArray(intensityColorTable);
     	    gl.uniform1i(this.u_intensityColorTable, 3);
 
     	    // paletteRGB
-    	    var _colorRGB = getFileJSON("color_rgb.json");
-    	    var paletteRGB = new Uint8Array(256*3);
-    	    for(var i = 0; i < 256; i++) {
+            const _colorRGB = getFileJSON("color_rgb.json");
+            const paletteRGB = new Uint8Array(256 * 3);
+            for(let i = 0; i < 256; i++) {
     	    	paletteRGB[i*3 + 0] = _colorRGB[i][0];
     	    	paletteRGB[i*3 + 1] = _colorRGB[i][1];
     	    	paletteRGB[i*3 + 2] = _colorRGB[i][2]
@@ -228,13 +228,13 @@ class WebGLRenderer extends Renderer {
 	}
 
 	rectangleBuffer(gl: WebGLRenderingContext, x: number, y: number, width: number, height: number) {
-		var buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		var x1 = x;
-		var x2 = x + width;
-		var y1 = y;
-		var y2 = y + height;
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        const x1 = x;
+        const x2 = x + width;
+        const y1 = y;
+        const y2 = y + height;
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
 		   x1, y1,
 		   x2, y1,
 		   x1, y2,
@@ -245,10 +245,10 @@ class WebGLRenderer extends Renderer {
 	}
 
 	getShader(gl: WebGLRenderingContext, id: string) {
-	    var el: any = document.getElementById(id); // TODO
-	    var source = el.text;
-	    var shader = gl.createShader(el.type === "x-shader/x-fragment" ? gl.FRAGMENT_SHADER : gl.VERTEX_SHADER);
-	    gl.shaderSource(shader, source);
+        const el: any = document.getElementById(id); // TODO
+        const source = el.text;
+        const shader = gl.createShader(el.type === "x-shader/x-fragment" ? gl.FRAGMENT_SHADER : gl.VERTEX_SHADER);
+        gl.shaderSource(shader, source);
 	    gl.compileShader(shader);
 
 	    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -260,10 +260,10 @@ class WebGLRenderer extends Renderer {
 	}
 
 	getProgram(gl: WebGLRenderingContext, vid: string, fid: string) {
-	    var fsh = this.getShader(gl, fid);
-	    var vsh = this.getShader(gl, vid);
-	    var program = gl.createProgram();
-	    gl.attachShader(program, vsh);
+        const fsh = this.getShader(gl, fid);
+        const vsh = this.getShader(gl, vid);
+        const program = gl.createProgram();
+        gl.attachShader(program, vsh);
 	    gl.attachShader(program, fsh);
 	    gl.linkProgram(program);
 
@@ -304,9 +304,9 @@ class WebGLRenderer extends Renderer {
 			}
 		}
 
-		var gl = this.gl;
+        const gl = this.gl;
 
-		// use floor light shader
+        // use floor light shader
 		gl.useProgram(this.floorLightShader);
 
 		// bind buffers
@@ -325,21 +325,21 @@ class WebGLRenderer extends Renderer {
 		//gl.activeTexture(gl.TEXTURE0)
 
 		// construct light buffer
-		var lightBuffer = new Float32Array(80*36);
-		var lastTexture = null;
+        const lightBuffer = new Float32Array(80 * 36);
+        let lastTexture = null;
 
 
-		// reverse i to draw in the order Fallout 2 normally does
+        // reverse i to draw in the order Fallout 2 normally does
 		// otherwise there will be artifacts in the light rendering
 		// due to tile sizes being different and not overlapping properly
-		for(var i = tilemap.length - 1; i >= 0; i--) {
-			for(var j = 0; j < tilemap[0].length; j++) {
-				var tile = tilemap[j][i];
-				if(tile === "grid000") continue;
-				var img = "art/tiles/" + tile;
+		for(let i = tilemap.length - 1; i >= 0; i--) {
+			for(let j = 0; j < tilemap[0].length; j++) {
+                const tile = tilemap[j][i];
+                if(tile === "grid000") continue;
+                const img = "art/tiles/" + tile;
 
-				var scr = tileToScreen(i, j);
-				if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
+                const scr = tileToScreen(i, j);
+                if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
 				   scr.x >= cameraX+SCREEN_WIDTH || scr.y >= cameraY+SCREEN_HEIGHT)
 					continue;
 
@@ -347,8 +347,8 @@ class WebGLRenderer extends Renderer {
 					gl.activeTexture(gl.TEXTURE0);
 					
 					// TODO: uses hack
-					var texture = this.getTextureFromHack(img);
-					if(!texture) {
+                    let texture = this.getTextureFromHack(img);
+                    if(!texture) {
 						console.log("skipping tile without a texture: " + img);
 						continue
 					}
@@ -361,19 +361,19 @@ class WebGLRenderer extends Renderer {
 				// compute lighting
 
 				// TODO: how correct is this?
-				var hex = hexFromScreen(scr.x - 13,
-					                    scr.y + 13);
+                const hex = hexFromScreen(scr.x - 13,
+                    scr.y + 13);
 
-				var isTriangleLit = Lighting.initTile(hex);
-				var framebuffer;
-				var intensity_;
+                const isTriangleLit = Lighting.initTile(hex);
+                let framebuffer;
+                let intensity_;
 
-				if(isTriangleLit)
+                if(isTriangleLit)
 					framebuffer = Lighting.computeFrame();
 
 				// render tile
-				for(var y = 0; y < 36; y++) {
-					for(var x = 0; x < 80; x++) {
+				for(let y = 0; y < 36; y++) {
+					for(let x = 0; x < 80; x++) {
 						if(isTriangleLit) {
 							intensity_ = framebuffer[160 + 80*y + x]
 						}
@@ -404,27 +404,27 @@ class WebGLRenderer extends Renderer {
 	}
 
 	drawTileMap(tilemap: TileMap, offsetY: number): void {
-		var gl = this.gl;
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.tileBuffer);
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.tileBuffer);
 		gl.uniform1f(this.uNumFramesLocation, 1);
 		gl.uniform1f(this.uFrameLocation, 0);
 		gl.uniform2f(this.uScaleLocation, 80, 36);
 
-		for(var i = 0; i < tilemap.length; i++) {
-			for(var j = 0; j < tilemap[0].length; j++) {
-				var tile = tilemap[j][i];
-				if(tile === "grid000") continue;
-				var img = "art/tiles/" + tile;
+		for(let i = 0; i < tilemap.length; i++) {
+			for(let j = 0; j < tilemap[0].length; j++) {
+                const tile = tilemap[j][i];
+                if(tile === "grid000") continue;
+                const img = "art/tiles/" + tile;
 
-				var scr = tileToScreen(i, j);
-				scr.y += offsetY;
+                const scr = tileToScreen(i, j);
+                scr.y += offsetY;
 				if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
 				   scr.x >= cameraX+SCREEN_WIDTH || scr.y >= cameraY+SCREEN_HEIGHT)
 					continue;
 
 				// TODO: uses hack
-				var texture = this.getTextureFromHack(img);
-				if(!texture) {
+                let texture = this.getTextureFromHack(img);
+                if(!texture) {
 					console.log("skipping tile without a texture: " + img);
 					continue
 				}
@@ -449,20 +449,20 @@ class WebGLRenderer extends Renderer {
 	}
 
 	renderObject(obj: Obj): void {
-		var renderInfo = this.objectRenderInfo(obj);
-		if(!renderInfo || !renderInfo.visible)
+        let renderInfo = this.objectRenderInfo(obj);
+        if(!renderInfo || !renderInfo.visible)
 			return;
 
 		// TODO: uses hack
-		var texture = this.getTextureFromHack(obj.art);
-		if(!texture) {
+        let texture = this.getTextureFromHack(obj.art);
+        if(!texture) {
 			console.log("no texture for object");
 			return
 		}
 
-		var gl = this.gl;
+        const gl = this.gl;
 
-		// draw
+        // draw
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 
 		gl.uniform1f(this.uNumFramesLocation, renderInfo.artInfo.totalFrames);

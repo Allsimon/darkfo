@@ -58,4 +58,4 @@ class Party {
 	}
 }
 
-var gParty = new Party();
+const gParty = new Party();

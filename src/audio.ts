@@ -52,8 +52,8 @@ class HTMLAudioEngine implements AudioEngine {
 	}
 
 	playSound(soundName: string): HTMLAudioElement|null {
-		var sound = new Audio();
-		sound.addEventListener("loadeddata", () => sound.play(), false);
+        const sound = new Audio();
+        sound.addEventListener("loadeddata", () => sound.play(), false);
 		sound.src = "audio/" + soundName + ".wav";
 		return sound
 	}
@@ -79,10 +79,10 @@ class HTMLAudioEngine implements AudioEngine {
 		const sumFreqs = sfx.reduce((sum: number, x: [string, number]) => sum + x[1], 0);
 		let roll = getRandomInt(0, sumFreqs);
 
-		for(var i = 0; i < sfx.length; i++) {
-			var freq = sfx[i][1];
+		for(let i = 0; i < sfx.length; i++) {
+            const freq = sfx[i][1];
 
-			if(roll >= freq)
+            if(roll >= freq)
 				return sfx[i][0];
 
 			roll -= freq
@@ -93,9 +93,9 @@ class HTMLAudioEngine implements AudioEngine {
 	}
 
 	tick(): void {
-		var time = heart.timer.getTime();
+        const time = heart.timer.getTime();
 
-		if(!this.nextSfx)
+        if(!this.nextSfx)
 			this.nextSfx = this.rollNextSfx();
 
 		if(time >= this.nextSfxTime) {

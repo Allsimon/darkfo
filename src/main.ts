@@ -29,43 +29,44 @@ interface HeartImage {
 	getHeight(): number;
 }
 
-var gMap: GameMap|null = null;
+let gMap: GameMap | null = null;
 const images: { [name: string]: HeartImage } = {}; // Image cache
-var imageInfo: any = null; // Metadata about images (Number of frames, FPS, etc)
-var currentElevation = 0; // current map elevation
-var hexOverlay: HeartImage|null = null;
-var tempCanvas: HTMLCanvasElement|null = null; // temporary canvas used for detecting single pixels
-var tempCanvasCtx: CanvasRenderingContext2D|null = null; // and the context for it
+let imageInfo: any = null; // Metadata about images (Number of frames, FPS, etc)
+let currentElevation = 0; // current map elevation
+let hexOverlay: HeartImage | null = null;
+let tempCanvas: HTMLCanvasElement | null = null; // temporary canvas used for detecting single pixels
+let tempCanvasCtx: CanvasRenderingContext2D | null = null; // and the context for it
 
 // position of viewport camera (will be overriden by map starts or scripts)
-var cameraX: number = 3580;
-var cameraY: number = 1020;
+let cameraX: number = 3580;
+let cameraY: number = 1020;
 
 const SCREEN_WIDTH: number = Config.ui.screenWidth;
 const SCREEN_HEIGHT: number = Config.ui.screenHeight;
 
-var gameTickTime: number = 0; // in Fallout 2 ticks (elapsed seconds * 10)
-var lastGameTick: number = 0; // real time of the last game tick
-var combat: Combat|null = null; // combat object
-var inCombat: boolean = false; // are we currently in combat?
-var gameHasFocus: boolean = false; // do we have input focus?
-var lastMousePickTime: number = 0; // time when we last checked what's under the mouse cursor
-var _lastFPSTime: number = 0; // Time since FPS counter was last updated
+let gameTickTime: number = 0; // in Fallout 2 ticks (elapsed seconds * 10)
+let lastGameTick: number = 0; // real time of the last game tick
+let combat: Combat | null = null; // combat object
+let inCombat: boolean = false; // are we currently in combat?
+let gameHasFocus: boolean = false; // do we have input focus?
+let lastMousePickTime: number = 0; // time when we last checked what's under the mouse cursor
+let _lastFPSTime: number = 0; // Time since FPS counter was last updated
 
 enum Skills {
 	None = 0,
 	Lockpick,
 	Repair
 }
-var skillMode: Skills = Skills.None;
 
-var isLoading: boolean = true; // are we currently loading a map?
-var isWaitingOnRemote: boolean = false; // are we waiting on the remote server to send critical info?
-var isInitializing: boolean = true; // are we initializing the engine?
-var loadingAssetsLoaded: number = 0; // how many images we've loaded
-var loadingAssetsTotal: number = 0; // out of this total
-var loadingLoadedCallback: (() => void)|null = null; // loaded callback
-var lazyAssetLoadingQueue: { [name: string]: ((img: any) => void)[] } = {}; // set of lazily-loaded assets being loaded
+let skillMode: Skills = Skills.None;
+
+let isLoading: boolean = true; // are we currently loading a map?
+let isWaitingOnRemote: boolean = false; // are we waiting on the remote server to send critical info?
+let isInitializing: boolean = true; // are we initializing the engine?
+let loadingAssetsLoaded: number = 0; // how many images we've loaded
+let loadingAssetsTotal: number = 0; // out of this total
+let loadingLoadedCallback: (() => void) | null = null; // loaded callback
+let lazyAssetLoadingQueue: { [name: string]: ((img: any) => void)[] } = {}; // set of lazily-loaded assets being loaded
 
 interface FloatMessage {
 	msg: string;
@@ -77,10 +78,10 @@ interface FloatMessage {
 const floatMessages: FloatMessage[] = [];
 
 // the global player object
-var player: Player|null = null;
+let player: Player | null = null;
 
-var renderer: Renderer|null = null;
-var audioEngine: AudioEngine|null = null;
+let renderer: Renderer | null = null;
+let audioEngine: AudioEngine | null = null;
 
 let $fpsOverlay: HTMLElement|null = null;
 
@@ -104,12 +105,12 @@ function lazyLoadImage(art: string, callback?: (x: any) => void, isHeartImg?: bo
 
 	lazyAssetLoadingQueue[art] = (callback ? [callback] : []);
 
-	var img = new Image();
-	img.onload = function() {
+    const img = new Image();
+    img.onload = function() {
 		images[art] = new heart.HeartImage(img);
-		var callbacks = lazyAssetLoadingQueue[art];
-		if(callbacks !== undefined) {
-			for(var i = 0; i < callbacks.length; i++)
+        const callbacks = lazyAssetLoadingQueue[art];
+        if(callbacks !== undefined) {
+			for(let i = 0; i < callbacks.length; i++)
 				callbacks[i](images[art])
 			lazyAssetLoadingQueue[art] = undefined
 		}
@@ -124,8 +125,8 @@ function lookupScriptName(scriptID: number) {
 
 function dropObject(source: Obj, obj: Obj) {
 	// drop inventory object obj from source
-	var removed = false;
-	for(var i = 0; i < source.inventory.length; i++) {
+    let removed = false;
+    for(let i = 0; i < source.inventory.length; i++) {
 		if(source.inventory[i].pid === obj.pid) {
 			removed = true;
 			source.inventory.splice(i, 1); // remove from source
@@ -135,7 +136,7 @@ function dropObject(source: Obj, obj: Obj) {
 	if(!removed) throw "dropObject: couldn't find object";
 
 	gMap.addObject(obj); // add to objects
-	var idx = gMap.getObjects().length - 1; // our new index
+    const idx = gMap.getObjects().length - 1; // our new index
 	obj.move({x: source.position.x, y: source.position.y}, idx)
 }
 
@@ -148,14 +149,14 @@ function pickupObject(obj: Obj, source: Critter) {
 
 // Draws a line between a and b, returning the first object hit
 function hexLinecast(a: Point, b: Point): Obj|null {
-	var line = hexLine(a, b).slice(1, -1);
-	if(line === null)
+    const line = hexLine(a, b).slice(1, -1);
+    if(line === null)
 		return null;
-	for(var i = 0; i < line.length; i++) {
+	for(let i = 0; i < line.length; i++) {
 		// todo: we could optimize this by only
 		// checking in a certain radius of `a`
-		var obj = objectsAtPosition(line[i]);
-		if(obj.length !== 0)
+        const obj = objectsAtPosition(line[i]);
+        if(obj.length !== 0)
 			return obj[0]
 	}
 	return null
@@ -170,8 +171,8 @@ function critterAtPosition(position: Point): Critter|null {
 }
 
 function centerCamera(around: Point) {
-	var scr = hexToScreen(around.x, around.y);
-	cameraX = Math.max(0, scr.x - SCREEN_WIDTH/2 | 0);
+    const scr = hexToScreen(around.x, around.y);
+    cameraX = Math.max(0, scr.x - SCREEN_WIDTH/2 | 0);
 	cameraY = Math.max(0, scr.y - SCREEN_HEIGHT/2 | 0)
 }
 
@@ -360,12 +361,12 @@ function playerUseSkill(skill: Skills, obj: Obj): void {
 
 function playerUse() {
 	// TODO: playerUse should take an object
-	var mousePos = heart.mouse.getPosition();
-	var mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
-	var obj = getObjectUnderCursor(isSelectableObject);
-	var who = <Critter>obj;
+    const mousePos = heart.mouse.getPosition();
+    const mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
+    let obj = getObjectUnderCursor(isSelectableObject);
+    const who = <Critter>obj;
 
-	if(uiMode === UI_MODE_USE_SKILL) { // using a skill on object
+    if(uiMode === UI_MODE_USE_SKILL) { // using a skill on object
 		obj = getObjectUnderCursor((_: Obj) => true); // obj might not be usable, so select non-usable ones too
 		if(!obj)
 			return;
@@ -426,14 +427,14 @@ function playerUse() {
 
 			// TODO: move within range of target
 
-			var weapon = critterGetEquippedWeapon(player);
-			if(weapon === null) {
+            const weapon = critterGetEquippedWeapon(player);
+            if(weapon === null) {
 				console.log("You have no weapon equipped!");
 				return
 			}
 
 			if(weapon.weapon.isCalled()) {
-				var art = "art/critters/hmjmpsna"; // default art
+                let art = "art/critters/hmjmpsna"; // default art
 				if(critterHasAnim(who, "called-shot"))
 					art = critterGetAnim(who, "called-shot");
 
@@ -456,28 +457,28 @@ function playerUse() {
 		}
 	}
 
-	var callback = function() {
-		player.clearAnim();
+    const callback = function () {
+        player.clearAnim();
 
-		// if there's an object under the cursor, use it
-		if(obj.type === "critter") {
-			if(who.dead !== true && inCombat !== true &&
-			   obj._script && obj._script.talk_p_proc !== undefined) {
-				// talk to a critter
-				console.log("Talking to " + who.name);
-				Scripting.talk(who._script, who)
-			}
-			else if(who.dead === true) {
-				// loot a dead body
-				uiLoot(obj)
-			}
-			else console.log("Cannot talk to/loot that critter")
-		}
-		else
-			useObject(obj, player)
-	};
+        // if there's an object under the cursor, use it
+        if (obj.type === "critter") {
+            if (who.dead !== true && inCombat !== true &&
+                obj._script && obj._script.talk_p_proc !== undefined) {
+                // talk to a critter
+                console.log("Talking to " + who.name);
+                Scripting.talk(who._script, who)
+            }
+            else if (who.dead === true) {
+                // loot a dead body
+                uiLoot(obj)
+            }
+            else console.log("Cannot talk to/loot that critter")
+        }
+        else
+            useObject(obj, player)
+    };
 
-	if(Config.engine.doInfiniteUse === true)
+    if(Config.engine.doInfiniteUse === true)
 		callback();
 	else
 		player.walkInFrontOf(obj.position, callback)
@@ -490,18 +491,18 @@ heart.mousepressed = (x: number, y: number, btn: string) => {
 		playerUse();
 	else if(btn === "r") {
 		// item context menu
-		var obj = getObjectUnderCursor(isSelectableObject);
-		if(obj)
+        const obj = getObjectUnderCursor(isSelectableObject);
+        if(obj)
 			uiContextMenu(obj, {clientX: x, clientY: y})
 	}
 };
 
 heart.keydown = (k: string) => {
 	if(isLoading === true) return;
-	var mousePos = heart.mouse.getPosition();
-	var mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
+    const mousePos = heart.mouse.getPosition();
+    const mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
 
-	if(k === Config.controls.cameraDown) cameraY += 15;
+    if(k === Config.controls.cameraDown) cameraY += 15;
 	if(k === Config.controls.cameraRight) cameraX += 15;
 	if(k === Config.controls.cameraLeft) cameraX -= 15;
 	if(k === Config.controls.cameraUp) cameraY -= 15;
@@ -512,7 +513,7 @@ heart.keydown = (k: string) => {
 	if(k === Config.controls.showObjects) { Config.ui.showObjects = !Config.ui.showObjects }
 	if(k === Config.controls.showWalls) Config.ui.showWalls = !Config.ui.showWalls;
 	if(k === Config.controls.talkTo) {
-		var critter = critterAtPosition(mouseHex);
+		let critter = critterAtPosition(mouseHex);
 		if(critter) {
 			if(critter._script && critter._script.talk_p_proc !== undefined) {
 				console.log("talking to " + critter.name);
@@ -523,8 +524,8 @@ heart.keydown = (k: string) => {
 	if(k === Config.controls.inspect) {
 		gMap.getObjects().forEach((obj, idx) => {
 			if(obj.position.x === mouseHex.x && obj.position.y === mouseHex.y) {
-				var hasScripts = (obj.script !== undefined ? ("yes (" + obj.script + ")") : "no") + " " + (obj._script === undefined ? "and is NOT loaded" : "and is loaded");
-				console.log("object is at index " + idx + ", of type " + obj.type + ", has art " + obj.art + ", and has scripts? " + hasScripts + " -> %o", obj)
+                const hasScripts = (obj.script !== undefined ? ("yes (" + obj.script + ")") : "no") + " " + (obj._script === undefined ? "and is NOT loaded" : "and is loaded");
+                console.log("object is at index " + idx + ", of type " + obj.type + ", has art " + obj.art + ", and has scripts? " + hasScripts + " -> %o", obj)
 			}
 		})
 	}
@@ -575,8 +576,8 @@ heart.keydown = (k: string) => {
 	if(k === Config.controls.playerToTargetRaycast) {
 		var obj = objectsAtPosition(mouseHex)[0];
 		if(obj !== undefined) {
-			var hit = hexLinecast(player.position, obj.position);
-			console.log("hit obj: " + hit.art)
+            const hit = hexLinecast(player.position, obj.position);
+            console.log("hit obj: " + hit.art)
 		}
 	}
 
@@ -590,8 +591,8 @@ heart.keydown = (k: string) => {
 	}
 
 	if(k === Config.controls.use) {
-		var objs = objectsAtPosition(mouseHex);
-		for(var i = 0; i < objs.length; i++) {
+        const objs = objectsAtPosition(mouseHex);
+        for(var i = 0; i < objs.length; i++) {
 			useObject(objs[i])
 		}
 	}
@@ -644,29 +645,29 @@ function changeCursor(image: string) {
 }
 
 function objectTransparentAt(obj: Obj, position: Point) {
-	var frame = obj.frame !== undefined ? obj.frame : 0;
-	var sx = imageInfo[obj.art].frameOffsets[obj.orientation][frame].sx;
+    const frame = obj.frame !== undefined ? obj.frame : 0;
+    const sx = imageInfo[obj.art].frameOffsets[obj.orientation][frame].sx;
 
-	tempCanvasCtx.clearRect(0, 0, 1, 1); // clear previous color
+    tempCanvasCtx.clearRect(0, 0, 1, 1); // clear previous color
 	tempCanvasCtx.drawImage(images[obj.art].img, sx+position.x, position.y, 1, 1, 0, 0, 1, 1);
-	var pixelAlpha = tempCanvasCtx.getImageData(0, 0, 1, 1).data[3];
+    const pixelAlpha = tempCanvasCtx.getImageData(0, 0, 1, 1).data[3];
 
-	return (pixelAlpha === 0)
+    return (pixelAlpha === 0)
 }
 
 function getObjectUnderCursor(p: (obj: Obj) => boolean) {
-	var mouse = heart.mouse.getPosition();
-	mouse = {x: mouse[0] + cameraX, y: mouse[1] + cameraY};
+    let mouse = heart.mouse.getPosition();
+    mouse = {x: mouse[0] + cameraX, y: mouse[1] + cameraY};
 
 	// reverse z-ordered search
-	var objects = gMap.getObjects();
-	for(var i = objects.length - 1; i > 0; i--) {
-		var bbox = objectBoundingBox(objects[i]);
-		if(bbox === null) continue;
+    const objects = gMap.getObjects();
+    for(let i = objects.length - 1; i > 0; i--) {
+        const bbox = objectBoundingBox(objects[i]);
+        if(bbox === null) continue;
 		if(pointInBoundingBox(mouse, bbox))
 			if(p === undefined || p(objects[i]) === true) {
-				var mouseRel = {x: mouse.x - bbox.x, y: mouse.y - bbox.y};
-				if(!objectTransparentAt(objects[i], mouseRel))
+                const mouseRel = {x: mouse.x - bbox.x, y: mouse.y - bbox.y};
+                if(!objectTransparentAt(objects[i], mouseRel))
 					return objects[i]
 			}
 	}
@@ -687,16 +688,16 @@ heart.update = function() {
 	
 	if(uiMode !== UI_MODE_NONE)
 		return;
-	var time = heart.timer.getTime();
+    const time = heart.timer.getTime();
 
-	if(time - _lastFPSTime >= 500) {
+    if(time - _lastFPSTime >= 500) {
 		$fpsOverlay.textContent = "fps: " + heart.timer.getFPS();
 		_lastFPSTime = time;
 	}
 
 	if(gameHasFocus) {
-		var mousePos = heart.mouse.getPosition();
-		if(mousePos[0] <= Config.ui.scrollPadding) cameraX -= 15;
+        const mousePos = heart.mouse.getPosition();
+        if(mousePos[0] <= Config.ui.scrollPadding) cameraX -= 15;
 		if(mousePos[0] >= SCREEN_WIDTH-Config.ui.scrollPadding) cameraX += 15;
 
 		if(mousePos[1] <= Config.ui.scrollPadding) cameraY -= 15;
@@ -719,16 +720,16 @@ heart.update = function() {
 		}
 	}
 
-	var didTick = (time - lastGameTick >= 1000/10); // 10 Hz game tick
+    const didTick = (time - lastGameTick >= 1000 / 10); // 10 Hz game tick
 	if(didTick) {
 		lastGameTick = time;
 		gameTickTime++;
 
 		if(Config.engine.doTimedEvents && !inCombat) {
 			// check and update timed events
-			var timedEvents = Scripting.timeEventList;
-			var numEvents = timedEvents.length;
-			for(var i = 0; i < numEvents; i++) {
+            const timedEvents = Scripting.timeEventList;
+            let numEvents = timedEvents.length;
+            for(var i = 0; i < numEvents; i++) {
 				const event = timedEvents[i];
 				const obj = event.obj;
 
@@ -766,32 +767,32 @@ heart.update = function() {
 
 // get an object's bounding box in screen-space (note: not camera-space)
 function objectBoundingBox(obj: Obj): BoundingBox {
-	var scr = hexToScreen(obj.position.x, obj.position.y);
+    const scr = hexToScreen(obj.position.x, obj.position.y);
 
-	if(images[obj.art] === undefined) // no art
+    if(images[obj.art] === undefined) // no art
 		return null;
 
-	var info = imageInfo[obj.art];
-	if(info === undefined)
+    const info = imageInfo[obj.art];
+    if(info === undefined)
 		throw "No image map info for: " + obj.art;
 
-	var frameIdx = 0;
-	if(obj.frame !== undefined)
+    let frameIdx = 0;
+    if(obj.frame !== undefined)
 		frameIdx += obj.frame;
 
 	if(!(obj.orientation in info.frameOffsets))
 		obj.orientation = 0; // ...
-	var frameInfo = info.frameOffsets[obj.orientation][frameIdx];
-	var dirOffset = info.directionOffsets[obj.orientation];
-	var offsetX = Math.floor(frameInfo.w / 2) - dirOffset.x - frameInfo.ox;
-	var offsetY = frameInfo.h - dirOffset.y - frameInfo.oy;
+    const frameInfo = info.frameOffsets[obj.orientation][frameIdx];
+    const dirOffset = info.directionOffsets[obj.orientation];
+    const offsetX = Math.floor(frameInfo.w / 2) - dirOffset.x - frameInfo.ox;
+    const offsetY = frameInfo.h - dirOffset.y - frameInfo.oy;
 
-	return {x: scr.x - offsetX, y: scr.y - offsetY, w: frameInfo.w, h: frameInfo.h}
+    return {x: scr.x - offsetX, y: scr.y - offsetY, w: frameInfo.w, h: frameInfo.h}
 }
 
 function objectOnScreen(obj: Obj): boolean {
-	var bbox = objectBoundingBox(obj);
-	if(bbox === null)
+    const bbox = objectBoundingBox(obj);
+    if(bbox === null)
 		return false;
 
 	if(bbox.x + bbox.w < cameraX || bbox.y + bbox.h < cameraY ||

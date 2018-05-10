@@ -24,7 +24,7 @@ limitations under the License.
 
 module Lightmap {
 	function light_reset(): void {
-		for(var i = 0; i < tile_intensity.length; i++)
+		for(let i = 0; i < tile_intensity.length; i++)
 			tile_intensity[i] = 655
 	}
 
@@ -32,16 +32,16 @@ module Lightmap {
 	export var tile_intensity = new Array(40000);
 	light_reset();
 
-	var light_offsets = new Array(532);
-	zeroArray(light_offsets);
+    const light_offsets = new Array(532);
+    zeroArray(light_offsets);
 
 	// length 36
-	var light_distance = [1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 3, 4, 5,
-	                      6, 7, 8, 4, 5, 6, 7, 8, 5, 6, 7, 8, 6, 7, 8, 7, 8, 8];
+    const light_distance = [1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 3, 4, 5,
+        6, 7, 8, 4, 5, 6, 7, 8, 5, 6, 7, 8, 6, 7, 8, 7, 8, 8];
 
-	var isInit = false;
+    let isInit = false;
 
-	function light_subtract_from_tile(tileNum: number, intensity: number) {
+    function light_subtract_from_tile(tileNum: number, intensity: number) {
 		tile_intensity[tileNum] -= intensity
 	}
 
@@ -50,7 +50,7 @@ module Lightmap {
 	}
 
 	function zeroArray(arr: any[]) {
-		for(var i = 0; i < arr.length; i++)
+		for(let i = 0; i < arr.length; i++)
 			arr[i] = 0
 	}
 
@@ -58,10 +58,10 @@ module Lightmap {
 	// edx controls whether light is added or subtracted
 
 	function obj_adjust_light(obj: Obj, isSub: boolean=false) {
-		var pos = obj.position;
-		var lightModifier = isSub ? light_subtract_from_tile : light_add_to_tile;
+        const pos = obj.position;
+        const lightModifier = isSub ? light_subtract_from_tile : light_add_to_tile;
 
-		lightModifier(toTileNum(obj.position), obj.lightIntensity);
+        lightModifier(toTileNum(obj.position), obj.lightIntensity);
 
 		obj.lightIntensity = Math.min(obj.lightIntensity, 65536);
 
@@ -72,20 +72,20 @@ module Lightmap {
 			isInit = true
 		}
 
-		var edx: any, eax;
-		edx = (pos.x%2)*3 * 32;
+        let edx: any, eax;
+        edx = (pos.x%2)*3 * 32;
 		eax = edx*9;
 		//var lightOffsetsStart = light_offsets + eax // so &light_offsets[eax/4|0], we'd use an index here
-		var lightOffsetsStart = eax; // starting offset into light_offsets
+        const lightOffsetsStart = eax; // starting offset into light_offsets
 
-		var light_per_dist = /* obj.lightIntensity - */ (((obj.lightIntensity - 655) / (obj.lightRadius+1)) | 0);
+        const light_per_dist = /* obj.lightIntensity - */ (((obj.lightIntensity - 655) / (obj.lightRadius + 1)) | 0);
 
-		//console.log("light per dist: %d", light_per_dist)
+        //console.log("light per dist: %d", light_per_dist)
 
-		var stackArray = new Array(36);
-		var light = obj.lightIntensity;
+        const stackArray = new Array(36);
+        let light = obj.lightIntensity;
 
-		light -= light_per_dist;
+        light -= light_per_dist;
 		stackArray[0] = light;
 
 		light -= light_per_dist;
@@ -137,25 +137,25 @@ module Lightmap {
 		stackArray[136/4|0] = light;
 		stackArray[140/4|0] = light;
 
-		var _light_blocked = new Array(36*6); // XXX: Is this the exact size?
+        const _light_blocked = new Array(36 * 6); // XXX: Is this the exact size?
 
 		// zero arrays
 		zeroArray(_light_blocked);
 
-		var isLightBlocked; // var_C
+        let isLightBlocked; // var_C
 
 		function light_blocked(index: number) {
 			return _light_blocked[index];
 		}
 
-		for(var i = 0; i < 36; i++) {
+		for(let i = 0; i < 36; i++) {
 			if(obj.lightRadius >= light_distance[i]) {
-				var v26, v27, v28, v29, v30, v31, v32, v33, v34; // temporaries
+                let v26, v27, v28, v29, v30, v31, v32, v33, v34; // temporaries
 
-				for(var dir = 0; dir < 6; dir++) {
-					var nextDir = (dir + 1) % 6;
+				for(let dir = 0; dir < 6; dir++) {
+                    const nextDir = (dir + 1) % 6;
 
-					switch(i) {
+                    switch(i) {
 			            case 0:
 			              isLightBlocked = 0;
 			              break;
@@ -278,15 +278,15 @@ module Lightmap {
 
 					if(isLightBlocked === 0) {
 						// loc_4A7500:
-						var nextTile = toTileNum(obj.position) + light_offsets[(lightOffsetsStart/4|0) + 36 * dir + i];
+                        const nextTile = toTileNum(obj.position) + light_offsets[(lightOffsetsStart / 4 | 0) + 36 * dir + i];
 
-						if(nextTile > 0 && nextTile < 40000) { // nextTile is within valid tile range
-							var edi = 1;
-							// for each object at position nextTile
-							var objs = objectsAtPosition(fromTileNum(nextTile));
-							for(var objsN = 0; objsN < objs.length; objsN++) {
-								var curObj = objs[objsN];
-								if(!curObj.pro) // XXX: why wouldn't an object have pro?
+                        if(nextTile > 0 && nextTile < 40000) { // nextTile is within valid tile range
+                            let edi = 1;
+                            // for each object at position nextTile
+                            const objs = objectsAtPosition(fromTileNum(nextTile));
+                            for(let objsN = 0; objsN < objs.length; objsN++) {
+                                const curObj = objs[objsN];
+                                if(!curObj.pro) // XXX: why wouldn't an object have pro?
 									continue;
 
 								// if(curObj+24h & 1 === 0) { continue }
@@ -304,7 +304,7 @@ module Lightmap {
 									if(!(curObj.flags & 8)) { // Flat flag?
 									    //proto_ptr(*(v37 + 100), &v43, 3, v11);
 									    //var flags = (pro+24)
-									    var flags = curObj.pro.flags; // XXX: flags directly from PRO?
+                                        const flags = curObj.pro.flags; // XXX: flags directly from PRO?
 									    //console.log("pro flags: " + flags.toString(16))
 									    if(flags & 0x8000000 || flags & 0x40000000) {
 									    	if(dir != 4 && dir != 5 && (dir || i >= 8) && (dir != 3 || i <= 15))
@@ -338,8 +338,8 @@ module Lightmap {
 							}
 
 							if(edi !== 0) {
-								var lightAdjustment = stackArray[i];
-								// eax = 0 // should be set to obj+28h, aka elevation (we don't take elevation into account so we don't need this)
+                                const lightAdjustment = stackArray[i];
+                                // eax = 0 // should be set to obj+28h, aka elevation (we don't take elevation into account so we don't need this)
 								lightModifier(nextTile, lightAdjustment)
 
 							}
@@ -359,21 +359,21 @@ module Lightmap {
 		//var centerTile_: Point = centerTile()
 
 		// should we use the center tile at all?
-		var edi = toTileNum(tile_center);
-		var edx = edi & 1;
-		var eax = edx*4;
-		eax -= edx;
+        let edi = toTileNum(tile_center);
+        let edx = edi & 1;
+        let eax = edx * 4;
+        eax -= edx;
 		eax <<= 5;
 		edx = eax;
 		eax <<= 3;
-		var ecx = 0;
-		eax += edx;
+        let ecx = 0;
+        eax += edx;
 
-		var v2c = ecx;
-		var v54 = eax;
-		var v48;
-		var ebx, ebp, esi, v3c, v40, v50, v20, v24, lightOffsetsStart, v58;
-		var v44, v4c, v38, v34, v28, v1c, v28;
+        let v2c = ecx;
+        let v54 = eax;
+        let v48;
+        let ebx, ebp, esi, v3c, v40, v50, v20, v24, lightOffsetsStart, v58;
+        var v44, v4c, v38, v34, v28, v1c, v28;
 
 		do {
 			eax = v54;
@@ -524,8 +524,8 @@ module Lightmap {
 		if(distance === 0)
 			return tileNum;
 
-		var hex = hexInDirectionDistance(fromTileNum(tileNum), dir, distance);
-		if(!hex) {
+        let hex = hexInDirectionDistance(fromTileNum(tileNum), dir, distance);
+        if(!hex) {
 			console.log("hex (input tile is %s) is %o; dir=%d distance=%d", tileNum.toString(16), hex, dir, distance);
 			return -1
 		}
