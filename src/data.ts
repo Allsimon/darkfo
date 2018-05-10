@@ -16,14 +16,14 @@ limitations under the License.
 
 "use strict";
 
-var mapAreas: AreaMap|null = null
+var mapAreas: AreaMap|null = null;
 
-var proMap: any = null // TODO: type
-var lstFiles: { [lsgFile: string]: string[] } = {}
-var messageFiles: { [msgFile: string]: { [msgID: string]: string } } = {}
-var mapInfo: { [mapID: number]: MapInfo }|null = null
-var elevatorInfo: { elevators: Elevator[] }|null = null
-var dirtyMapCache: { [mapName: string]: SerializedMap } = {}
+var proMap: any = null; // TODO: type
+var lstFiles: { [lsgFile: string]: string[] } = {};
+var messageFiles: { [msgFile: string]: { [msgID: string]: string } } = {};
+var mapInfo: { [mapID: number]: MapInfo }|null = null;
+var elevatorInfo: { elevators: Elevator[] }|null = null;
+var dirtyMapCache: { [mapName: string]: SerializedMap } = {};
 
 interface AreaMap {
     // XXX: Why does using a number key break areas?
@@ -69,7 +69,7 @@ interface Elevator {
 
 function getElevator(type: number): Elevator {
 	if(!elevatorInfo) {
-		console.log("loading elevator info")
+		console.log("loading elevator info");
 		elevatorInfo = getFileJSON("lut/elevators.json")
 	}
 
@@ -77,15 +77,15 @@ function getElevator(type: number): Elevator {
 }
 
 function parseAreas(data: string): AreaMap {
-	var areas = parseIni(data)
-	var out: AreaMap = {}
+	var areas = parseIni(data);
+	var out: AreaMap = {};
 
 	for(var _area in areas) {
-		var area = areas[_area]
-		var match = _area.match(/Area (\d+)/)
-		if(match === null) throw "city.txt: invalid area name: " + area.area_name
-		var areaID = parseInt(match[1])
-		var worldPos = area.world_pos.split(",").map((x: string) => parseInt(x))
+		var area = areas[_area];
+		var match = _area.match(/Area (\d+)/);
+		if(match === null) throw "city.txt: invalid area name: " + area.area_name;
+		var areaID = parseInt(match[1]);
+		var worldPos = area.world_pos.split(",").map((x: string) => parseInt(x));
 
 		var newArea: Area = {
             name: area.area_name,
@@ -94,28 +94,28 @@ function parseAreas(data: string): AreaMap {
             state: area.start_state.toLowerCase() === "on",
             worldPosition: {x: worldPos[0], y: worldPos[1]},
             entrances: []
-        }
+        };
 
 	    // map/label art
-		var mapArtIdx = parseInt(area.townmap_art_idx)
-		var labelArtIdx = parseInt(area.townmap_label_art_idx)
+		var mapArtIdx = parseInt(area.townmap_art_idx);
+		var labelArtIdx = parseInt(area.townmap_label_art_idx);
 
 		//console.log(mapArtIdx + " - " + labelArtIdx)
 
 		if(mapArtIdx !== -1)
-			newArea.mapArt = lookupInterfaceArt(mapArtIdx)
+			newArea.mapArt = lookupInterfaceArt(mapArtIdx);
 		if(labelArtIdx !== -1)
-			newArea.labelArt = lookupInterfaceArt(labelArtIdx)
+			newArea.labelArt = lookupInterfaceArt(labelArtIdx);
 
 		// entrances
 		for(var _key in area) {
 			// entrance_N
 			// e.g.: entrance_0=On,345,230,Destroyed Arroyo Bridge,-1,26719,0
 
-			var s = _key.split("_")
+			var s = _key.split("_");
 			if(s[0] === "entrance") {
-				var entranceString = area[_key]
-				s = entranceString.split(",")
+				var entranceString = area[_key];
+				s = entranceString.split(",");
 
 				var entrance = {
 					startState: s[0],
@@ -126,7 +126,7 @@ function parseAreas(data: string): AreaMap {
 					elevation: parseInt(s[4]),
 					tileNum: parseInt(s[5]),
 					orientation: parseInt(s[6])
-				}
+				};
 				newArea.entrances.push(entrance)
 			}
 		}
@@ -139,7 +139,7 @@ function parseAreas(data: string): AreaMap {
 
 function areaContainingMap(mapName: string) {
 	for(var area in mapAreas) {
-		var entrances = mapAreas[area].entrances
+		var entrances = mapAreas[area].entrances;
 		for(var i = 0; i < entrances.length; i++) {
 			if(entrances[i].mapName === mapName)
 				return mapAreas[area]
@@ -154,43 +154,43 @@ function loadAreas() {
 
 function allAreas() {
 	if(mapAreas === null)
-		mapAreas = loadAreas()
-	var areas = []
+		mapAreas = loadAreas();
+	var areas = [];
 	for(var area in mapAreas)
 		areas.push(mapAreas[area])
 	return areas
 }
 
 function loadMessage(name: string) {
-	name = name.toLowerCase()
-	var msg = getFileText("data/text/english/game/" + name + ".msg")
+	name = name.toLowerCase();
+	var msg = getFileText("data/text/english/game/" + name + ".msg");
 	if(messageFiles[name] === undefined)
-		messageFiles[name] = {}
+		messageFiles[name] = {};
 
 	// parse message file
-	var lines = msg.split(/\r|\n/)
+	var lines = msg.split(/\r|\n/);
 
 	// preprocess and merge lines
 	for(var i = 0; i < lines.length; i++) {
 		// comments/blanks
 		if(lines[i][0] === '#' || lines[i].trim() === '') {
-			lines.splice(i--, 1)
+			lines.splice(i--, 1);
 			continue
 		}
 
 		// probably a continuation -- merge it with the last line
 		if(lines[i][0] !== '{') {
-			lines[i-1] += lines[i]
-			lines.splice(i--, 1)
+			lines[i-1] += lines[i];
+			lines.splice(i--, 1);
 			continue
 		}
 	}
 
 	for(var i = 0; i < lines.length; i++) {
 		// e.g. {100}{}{You have entered a dark cave in the side of a mountain.}
-		var m = lines[i].match(/\{(\d+)\}\{.*\}\{(.*)\}/)
+		var m = lines[i].match(/\{(\d+)\}\{.*\}\{(.*)\}/);
 		if(m === null)
-			throw "message parsing: not a valid line: " + lines[i]
+			throw "message parsing: not a valid line: " + lines[i];
 		// HACK: replace unicode replacement character with an apostrophe (because the Web sucks at character encodings)
 		messageFiles[name][m[1]] = m[2].replace(/\ufffd/g, "'")
 	}
@@ -203,9 +203,9 @@ function loadLst(lst: string): string[] {
 
 function getLstId(lst: string, id: number): string {
 	if(lstFiles[lst] === undefined)
-		lstFiles[lst] = loadLst(lst)
+		lstFiles[lst] = loadLst(lst);
 	if(lstFiles[lst] === undefined)
-		return null
+		return null;
 
 	return lstFiles[lst][id]
 }
@@ -214,35 +214,35 @@ function getLstId(lst: string, id: number): string {
 
 function parseMapInfo() {
 	if(mapInfo !== null)
-		return
+		return;
 	
 	// parse map info from data/data/maps.txt
-	mapInfo = {}
-	var text = getFileText("data/data/maps.txt")
-	var ini: any = parseIni(text)
+	mapInfo = {};
+	var text = getFileText("data/data/maps.txt");
+	var ini: any = parseIni(text);
 	for(var category in ini) {
-		var id: any = category.match(/Map (\d+)/)[1]
-		if(id === null) throw "maps.txt: invalid category: " + category
-		id = parseInt(id)
+		var id: any = category.match(/Map (\d+)/)[1];
+		if(id === null) throw "maps.txt: invalid category: " + category;
+		id = parseInt(id);
 
-		var randomStartPoints = []
+		var randomStartPoints = [];
 		for(var key in ini[category]) {
 			if(key.indexOf("random_start_point_") === 0) {
-				var startPoint = ini[category][key].match(/elev:(\d), tile_num:(\d+)/)
+				var startPoint = ini[category][key].match(/elev:(\d), tile_num:(\d+)/);
 				if(startPoint === null)
-					throw "invalid random_start_point: " + ini[category][key]
+					throw "invalid random_start_point: " + ini[category][key];
 				randomStartPoints.push({elevation: parseInt(startPoint[1]),
 					                    tileNum: parseInt(startPoint[2])})
 			}
 		}
 
 		// parse ambient sfx list
-		var ambientSfx: [string, number][] = []
-		var ambient_sfx = ini[category].ambient_sfx
+		var ambientSfx: [string, number][] = [];
+		var ambient_sfx = ini[category].ambient_sfx;
 		if(ambient_sfx) {
-			var s = ambient_sfx.split(",")
+			var s = ambient_sfx.split(",");
 			for(var i = 0; i < s.length; i++) {
-				var kv = s[i].trim().split(":")
+				var kv = s[i].trim().split(":");
 				ambientSfx.push([kv[0].toLowerCase(), parseInt(kv[1].toLowerCase())])
 			}
 		}
@@ -257,7 +257,7 @@ function parseMapInfo() {
 
 function lookupMapFromLookup(lookupName: string) {
 	if(mapInfo === null)
-		parseMapInfo()
+		parseMapInfo();
 
 	for(var mapID in mapInfo) {
 		if(mapInfo[mapID].lookupName === lookupName)
@@ -268,7 +268,7 @@ function lookupMapFromLookup(lookupName: string) {
 
 function lookupMapNameFromLookup(lookupName: string) {
 	if(mapInfo === null)
-		parseMapInfo()
+		parseMapInfo();
 
 	for(var mapID in mapInfo) {
 		if(mapInfo[mapID].lookupName.toLowerCase() === lookupName.toLowerCase())
@@ -279,14 +279,14 @@ function lookupMapNameFromLookup(lookupName: string) {
 
 function lookupMapName(mapID: number): string|null {
 	if(mapInfo === null)
-		parseMapInfo()
+		parseMapInfo();
 
 	return mapInfo[mapID].name || null
 }
 
 function getMapInfo(mapName: string) {
 	if(mapInfo === null)
-		parseMapInfo()
+		parseMapInfo();
 
 	for(var mapID in mapInfo) {
 		if(mapInfo[mapID].name.toLowerCase() === mapName.toLowerCase())

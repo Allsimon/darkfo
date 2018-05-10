@@ -95,4 +95,4 @@ const Config = {
 				dialogue: false
 		}
 	}
-}
+};

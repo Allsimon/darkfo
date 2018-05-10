@@ -265,7 +265,7 @@ module Ui {
 
         clear(): void {
             this.items.length = 0;
-            
+
             const node = this.elem;
             while(node.firstChild)
                 node.removeChild(node.firstChild);
@@ -371,7 +371,7 @@ module Ui {
         const redrawStatsSkills = () => {
             // Draw skills
             skillList.clear(); // TODO: setItemText or something
-            
+
             for(const skill of skills)
                 skillList.addItem({ text: `${skill} ${newSkillSet.get(skill, newStatSet)}%`, id: skill });
 
@@ -418,7 +418,7 @@ module Ui {
                     newSkillSet.tag(skill);
                 else
                     newSkillSet.untag(skill);
-                
+
                 redrawStatsSkills();
             };
 
@@ -447,8 +447,8 @@ module Ui {
 var UI_MODE_NONE = 0, UI_MODE_DIALOGUE = 1, UI_MODE_BARTER = 2, UI_MODE_LOOT = 3,
     UI_MODE_INVENTORY = 4, UI_MODE_WORLDMAP = 5, UI_MODE_ELEVATOR = 6,
     UI_MODE_CALLED_SHOT = 7, UI_MODE_SKILLDEX = 8, UI_MODE_USE_SKILL = 9,
-    UI_MODE_CONTEXT_MENU = 10, UI_MODE_SAVELOAD = 11, UI_MODE_CHAR = 12
-var uiMode: number = UI_MODE_NONE
+    UI_MODE_CONTEXT_MENU = 10, UI_MODE_SAVELOAD = 11, UI_MODE_CHAR = 12;
+var uiMode: number = UI_MODE_NONE;
 
 function $id(id: string): HTMLElement {
     return document.getElementById(id);
@@ -530,16 +530,16 @@ function makeEl(tag: string, options: ElementOptions): HTMLElement {
 function initUI() {
     Ui.init();
 
-    makeDropTarget($id("inventoryBoxList"), (data: string) => { uiMoveSlot(data, "inventory") })
-    makeDropTarget($id("inventoryBoxItem1"), (data: string) => { uiMoveSlot(data, "leftHand") })
-    makeDropTarget($id("inventoryBoxItem2"), (data: string) => { uiMoveSlot(data, "rightHand") })
+    makeDropTarget($id("inventoryBoxList"), (data: string) => { uiMoveSlot(data, "inventory") });
+    makeDropTarget($id("inventoryBoxItem1"), (data: string) => { uiMoveSlot(data, "leftHand") });
+    makeDropTarget($id("inventoryBoxItem2"), (data: string) => { uiMoveSlot(data, "rightHand") });
 
     for(let i = 0; i < 2; i++) {
         for(const $chance of Array.from(document.querySelectorAll("#calledShotBox .calledShotChance")))
             $chance.appendChild(makeEl("div", { classes: ["number"], style: { left: (i*9) + "px" }, id: "digit" + (i+1) }));
     }
 
-    $id("calledShotCancelBtn").onclick = () => { uiCloseCalledShot() }
+    $id("calledShotCancelBtn").onclick = () => { uiCloseCalledShot() };
 
     /*
     $id("worldmapViewButton").onclick = () => {
@@ -556,17 +556,17 @@ function initUI() {
     }
     */
 
-    $id("inventoryButton").onclick = () => { uiInventoryScreen() }
+    $id("inventoryButton").onclick = () => { uiInventoryScreen() };
     $id("inventoryDoneButton").onclick = () => {
-        uiMode = UI_MODE_NONE
-        $id("inventoryBox").style.visibility = "hidden"
+        uiMode = UI_MODE_NONE;
+        $id("inventoryBox").style.visibility = "hidden";
         uiDrawWeapon()
-    }
+    };
 
-    $id("lootBoxDoneButton").onclick = () => { uiEndLoot(); }
+    $id("lootBoxDoneButton").onclick = () => { uiEndLoot(); };
 
     $id("attackButtonContainer").onclick = () => {
-        if(!Config.engine.doCombat) return
+        if(!Config.engine.doCombat) return;
         if(inCombat) {
             // TODO: targeting reticle for attacks
         }
@@ -575,31 +575,31 @@ function initUI() {
             Combat.start()
         }
     };
-    
+
     $id("attackButtonContainer").oncontextmenu = () => { // right mouse button (cycle weapon modes)
-        var wep = critterGetEquippedWeapon(player)
-        if(!wep) return false
-        wep.weapon.cycleMode()
-        uiDrawWeapon()
+        var wep = critterGetEquippedWeapon(player);
+        if(!wep) return false;
+        wep.weapon.cycleMode();
+        uiDrawWeapon();
         return false
     };
 
     $id("endTurnButton").onclick = () => {
         if(inCombat && combat.inPlayerTurn) {
-            console.log("[TURN]")
+            console.log("[TURN]");
             combat.nextTurn()
         }
-    }
+    };
 
     $id("endCombatButton").onclick = () => {
         if(inCombat)
             combat.end()
-    }
+    };
 
     $id("endContainer").addEventListener("animationiteration", uiEndCombatAnimationDone);
     $id("endContainer").addEventListener("webkitAnimationIteration", uiEndCombatAnimationDone);
 
-    $id("skilldexButton").onclick = () => { Ui.skilldexWindow.toggle() }
+    $id("skilldexButton").onclick = () => { Ui.skilldexWindow.toggle() };
 
     function makeScrollable($el: HTMLElement, scroll: number=60) {
         $el.onwheel = (e: WheelEvent) => {
@@ -609,29 +609,29 @@ function initUI() {
         };
     }
 
-    makeScrollable($id("inventoryBoxList"))
+    makeScrollable($id("inventoryBoxList"));
 
-    makeScrollable($id("barterBoxInventoryLeft"))
-    makeScrollable($id("barterBoxInventoryRight"))
-    makeScrollable($id("barterBoxLeft"))
-    makeScrollable($id("barterBoxRight"))
-    makeScrollable($id("lootBoxLeft"))
-    makeScrollable($id("lootBoxRight"))
-    makeScrollable($id("worldMapLabels"))
-    makeScrollable($id("displayLog"))
-    makeScrollable($id("dialogueBoxReply"), 30)
+    makeScrollable($id("barterBoxInventoryLeft"));
+    makeScrollable($id("barterBoxInventoryRight"));
+    makeScrollable($id("barterBoxLeft"));
+    makeScrollable($id("barterBoxRight"));
+    makeScrollable($id("lootBoxLeft"));
+    makeScrollable($id("lootBoxRight"));
+    makeScrollable($id("worldMapLabels"));
+    makeScrollable($id("displayLog"));
+    makeScrollable($id("dialogueBoxReply"), 30);
 
-    drawHP(critterGetStat(player, "HP"))
+    drawHP(critterGetStat(player, "HP"));
     uiDrawWeapon()
 }
 
 function uiHideContextMenu() {
-    uiMode = UI_MODE_NONE
+    uiMode = UI_MODE_NONE;
     $id("itemContextMenu").style.visibility = "hidden"
 }
 
 function uiContextMenu(obj: Obj, evt: any) {
-    uiMode = UI_MODE_CONTEXT_MENU
+    uiMode = UI_MODE_CONTEXT_MENU;
 
     function button(obj: Obj, action: string, onclick: () => void) {
         return makeEl("img", { id: "context_" + action,
@@ -647,21 +647,21 @@ function uiContextMenu(obj: Obj, evt: any) {
         left: `${evt.clientX}px`,
         top: `${evt.clientY}px`
     });
-    var cancelBtn = button(obj, "cancel", () => {})
-    var lookBtn = button(obj, "look", () => uiLog("You see: " + obj.getDescription()))
-    var useBtn = button(obj, "use", () => playerUse()) // TODO: playerUse should take an object
+    var cancelBtn = button(obj, "cancel", () => {});
+    var lookBtn = button(obj, "look", () => uiLog("You see: " + obj.getDescription()));
+    var useBtn = button(obj, "use", () => playerUse()); // TODO: playerUse should take an object
     var talkBtn = button(obj, "talk", () => {
-            console.log("talking to " + obj.name)
+            console.log("talking to " + obj.name);
             Scripting.talk(obj._script, obj)
-    })
-    var pickupBtn = button(obj, "pickup", () => pickupObject(obj, player))
+    });
+    var pickupBtn = button(obj, "pickup", () => pickupObject(obj, player));
 
-    $menu.appendChild(cancelBtn)
-    $menu.appendChild(lookBtn)
+    $menu.appendChild(cancelBtn);
+    $menu.appendChild(lookBtn);
     if(obj._script && obj._script.talk_p_proc !== undefined)
-        $menu.appendChild(talkBtn)
+        $menu.appendChild(talkBtn);
     if(canUseObject(obj))
-        $menu.appendChild(useBtn)
+        $menu.appendChild(useBtn);
     $menu.appendChild(pickupBtn)
 }
 
@@ -691,10 +691,10 @@ function uiEndCombatAnimationDone(this: HTMLElement) {
 
 function uiDrawWeapon() {
     // draw the active weapon in the interface bar
-    var weapon = critterGetEquippedWeapon(player)
+    var weapon = critterGetEquippedWeapon(player);
     clearEl($id("attackButton"));
     if(weapon === null)
-        return
+        return;
 
     if(weapon.weapon.type !== "melee") {
         const $attackButtonWeapon = $id("attackButtonWeapon") as HTMLImageElement;
@@ -713,17 +713,17 @@ function uiDrawWeapon() {
     }
 
     // draw weapon AP
-    var CHAR_W = 10
-    var digit = weapon.weapon.getAPCost(1)
+    var CHAR_W = 10;
+    var digit = weapon.weapon.getAPCost(1);
     if(digit === undefined || digit > 9)
-        return // TODO: Weapon AP >9?
-    $id("attackButtonAPDigit").style.backgroundPosition = (0 - CHAR_W*digit) + "px"
+        return; // TODO: Weapon AP >9?
+    $id("attackButtonAPDigit").style.backgroundPosition = (0 - CHAR_W*digit) + "px";
 
     // draw weapon type (single, burst, called, punch, ...)
     // TODO: all melee weapons
     var wepTypes: { [wepType: string]: string } = {"melee": "punch", "gun": "single"};
     var type = wepTypes[weapon.weapon.type];
-    $img("attackButtonType").src = `art/intrface/${type}.png`
+    $img("attackButtonType").src = `art/intrface/${type}.png`;
 
     // hide or show called shot sigil?
     if(weapon.weapon.mode === "called")
@@ -734,32 +734,32 @@ function uiDrawWeapon() {
 
 // TODO: Rewrite this sanely (and not directly modify the player object's properties...)
 function uiMoveSlot(data: string, target: string) {
-    const playerUnsafe = player as any;    
-    var obj = null
+    const playerUnsafe = player as any;
+    var obj = null;
 
     if(data[0] === "i") {
         if(target === "inventory")
-            return // disallow inventory -> inventory
+            return; // disallow inventory -> inventory
 
-        var idx = parseInt(data.slice(1))
-        console.log("idx: " + idx)
-        obj = player.inventory[idx]
+        var idx = parseInt(data.slice(1));
+        console.log("idx: " + idx);
+        obj = player.inventory[idx];
         player.inventory.splice(idx, 1) // remove object from inventory
     }
     else {
-        obj = playerUnsafe[data]
+        obj = playerUnsafe[data];
         playerUnsafe[data] = null // remove object from slot
     }
 
-    console.log("obj: " + obj + " (data: " + data + ", target: " + target + ")")
+    console.log("obj: " + obj + " (data: " + data + ", target: " + target + ")");
 
     if(target === "inventory")
-        player.inventory.push(obj)
+        player.inventory.push(obj);
     else {
         if(playerUnsafe[target] !== undefined && playerUnsafe[target] !== null) {
             // perform a swap
             if(data[0] === "i")
-                player.inventory.push(playerUnsafe[target]) // inventory -> slot
+                player.inventory.push(playerUnsafe[target]); // inventory -> slot
             else
                 playerUnsafe[data] = playerUnsafe[target] // slot -> slot
         }
@@ -770,10 +770,10 @@ function uiMoveSlot(data: string, target: string) {
     uiInventoryScreen()
 }
 
-function makeDropTarget($el: HTMLElement, dropCallback: (data: string, e?: DragEvent) => void) {    
+function makeDropTarget($el: HTMLElement, dropCallback: (data: string, e?: DragEvent) => void) {
     $el.ondrop = (e: DragEvent) => {
-        var data = e.dataTransfer.getData("text/plain")
-        dropCallback(data, e)
+        var data = e.dataTransfer.getData("text/plain");
+        dropCallback(data, e);
         return false
     };
     $el.ondragenter = () => false;
@@ -783,7 +783,7 @@ function makeDropTarget($el: HTMLElement, dropCallback: (data: string, e?: DragE
 function makeDraggable($el: HTMLElement, data: string, endCallback?: () => void) {
     $el.setAttribute("draggable", "true");
     $el.ondragstart = (e: DragEvent) => {
-        e.dataTransfer.setData('text/plain', data)
+        e.dataTransfer.setData('text/plain', data);
         console.log("start drag")
     };
     $el.ondragend = (e: DragEvent) => {
@@ -795,12 +795,12 @@ function makeDraggable($el: HTMLElement, data: string, endCallback?: () => void)
 }
 
 function uiInventoryScreen() {
-    uiMode = UI_MODE_INVENTORY
+    uiMode = UI_MODE_INVENTORY;
 
     showv($id("inventoryBox"));
     drawInventory($id("inventoryBoxList"), player.inventory, (obj: Obj, e: MouseEvent) => {
         makeItemContextMenu(e, obj, "inventory")
-    })
+    });
 
     function drawInventory($el: HTMLElement, objects: Obj[], clickCallback?: (item: Obj, e: MouseEvent) => void) {
         clearEl($el);
@@ -821,23 +821,23 @@ function uiInventoryScreen() {
 
     function itemAction(obj: Obj, slot: keyof Player, action: "cancel"|"use"|"drop") {
         switch(action) {
-            case "cancel": break
+            case "cancel": break;
             case "use":
-                console.log("using object: " + obj.art)
-                useObject(obj, player)
-                break
+                console.log("using object: " + obj.art);
+                useObject(obj, player);
+                break;
             case "drop":
                 //console.log("todo: drop " + obj.art); break
-                console.log("dropping: " + obj.art + " with pid " + obj.pid)
+                console.log("dropping: " + obj.art + " with pid " + obj.pid);
                 if(slot !== "inventory") {
                     // add into inventory to drop
-                    console.log("moving into inventory first")
-                    player.inventory.push(obj)
+                    console.log("moving into inventory first");
+                    player.inventory.push(obj);
                     player[slot] = null
                 }
 
-                dropObject(player, obj)
-                uiInventoryScreen()
+                dropObject(player, obj);
+                uiInventoryScreen();
                 break
         }
     }
@@ -846,7 +846,7 @@ function uiInventoryScreen() {
         return makeEl("img", { id: "context_" + action,
                                classes: ["itemContextMenuButton"],
                                click: () => {
-                                    itemAction(obj, slot, action)
+                                    itemAction(obj, slot, action);
                                     hidev($id("itemContextMenu"));
                                }
         });
@@ -860,24 +860,24 @@ function uiInventoryScreen() {
             left: `${e.clientX}px`,
             top: `${e.clientY}px`
         });
-        var cancelBtn = makeContextButton(obj, slot, "cancel")
-        var useBtn = makeContextButton(obj, slot, "use")
-        var dropBtn = makeContextButton(obj, slot, "drop")
+        var cancelBtn = makeContextButton(obj, slot, "cancel");
+        var useBtn = makeContextButton(obj, slot, "use");
+        var dropBtn = makeContextButton(obj, slot, "drop");
 
-        $menu.appendChild(cancelBtn)
+        $menu.appendChild(cancelBtn);
         if(canUseObject(obj))
-            $menu.appendChild(useBtn)
+            $menu.appendChild(useBtn);
         $menu.appendChild(dropBtn)
     }
 
     function drawSlot(slot: keyof Player, slotID: string) {
-        var art = player[slot].invArt
+        var art = player[slot].invArt;
         // 90x60 // 70x40
         var img = makeEl("img", { src: art+'.png',
                                   attrs: { width: 72, height: 60, title: player[slot].name },
                                   click: (e: MouseEvent) => { makeItemContextMenu(e, player[slot], slot); }
         });
-        makeDraggable(img, slot)
+        makeDraggable(img, slot);
 
         const $slotEl = $id(slotID);
         clearEl($slotEl);
@@ -885,7 +885,7 @@ function uiInventoryScreen() {
     }
 
     if(player.leftHand)
-        drawSlot("leftHand", "inventoryBoxItem1")
+        drawSlot("leftHand", "inventoryBoxItem1");
     if(player.rightHand)
         drawSlot("rightHand", "inventoryBoxItem2")
 }
@@ -895,21 +895,21 @@ function drawHP(hp: number) {
 }
 
 function drawDigits(idPrefix: string, amount: number, maxDigits: number, hasSign: boolean) {
-    var CHAR_W = 9, CHAR_NEG = 12
-    var sign = (amount < 0) ? CHAR_NEG : 0
-    if(amount < 0) amount = -amount
-    var digits = amount.toString()
-    var firstDigitIdx = (hasSign ? 2 : 1)
+    var CHAR_W = 9, CHAR_NEG = 12;
+    var sign = (amount < 0) ? CHAR_NEG : 0;
+    if(amount < 0) amount = -amount;
+    var digits = amount.toString();
+    var firstDigitIdx = (hasSign ? 2 : 1);
     if(hasSign)
         $q(idPrefix+"1").style.backgroundPosition = (0 - CHAR_W*sign) + "px"; // sign
     for(var i = firstDigitIdx; i <= maxDigits-digits.length; i++) // left-fill with zeroes
         $q(idPrefix + i).style.backgroundPosition = "0px";
     for(var i = 0; i < digits.length; i++) {
-        var idx = digits.length - 1 - i
+        var idx = digits.length - 1 - i;
         if(digits[idx] === '-')
-            var digit = 12
+            var digit = 12;
         else
-            var digit = parseInt(digits[idx])
+            var digit = parseInt(digits[idx]);
         $q(idPrefix + (maxDigits-i)).style.backgroundPosition = (0 - CHAR_W*digit) + "px";
     }
 }
@@ -936,7 +936,7 @@ function uiAnimateBox($el: HTMLElement, origin: number|null, target: number, cal
 
             $el.addEventListener("transitionend", listener);
         }
-        
+
         // Ease into the target position over 1 second
         $el.style.transition = "top 1s ease";
         $el.style.top = `${target}px`;
@@ -945,22 +945,22 @@ function uiAnimateBox($el: HTMLElement, origin: number|null, target: number, cal
 
 function uiStartDialogue(force: boolean, target?: Critter) {
     if(uiMode === UI_MODE_BARTER && force !== true)
-        return
+        return;
 
-    uiMode = UI_MODE_DIALOGUE
-    $id("dialogueContainer").style.visibility = "visible"
+    uiMode = UI_MODE_DIALOGUE;
+    $id("dialogueContainer").style.visibility = "visible";
     $id("dialogueBox").style.visibility = "visible";
     uiAnimateBox($id("dialogueBox"), 480, 290);
 
     // center around the dialogue target
-    if(!target) return
-    var bbox = objectBoundingBox(target)
+    if(!target) return;
+    var bbox = objectBoundingBox(target);
     if(bbox !== null) {
-        const dc = $id("dialogueContainer")
+        const dc = $id("dialogueContainer");
         // alternatively: dc.offset().left - $(heart.canvas).offset().left
-        const dx = (dc.offsetWidth / 2 | 0) + dc.offsetLeft
-        const dy = (dc.offsetHeight / 4 | 0) + dc.offsetTop - (bbox.h / 2 | 0)
-        cameraX = bbox.x - dx
+        const dx = (dc.offsetWidth / 2 | 0) + dc.offsetLeft;
+        const dy = (dc.offsetHeight / 4 | 0) + dc.offsetTop - (bbox.h / 2 | 0);
+        cameraX = bbox.x - dx;
         cameraY = bbox.y - dy
     }
 }
@@ -989,15 +989,15 @@ function uiAddDialogueOption(msg: string, optionID: number) {
 
 function uiGetAmount(item: Obj) {
     while(true) {
-        var amount: any = prompt("How many?")
+        var amount: any = prompt("How many?");
         if(amount === null)
-            return 0
+            return 0;
         else if(amount === "")
-            return item.amount // all of it!
-        else amount = parseInt(amount)
+            return item.amount; // all of it!
+        else amount = parseInt(amount);
 
         if(isNaN(amount) || item.amount < amount)
-            alert("Invalid amount")
+            alert("Invalid amount");
         else return amount
     }
 }
@@ -1005,7 +1005,7 @@ function uiGetAmount(item: Obj) {
 function _uiAddItem(items: Obj[], item: Obj, count: number) {
     for(var i = 0; i < items.length; i++) {
         if(items[i].approxEq(item)) {
-            items[i].amount += count
+            items[i].amount += count;
             return
         }
     }
@@ -1016,22 +1016,22 @@ function _uiAddItem(items: Obj[], item: Obj, count: number) {
 
 function uiSwapItem(a: Obj[], item: Obj, b: Obj[], amount: number) {
     // swap item from a -> b
-    if(amount === 0) return
+    if(amount === 0) return;
 
-    var idx = -1
+    var idx = -1;
     for(var i = 0; i < a.length; i++) {
         if(a[i].approxEq(item)) {
-            idx = i
+            idx = i;
             break
         }
     }
     if(idx === -1)
-        throw "item (" + item + ") does not exist in a"
+        throw "item (" + item + ") does not exist in a";
 
     if(amount < item.amount) // deduct amount from a and give amount to b
-        item.amount -= amount
+        item.amount -= amount;
     else // just swap them
-        a.splice(idx, 1)
+        a.splice(idx, 1);
 
     // add the item to b
     _uiAddItem(b, item, amount)
@@ -1048,20 +1048,20 @@ function uiEndBarterMode() {
         off($id("barterBoxInventoryRight"), "drop dragenter dragover");
         off($id("barterTalkButton"), "click");
         off($id("barterOfferButton"), "click");
-        
+
         uiStartDialogue(true) // force dialogue mode
     });
 }
 
 function uiBarterMode(merchant: Critter) {
-    uiMode = UI_MODE_BARTER
-    
+    uiMode = UI_MODE_BARTER;
+
     // Hide dialogue screen for now (animate down)
     const $dialogueBox = $id("dialogueBox");
     uiAnimateBox($dialogueBox, null, 480, () => {
         $dialogueBox.style.visibility = "hidden";
         console.log("going to pop up barter box");
-        
+
         // Pop up the bartering screen (animate up)
         const $barterBox = $id("barterBox");
         $barterBox.style.visibility = "visible";
@@ -1072,15 +1072,15 @@ function uiBarterMode(merchant: Critter) {
     // TODO: would it be better if we dropped the "working" copies?
 
     // a copy of inventories for both parties
-    let workingPlayerInventory = player.inventory.map(cloneItem)
-    let workingMerchantInventory = merchant.inventory.map(cloneItem)
+    let workingPlayerInventory = player.inventory.map(cloneItem);
+    let workingMerchantInventory = merchant.inventory.map(cloneItem);
 
     // and our working barter tables
-    let playerBarterTable: Obj[] = []
-    let merchantBarterTable: Obj[] = []
+    let playerBarterTable: Obj[] = [];
+    let merchantBarterTable: Obj[] = [];
 
     function totalAmount(objects: Obj[]): number {
-        var total = 0
+        var total = 0;
         for(var i = 0; i < objects.length; i++) {
             total += objects[i].pro.extra.cost * objects[i].amount
         }
@@ -1089,21 +1089,21 @@ function uiBarterMode(merchant: Critter) {
 
     // TODO: checkOffer() or some-such
     function offer() {
-        console.log("[OFFER]")
+        console.log("[OFFER]");
 
-        var merchantOffered = totalAmount(merchantBarterTable)
-        var playerOffered = totalAmount(playerBarterTable)
-        var diffOffered = playerOffered - merchantOffered
+        var merchantOffered = totalAmount(merchantBarterTable);
+        var playerOffered = totalAmount(playerBarterTable);
+        var diffOffered = playerOffered - merchantOffered;
 
         if(diffOffered >= 0) {
             // OK, player offered equal to more more than the value
-            console.log("[OFFER OK]")
+            console.log("[OFFER OK]");
 
             // finalize and apply the deal
 
             // swap to working inventories
-            merchant.inventory = workingMerchantInventory
-            player.inventory = workingPlayerInventory
+            merchant.inventory = workingMerchantInventory;
+            player.inventory = workingPlayerInventory;
 
             // add in the table items
             for(var i = 0; i < merchantBarterTable.length; i++)
@@ -1112,11 +1112,11 @@ function uiBarterMode(merchant: Critter) {
                 merchant.addInventoryItem(playerBarterTable[i], playerBarterTable[i].amount)
 
             // re-clone so we can continue bartering if necessary
-            workingPlayerInventory = player.inventory.map(cloneItem)
-            workingMerchantInventory = merchant.inventory.map(cloneItem)
+            workingPlayerInventory = player.inventory.map(cloneItem);
+            workingMerchantInventory = merchant.inventory.map(cloneItem);
 
-            playerBarterTable = []
-            merchantBarterTable = []
+            playerBarterTable = [];
+            merchantBarterTable = [];
 
             redrawBarterInventory()
         }
@@ -1129,7 +1129,7 @@ function uiBarterMode(merchant: Critter) {
         clearEl($el);
 
         for(var i = 0; i < objects.length; i++) {
-            var inventoryImage = objects[i].invArt
+            var inventoryImage = objects[i].invArt;
             // 90x60 // 70x40
             var img = makeEl("img", { src: inventoryImage+'.png',
                                       attrs: { width: 72, height: 60, title: objects[i].name } });
@@ -1140,60 +1140,60 @@ function uiBarterMode(merchant: Critter) {
     }
 
     function uiBarterMove(data: string, where: "left"|"right"|"leftInv"|"rightInv") {
-        console.log("barter: move " + data + " to " + where)
+        console.log("barter: move " + data + " to " + where);
 
         var from = ({"p": workingPlayerInventory,
                     "m": workingMerchantInventory,
                     "l": playerBarterTable,
-                    "r": merchantBarterTable} as any)[data[0]]
+                    "r": merchantBarterTable} as any)[data[0]];
 
-        if(from === undefined) throw "uiBarterMove: wrong data: " + data
+        if(from === undefined) throw "uiBarterMove: wrong data: " + data;
 
-        var idx = parseInt(data.slice(1))
-        var obj = from[idx]
-        if(obj === undefined) throw "uiBarterMove: obj not found in list (" + idx + ")"
+        var idx = parseInt(data.slice(1));
+        var obj = from[idx];
+        if(obj === undefined) throw "uiBarterMove: obj not found in list (" + idx + ")";
 
         // player inventory -> left table or player inventory
         if(data[0] === "p" && where !== "left" && where !== "leftInv")
-            return
+            return;
 
         // merchant inventory -> right table or merchant inventory
         if(data[0] === "m" && where !== "right" && where !== "rightInv")
-            return
+            return;
 
         var to = {"left": playerBarterTable,
                   "right": merchantBarterTable,
                   "leftInv": workingPlayerInventory,
-                  "rightInv": workingMerchantInventory}[where]
+                  "rightInv": workingMerchantInventory}[where];
 
         if(to === undefined)
-            throw "uiBarterMove: invalid location: " + where
+            throw "uiBarterMove: invalid location: " + where;
         else if(to === from) // table -> same table
-            return
+            return;
         else if(obj.amount > 1)
-            uiSwapItem(from, obj, to, uiGetAmount(obj))
-        else uiSwapItem(from, obj, to, 1)
+            uiSwapItem(from, obj, to, uiGetAmount(obj));
+        else uiSwapItem(from, obj, to, 1);
 
         redrawBarterInventory()
     }
 
     // bartering drop targets
-    makeDropTarget($id("barterBoxLeft"), (data: string) => { uiBarterMove(data, "left") })
-    makeDropTarget($id("barterBoxRight"), (data: string) => { uiBarterMove(data, "right") })
-    makeDropTarget($id("barterBoxInventoryLeft"), (data: string) => { uiBarterMove(data, "leftInv") })
-    makeDropTarget($id("barterBoxInventoryRight"), (data: string) => { uiBarterMove(data, "rightInv") })
+    makeDropTarget($id("barterBoxLeft"), (data: string) => { uiBarterMove(data, "left") });
+    makeDropTarget($id("barterBoxRight"), (data: string) => { uiBarterMove(data, "right") });
+    makeDropTarget($id("barterBoxInventoryLeft"), (data: string) => { uiBarterMove(data, "leftInv") });
+    makeDropTarget($id("barterBoxInventoryRight"), (data: string) => { uiBarterMove(data, "rightInv") });
 
     $id("barterTalkButton").onclick = uiEndBarterMode;
     $id("barterOfferButton").onclick = offer;
 
     function redrawBarterInventory() {
-        drawInventory($id("barterBoxInventoryLeft"), "p", workingPlayerInventory)
-        drawInventory($id("barterBoxInventoryRight"), "m", workingMerchantInventory)
-        drawInventory($id("barterBoxLeft"), "l", playerBarterTable)
-        drawInventory($id("barterBoxRight"), "r", merchantBarterTable)
+        drawInventory($id("barterBoxInventoryLeft"), "p", workingPlayerInventory);
+        drawInventory($id("barterBoxInventoryRight"), "m", workingMerchantInventory);
+        drawInventory($id("barterBoxLeft"), "l", playerBarterTable);
+        drawInventory($id("barterBoxRight"), "r", merchantBarterTable);
 
-        var moneyLeft = totalAmount(playerBarterTable)
-        var moneyRight = totalAmount(merchantBarterTable)
+        var moneyLeft = totalAmount(playerBarterTable);
+        var moneyRight = totalAmount(merchantBarterTable);
 
         $id("barterBoxLeftAmount").innerHTML = "$" + moneyLeft;
         $id("barterBoxRightAmount").innerHTML = "$" + moneyRight;
@@ -1203,8 +1203,8 @@ function uiBarterMode(merchant: Critter) {
 }
 
 function uiEndLoot() {
-    uiMode = UI_MODE_NONE
-    
+    uiMode = UI_MODE_NONE;
+
     hidev($id("lootBox"));
     off($id("lootBoxLeft"), "drop dragenter dragover");
     off($id("lootBoxRight"), "drop dragenter dragover");
@@ -1212,30 +1212,30 @@ function uiEndLoot() {
 }
 
 function uiLoot(object: Obj) {
-    uiMode = UI_MODE_LOOT
+    uiMode = UI_MODE_LOOT;
 
     function uiLootMove(data: string /* "l"|"r" */, where: "left"|"right") {
-        console.log("loot: move " + data + " to " + where)
+        console.log("loot: move " + data + " to " + where);
 
         var from = ({"l": player.inventory,
-                    "r": object.inventory} as any)[data[0]]
+                    "r": object.inventory} as any)[data[0]];
 
-        if(from === undefined) throw "uiLootMove: wrong data: " + data
+        if(from === undefined) throw "uiLootMove: wrong data: " + data;
 
-        var idx = parseInt(data.slice(1))
-        var obj = from[idx]
-        if(obj === undefined) throw "uiLootMove: obj not found in list (" + idx + ")"
+        var idx = parseInt(data.slice(1));
+        var obj = from[idx];
+        if(obj === undefined) throw "uiLootMove: obj not found in list (" + idx + ")";
 
         var to = {"left": player.inventory,
-                  "right": object.inventory}[where]
+                  "right": object.inventory}[where];
 
         if(to === undefined)
-            throw "uiLootMove: invalid location: " + where
+            throw "uiLootMove: invalid location: " + where;
         else if(to === from) // object -> same location
-            return
+            return;
         else if(obj.amount > 1)
-            uiSwapItem(from, obj, to, uiGetAmount(obj))
-        else uiSwapItem(from, obj, to, 1)
+            uiSwapItem(from, obj, to, uiGetAmount(obj));
+        else uiSwapItem(from, obj, to, 1);
 
         drawLoot()
     }
@@ -1244,7 +1244,7 @@ function uiLoot(object: Obj) {
         clearEl($el);
 
         for(var i = 0; i < objects.length; i++) {
-            var inventoryImage = objects[i].invArt
+            var inventoryImage = objects[i].invArt;
             // 90x60 // 70x40
             var img = makeEl("img", { src: inventoryImage+'.png',
                                       attrs: { width: 72, height: 60, title: objects[i].name } });
@@ -1254,24 +1254,24 @@ function uiLoot(object: Obj) {
         }
     }
 
-    console.log("looting...")
+    console.log("looting...");
 
     showv($id("lootBox"));
 
     // loot drop targets
-    makeDropTarget($id("lootBoxLeft"), (data: string) => { uiLootMove(data, "left") })
-    makeDropTarget($id("lootBoxRight"), (data: string) => { uiLootMove(data, "right") })
+    makeDropTarget($id("lootBoxLeft"), (data: string) => { uiLootMove(data, "left") });
+    makeDropTarget($id("lootBoxRight"), (data: string) => { uiLootMove(data, "right") });
 
     $id("lootBoxTakeAllButton").onclick = () => {
-        console.log("take all...")
-        var inv = object.inventory.slice(0) // clone inventory
+        console.log("take all...");
+        var inv = object.inventory.slice(0); // clone inventory
         for(var i = 0; i < inv.length; i++)
             uiSwapItem(object.inventory, inv[i], player.inventory, inv[i].amount)
         drawLoot()
     };
 
     function drawLoot() {
-        drawInventory($id("lootBoxLeft"), "l", player.inventory)
+        drawInventory($id("lootBoxLeft"), "l", player.inventory);
         drawInventory($id("lootBoxRight"), "r", object.inventory)
     }
 
@@ -1285,7 +1285,7 @@ function uiLog(msg: string) {
 }
 
 function uiCloseWorldMap() {
-    uiMode = UI_MODE_NONE
+    uiMode = UI_MODE_NONE;
 
     hide($id("worldMapContainer"));
     hidev($id("areamap"));
@@ -1295,16 +1295,16 @@ function uiCloseWorldMap() {
 }
 
 function uiWorldMap(onAreaMap: boolean=false) {
-    uiMode = UI_MODE_WORLDMAP
+    uiMode = UI_MODE_WORLDMAP;
     show($id("worldMapContainer"));
 
     if(!mapAreas)
-        mapAreas = loadAreas()
+        mapAreas = loadAreas();
 
     if(onAreaMap)
-        uiWorldMapAreaView()
+        uiWorldMapAreaView();
     else
-        uiWorldMapWorldView()
+        uiWorldMapWorldView();
     uiWorldMapLabels()
 }
 
@@ -1323,27 +1323,27 @@ function uiWorldMapWorldView() {
 }
 
 function uiWorldMapShowArea(area: Area) {
-    uiWorldMapAreaView()
+    uiWorldMapAreaView();
 
     const $areamap = $id("areamap");
     $areamap.style.backgroundImage = `url('${area.mapArt}.png')`;
     clearEl($areamap);
 
     for(const entrance of area.entrances) {
-        console.log("Area entrance: " + entrance.mapLookupName)
+        console.log("Area entrance: " + entrance.mapLookupName);
         var $entranceEl = makeEl("div", { classes: ["worldmapEntrance"] });
         var $hotspot = makeEl("div", { classes: ["worldmapEntranceHotspot"] });
 
         $hotspot.onclick = () => {
             // hotspot click -- travel to relevant map
-            const mapName = lookupMapNameFromLookup(entrance.mapLookupName)
+            const mapName = lookupMapNameFromLookup(entrance.mapLookupName);
             console.log("hotspot -> " + mapName + " (via " +
-                        entrance.mapLookupName + ")")
-            gMap.loadMap(mapName)
+                        entrance.mapLookupName + ")");
+            gMap.loadMap(mapName);
             uiCloseWorldMap()
         };
 
-        $entranceEl.appendChild($hotspot)
+        $entranceEl.appendChild($hotspot);
         appendHTML($entranceEl, entrance.mapLookupName);
         $entranceEl.style.left = entrance.x + "px";
         $entranceEl.style.top = entrance.y + "px";
@@ -1354,10 +1354,10 @@ function uiWorldMapShowArea(area: Area) {
 function uiWorldMapLabels() {
     $id("worldMapLabels").innerHTML = "<div id='worldMapLabelsBackground'></div>";
 
-    var i = 0
+    var i = 0;
     for(const areaID in mapAreas) {
-        var area = mapAreas[areaID]
-        if(!area.labelArt) continue
+        var area = mapAreas[areaID];
+        if(!area.labelArt) continue;
 
         var label = makeEl("img", { classes: ["worldMapLabelImage"], src: area.labelArt + ".png" });
         var labelButton = makeEl("div", { classes: ["worldMapLabelButton"],
@@ -1365,13 +1365,13 @@ function uiWorldMapLabels() {
 
         var areaLabel = makeEl("div", { classes: ["worldMapLabel"], style: {top: (1 + i*27) + "px"},
                                         children: [label, labelButton] });
-        $id("worldMapLabels").appendChild(areaLabel)
-        i++ 
+        $id("worldMapLabels").appendChild(areaLabel);
+        i++
     }
 }
 
 function uiElevatorDone() {
-    uiMode = UI_MODE_NONE
+    uiMode = UI_MODE_NONE;
     hidev($id("elevatorBox"));
 
     // flip all buttons to hidden
@@ -1383,14 +1383,14 @@ function uiElevatorDone() {
 }
 
 function uiElevator(elevator: Elevator) {
-    uiMode = UI_MODE_ELEVATOR
-    var art = lookupInterfaceArt(elevator.type)
-    console.log("elevator art: " + art)
-    console.log("buttons: " + elevator.buttonCount)
+    uiMode = UI_MODE_ELEVATOR;
+    var art = lookupInterfaceArt(elevator.type);
+    console.log("elevator art: " + art);
+    console.log("buttons: " + elevator.buttonCount);
 
     if(elevator.labels !== -1) {
-        var labelArt = lookupInterfaceArt(elevator.labels)
-        console.log("elevator label art: " + labelArt)
+        var labelArt = lookupInterfaceArt(elevator.labels);
+        console.log("elevator label art: " + labelArt);
 
         const $elevatorLabel = $id("elevatorLabel");
         showv($elevatorLabel);
@@ -1409,21 +1409,21 @@ function uiElevator(elevator: Elevator) {
             // button `i` pushed
             // todo: animate positioner/spinner (and come up with a better name for that)
 
-            var mapID = elevator.buttons[i-1].mapID
-            var level = elevator.buttons[i-1].level
-            var position = fromTileNum(elevator.buttons[i-1].tileNum)
+            var mapID = elevator.buttons[i-1].mapID;
+            var level = elevator.buttons[i-1].level;
+            var position = fromTileNum(elevator.buttons[i-1].tileNum);
 
             if(mapID !== gMap.mapID) {
                 // different map
                 console.log("elevator -> map " + mapID + ", level " + level + " @ " +
-                            position.x + ", " + position.y)
+                            position.x + ", " + position.y);
                 gMap.loadMapByID(mapID, position, level)
             }
             else if(level !== currentElevation) {
                 // same map, different elevation
-                console.log("elevator -> level " + level + " @ " + 
-                            position.x + ", " + position.y)
-                player.move(position)
+                console.log("elevator -> level " + level + " @ " +
+                            position.x + ", " + position.y);
+                player.move(position);
                 gMap.changeElevation(level, true)
             }
 
@@ -1434,38 +1434,38 @@ function uiElevator(elevator: Elevator) {
 }
 
 function uiCloseCalledShot() {
-    uiMode = UI_MODE_NONE
+    uiMode = UI_MODE_NONE;
     hide($id("calledShotBox"));
 }
 
 function uiCalledShot(art: string, target: Critter, callback?: (regionHit: string) => void) {
-    uiMode = UI_MODE_CALLED_SHOT
+    uiMode = UI_MODE_CALLED_SHOT;
     show($id("calledShotBox"));
 
     function drawChance(region: string) {
-        var chance: any = Combat.prototype.getHitChance(player, target, region).hit
-        console.log("id: %s | chance: %d", "#calledShot-"+region+"-chance #digit", chance)
+        var chance: any = Combat.prototype.getHitChance(player, target, region).hit;
+        console.log("id: %s | chance: %d", "#calledShot-"+region+"-chance #digit", chance);
         if(chance <= 0)
-            chance = "--"
+            chance = "--";
         drawDigits("#calledShot-"+region+"-chance #digit", chance, 2, false)
     }
 
-    drawChance("torso")
-    drawChance("head")
-    drawChance("eyes")
-    drawChance("groin")
-    drawChance("leftArm")
-    drawChance("rightArm")
-    drawChance("leftLeg")
-    drawChance("rightLeg")
+    drawChance("torso");
+    drawChance("head");
+    drawChance("eyes");
+    drawChance("groin");
+    drawChance("leftArm");
+    drawChance("rightArm");
+    drawChance("leftLeg");
+    drawChance("rightLeg");
 
     $id("calledShotBackground").style.backgroundImage = `url('${art}.png')`;
 
     for(const $label of $qa(".calledShotLabel")) {
         $label.onclick = (evt: MouseEvent) => {
-            var id = (evt.target as HTMLElement).id
-            var regionHit = id.split("-")[1]
-            console.log("clicked a called location (%s)", regionHit)
+            var id = (evt.target as HTMLElement).id;
+            var regionHit = id.split("-")[1];
+            console.log("clicked a called location (%s)", regionHit);
             if(callback)
                 callback(regionHit)
         };

@@ -18,7 +18,7 @@ limitations under the License.
 
 function binop(f: (x: any, y: any) => any) {
 	return function(this: ScriptVM) {
-		var rhs = this.pop()
+		var rhs = this.pop();
 		this.push(f(this.pop(), rhs))
 	}
 }
@@ -32,15 +32,15 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
             ,0x8004: function() { this.pc = this.pop() } // op_jmp
             ,0x8003: function() { } // op_critical_done (nop)
             ,0x802B: function() { // op_push_base
-            		var argc = this.pop()
-            		this.retStack.push(this.dvarBase)
+            		var argc = this.pop();
+            		this.retStack.push(this.dvarBase);
             		this.dvarBase = this.dataStack.length - argc
             		// console.log("op_push_base (argc %d)", argc)
             	}
             ,0x8019: function() { // op_swapa
-	            	var a = this.popAddr()
-	            	var b = this.popAddr()
-	            	this.retStack.push(a)
+	            	var a = this.popAddr();
+	            	var b = this.popAddr();
+	            	this.retStack.push(a);
 	            	this.retStack.push(b)
             	}
             ,0x802A: function() { this.dataStack.splice(this.dvarBase) } // op_pop_to_base
@@ -49,9 +49,9 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
             ,0x8013: function() { var num = this.pop(); this.dataStack[this.svarBase + num] = this.pop() } // op_store_global
             ,0x8012: function() { var num = this.pop(); this.push(this.dataStack[this.svarBase + num]) } // op_fetch_global
             ,0x801C: function() { // op_pop_return
-	            	var addr = this.popAddr()
+	            	var addr = this.popAddr();
 	            	if(addr === -1)
-	            		this.halted = true
+	            		this.halted = true;
 	            	else
 		            	this.pc = addr
 	            }
@@ -65,9 +65,9 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
             ,0x801B: function() { this.push(this.dataStack[this.dataStack.length-1]) } // op_dup
 
             ,0x8030: function() { // op_while
-            	var cond = this.pop()
+            	var cond = this.pop();
             	if(!cond) {
-	        		var pc = this.pop()
+	        		var pc = this.pop();
             		this.pc = pc
             	}
             }
@@ -76,10 +76,10 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
             	this.push(this.intfile.procedures[this.pop()].index)
             }
             ,0x8027: function() { // op_check_arg_count
-            	var argc = this.pop()
-            	var procIdx = this.pop()
-            	var proc = this.intfile.proceduresTable[procIdx]
-            	console.log("CHECK ARGS: argc=%d procIdx=%d, proc=%o", argc, procIdx, proc)
+            	var argc = this.pop();
+            	var procIdx = this.pop();
+            	var proc = this.intfile.proceduresTable[procIdx];
+            	console.log("CHECK ARGS: argc=%d procIdx=%d, proc=%o", argc, procIdx, proc);
             	if(argc !== proc.argc)
             		throw `vm error: expected ${proc.argc} args, got ${argc} args when calling ${proc.name}`
             }
@@ -99,8 +99,8 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
             	// we just check the next instruction and match it up with the set of
             	// instructions who use it as an identifier (whom use interpretGetName).
 
-            	var num = this.script.read32()
-            	var nextOpcode = this.script.peek16()
+            	var num = this.script.read32();
+            	var nextOpcode = this.script.peek16();
 
             	if(arrayIncludes([0x8014 // op_fetch_external
 				                 ,0x8015 // op_store_external
@@ -138,20 +138,20 @@ var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
 			,0x803B: binop(function(x,y) { return x * y })
 			,0x803d: binop(function(x,y) { return x % y })
 			,0x803C: binop(function(x,y) { return x / y | 0 }) // TODO: truncate or not?
-        	}
+        	};
 
 class ScriptVM {
-	script: BinaryReader
-	intfile: IntFile
-	pc: number = 0
-	dataStack: any[] = []
-	retStack: number[] = []
-	svarBase: number = 0
-	dvarBase: number = 0
-	halted: boolean = false
+	script: BinaryReader;
+	intfile: IntFile;
+	pc: number = 0;
+	dataStack: any[] = [];
+	retStack: number[] = [];
+	svarBase: number = 0;
+	dvarBase: number = 0;
+	halted: boolean = false;
 
 	constructor(script: BinaryReader, intfile: IntFile) {
-		this.script = script
+		this.script = script;
 		this.intfile = intfile
 	}
 
@@ -161,72 +161,72 @@ class ScriptVM {
 
 	pop(): any {
 		if(this.dataStack.length === 0)
-			throw "VM data stack underflow"
+			throw "VM data stack underflow";
 		return this.dataStack.pop()
 	}
 
 	popAddr(): any {
 		if(this.retStack.length === 0)
-			throw "VM return stack underflow"
+			throw "VM return stack underflow";
 		return this.retStack.pop()
 	}
 
 	dis(): string {
-		var offset = this.script.offset
-		var disassembly = disassemble(this.intfile, this.script)
-		this.script.seek(offset)
+		var offset = this.script.offset;
+		var disassembly = disassemble(this.intfile, this.script);
+		this.script.seek(offset);
 		return disassembly
 	}
 
 	// call a named procedure
 	call(procName: string, args: any[]=[]): any {
-		var proc = this.intfile.procedures[procName]
+		var proc = this.intfile.procedures[procName];
 		// console.log("CALL " + procName + " @ " + proc.offset + " from " + this.scriptObj.scriptName)
 		if(!proc)
-			throw "ScriptVM: unknown procedure " + procName
+			throw "ScriptVM: unknown procedure " + procName;
 
 		// TODO: which way are args passed on the stack?
-		args.reverse()
-		args.forEach(arg => this.push(arg))
-		this.push(args.length)
+		args.reverse();
+		args.forEach(arg => this.push(arg));
+		this.push(args.length);
 
-		this.retStack.push(-1) // push return address (TODO: how is this handled?)
+		this.retStack.push(-1); // push return address (TODO: how is this handled?)
 
 		// run procedure code
-		this.pc = proc.offset
-		this.run()
+		this.pc = proc.offset;
+		this.run();
 
 		return this.pop()
 	}
 
 	step(): boolean {
 		if(this.halted)
-			return false
+			return false;
 
 		// fetch op
-		var pc = this.pc
-		this.script.seek(pc)
-		var opcode = this.script.read16()
+		var pc = this.pc;
+		this.script.seek(pc);
+		var opcode = this.script.read16();
 
 		// dispatch based on opMap
 		if(opMap[opcode] !== undefined)
-			opMap[opcode].call(this)
+			opMap[opcode].call(this);
 		else {
-			console.warn("unimplemented opcode %s (pc=%s) in %s", opcode.toString(16), this.pc.toString(16), this.intfile.name)
+			console.warn("unimplemented opcode %s (pc=%s) in %s", opcode.toString(16), this.pc.toString(16), this.intfile.name);
 			if(Config.engine.doDisasmOnUnimplOp) {
-				console.log("disassembly:")
+				console.log("disassembly:");
 				console.log(disassemble(this.intfile, this.script))
 			}
 			return false
 		}
 
 		if(this.pc === pc) // PC wasn't explicitly set, let's advance it to the current file offset
-			this.pc = this.script.offset
+			this.pc = this.script.offset;
 		return true
 	}
 
 	run(): void {
-		this.halted = false
+		this.halted = false;
 		while(this.step()) { }
 	}
 }

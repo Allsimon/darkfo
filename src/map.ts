@@ -42,10 +42,10 @@ class GameMap {
 	startingElevation: number;
 	numLevels: number;
 
-	currentElevation: number = 0 // current map elevation
+	currentElevation: number = 0; // current map elevation
 
-	floorMap: string[][] = null // Floor tilemap
-	roofMap: string[][] = null // Roof tilemap
+	floorMap: string[][] = null; // Floor tilemap
+	roofMap: string[][] = null; // Roof tilemap
 
 	mapScript: any = null; // Current map script object
 	objects: Obj[][] = null; // Map objects on all levels
@@ -81,17 +81,17 @@ class GameMap {
 
 		// TODO: better object equality testing
 		for(var level = 0; level < this.numLevels; level++) {
-			var objects = this.objects[level]
+			var objects = this.objects[level];
 			for(var i = 0; i < objects.length; i++) {
 				if(objects[i] === obj) {
-					console.log("removeObject: destroying index %d (%o/%o)", i, obj, objects[i])
-					this.objects[level].splice(i, 1)
+					console.log("removeObject: destroying index %d (%o/%o)", i, obj, objects[i]);
+					this.objects[level].splice(i, 1);
 					return
 				}
 			}
 		}
 
-		console.log("removeObject: couldn't find object on map")
+		console.log("removeObject: couldn't find object on map");
 		console.trace()
 	}
 
@@ -114,30 +114,30 @@ class GameMap {
 	}
 
 	changeElevation(level: number, updateScripts: boolean=false, isMapLoading: boolean=false) {
-		var oldElevation = this.currentElevation
-		this.currentElevation = level
-		currentElevation = level // TODO: Get rid of this global
-		this.floorMap = this.mapObj.levels[level].tiles.floor
-		this.roofMap  = this.mapObj.levels[level].tiles.roof
+		var oldElevation = this.currentElevation;
+		this.currentElevation = level;
+		currentElevation = level; // TODO: Get rid of this global
+		this.floorMap = this.mapObj.levels[level].tiles.floor;
+		this.roofMap  = this.mapObj.levels[level].tiles.roof;
 		//this.spatials = this.mapObj.levels[level]["spatials"]
 
 		// If we're in combat, end it since we're moving off of that elevation
 		inCombat && combat.end();
 
-		player.clearAnim()
+		player.clearAnim();
 
 		// remove the player/party from the old objects list
 		// and add the them to the new one
-		var party = gParty.getPartyMembersAndPlayer()
+		var party = gParty.getPartyMembersAndPlayer();
 		party.forEach((obj: Critter) => {
-			arrayRemove(this.objects[oldElevation], obj)
+			arrayRemove(this.objects[oldElevation], obj);
 			this.objects[level].push(obj)
-		})
+		});
 
-		this.placeParty()
+		this.placeParty();
 
 		// set up renderer data
-		renderer.initData(this.roofMap, this.floorMap, this.getObjects())
+		renderer.initData(this.roofMap, this.floorMap, this.getObjects());
 
 		if(updateScripts) {
 			// TODO: we need some kind of active/inactive flag on scripts to toggle here,
@@ -148,11 +148,11 @@ class GameMap {
 
 		// rebuild the lightmap
 		if(Config.engine.doFloorLighting) {
-			Lightmap.resetLight()
+			Lightmap.resetLight();
 			Lightmap.rebuildLight()
 		}
 
-		centerCamera(player.position)
+		centerCamera(player.position);
 
 		Events.emit("elevationChanged", { elevation: level, oldElevation, isMapLoading })
 	}
@@ -161,14 +161,14 @@ class GameMap {
 		// set up party members' positions
 		gParty.getPartyMembers().forEach((obj: Critter) => {
 			// attempt party member placement around player
-			var placed = false
+			var placed = false;
 			for(var dist = 1; dist < 3; dist++) {
 				for(var dir = 0; dir < 6; dir++) {
-					var pos = hexInDirectionDistance(player.position, dir, dist)
+					var pos = hexInDirectionDistance(player.position, dir, dist);
 					if(objectsAtPosition(pos).length === 0) {
-						obj.position = pos
-						console.log("placed %o @ %o", obj, pos)
-						placed = true
+						obj.position = pos;
+						console.log("placed %o @ %o", obj, pos);
+						placed = true;
 						break
 					}
 				}
@@ -185,24 +185,24 @@ class GameMap {
 	doEnterNewMap(isFirstRun: boolean): void {
 		// Tell scripts they've entered the new map
 
-		const objectsAndSpatials = this.getObjectsAndSpatials()
-		const overridenStartPos = Scripting.enterMap(this.mapScript, objectsAndSpatials, this.currentElevation, this.mapID, isFirstRun)
+		const objectsAndSpatials = this.getObjectsAndSpatials();
+		const overridenStartPos = Scripting.enterMap(this.mapScript, objectsAndSpatials, this.currentElevation, this.mapID, isFirstRun);
 
 		if(overridenStartPos) {
 			// Starting position was overridden by map_enter_p_proc -- use the new one
-			console.log("Starting position overriden to %o", overridenStartPos)
-			player.position = overridenStartPos.position
-			player.orientation = overridenStartPos.orientation
+			console.log("Starting position overriden to %o", overridenStartPos);
+			player.position = overridenStartPos.position;
+			player.orientation = overridenStartPos.orientation;
 			this.currentElevation = currentElevation = overridenStartPos.elevation
 		}
 
 		// place party again, so if the map script overrided the start position we're in the right place
-		this.placeParty()
+		this.placeParty();
 
 		// Tell objects' scripts that they're now on the map
 		// TODO: Does this apply to all levels or just the current elevation?
-		this.objects.forEach(level => level.forEach(obj => obj.enterMap()))
-		this.spatials.forEach(level => level.forEach(spatial => Scripting.objectEnterMap(spatial, this.currentElevation, this.mapID)))
+		this.objects.forEach(level => level.forEach(obj => obj.enterMap()));
+		this.spatials.forEach(level => level.forEach(spatial => Scripting.objectEnterMap(spatial, this.currentElevation, this.mapID)));
 
 		Scripting.updateMap(this.mapScript, objectsAndSpatials, this.currentElevation)
 	}
@@ -255,135 +255,135 @@ class GameMap {
 
 	loadNewMap(mapName: string, startingPosition?: Point, startingElevation?: number, loadedCallback?: () => void) {
 		function load(file: string, callback?: (x:any) => void) {
-			if(images[file] !== undefined) return // don't load more than once
-			loadingAssetsTotal++
+			if(images[file] !== undefined) return; // don't load more than once
+			loadingAssetsTotal++;
 			heart.graphics.newImage(file+".png", (r: HeartImage) => {
-				images[file] = r
-				loadingAssetsLoaded++
+				images[file] = r;
+				loadingAssetsLoaded++;
 				if(callback) callback(r)
 			})
 		}
 
-		this.name = mapName.toLowerCase()
+		this.name = mapName.toLowerCase();
 
 		Events.emit("loadMapPre");
 
-		isLoading = true
-		loadingAssetsTotal = 1 // this will remain +1 until we load the map, preventing it from exiting early
-		loadingAssetsLoaded = 0
-		loadingLoadedCallback = loadedCallback || null
+		isLoading = true;
+		loadingAssetsTotal = 1; // this will remain +1 until we load the map, preventing it from exiting early
+		loadingAssetsLoaded = 0;
+		loadingLoadedCallback = loadedCallback || null;
 
 		// clear any previous objects/events
-		this.objects = null
-		this.mapScript = null
-		Scripting.reset(this.name)
+		this.objects = null;
+		this.mapScript = null;
+		Scripting.reset(this.name);
 
 		// reset player animation status (to idle)
-		player.clearAnim()
+		player.clearAnim();
 
-		console.log("loading map " + mapName)
+		console.log("loading map " + mapName);
 
-		var mapImages = getFileJSON("maps/" + mapName + ".images.json")
+		var mapImages = getFileJSON("maps/" + mapName + ".images.json");
 		for(var i = 0; i < mapImages.length; i++)
 			load(mapImages[i])
-		console.log("loading " + mapImages.length + " images")
+		console.log("loading " + mapImages.length + " images");
 
-		var map = getFileJSON("maps/"+mapName+".json")
-		this.mapObj = map
-		this.mapID = map.mapID
-		this.numLevels = map.levels.length
+		var map = getFileJSON("maps/"+mapName+".json");
+		this.mapObj = map;
+		this.mapID = map.mapID;
+		this.numLevels = map.levels.length;
 
-		var elevation = (startingElevation !== undefined) ? startingElevation : 0
+		var elevation = (startingElevation !== undefined) ? startingElevation : 0;
 
 		if(Config.engine.doLoadScripts) {
-			Scripting.init(mapName)
+			Scripting.init(mapName);
 			try {
-				this.mapScript = Scripting.loadScript(mapName)
+				this.mapScript = Scripting.loadScript(mapName);
 				Scripting.setMapScript(this.mapScript)
 			}
 			catch(e) {
-				this.mapScript = null
+				this.mapScript = null;
 				console.log("ERROR LOADING MAP SCRIPT:", e.message)
 			}
 		}
 		else
-			this.mapScript = null
+			this.mapScript = null;
 
 		// warp to the default position (may be overridden by map script)
-		player.position = startingPosition || map.startPosition
-		player.orientation = map.startOrientation
+		player.position = startingPosition || map.startPosition;
+		player.orientation = map.startOrientation;
 
 		if(Config.engine.doSpatials) {
-			this.spatials = map.levels.map((level: any) => level.spatials)
+			this.spatials = map.levels.map((level: any) => level.spatials);
 
 			if(Config.engine.doLoadScripts) {
 				// initialize spatial scripts
 				this.spatials.forEach((level: any) => level.forEach((spatial: Spatial) => {
-					var script = Scripting.loadScript(spatial.script)
+					var script = Scripting.loadScript(spatial.script);
 					if(script === null)
-						console.log("load script failed for spatial " + spatial.script)
+						console.log("load script failed for spatial " + spatial.script);
 					else {
 						spatial._script = script
 						// no need to initialize here because spatials only use spatial_p_proc
 					}
 
-					spatial.isSpatial = true
+					spatial.isSpatial = true;
 					spatial.position = fromTileNum(spatial.tileNum)
 				}))
 			}
 		}
 		else // TODO: Spatial type
-			this.spatials = map.levels.map((_: any) => [] as Spatial[])
+			this.spatials = map.levels.map((_: any) => [] as Spatial[]);
 
 		// Load map objects. Note that these need to be loaded *after* the map so that object scripts
 		// have access to the map script object.
-		this.objects = new Array(map.levels.length)
+		this.objects = new Array(map.levels.length);
 		for(var level = 0; level < map.levels.length; level++) {
 			this.objects[level] = map.levels[level].objects.map((obj: any) => objFromMapObject(obj))
 		}
 
 		// change to our new elevation (sets up map state)
-		this.changeElevation(elevation, false, true)
+		this.changeElevation(elevation, false, true);
 
 		// TODO: when exactly are these called?
 		// TODO: when objectsAndSpatials is updated, the scripting engine won't know
-		var objectsAndSpatials = this.getObjectsAndSpatials()
+		var objectsAndSpatials = this.getObjectsAndSpatials();
 
 		if(Config.engine.doLoadScripts) {
 			// party member NPCs get the new map script
 			gParty.getPartyMembers().forEach((obj: Critter) => {
 				obj._script._mapScript = this.mapScript
-			})
+			});
 
-			this.doEnterNewMap(true)
-			elevation = this.currentElevation
+			this.doEnterNewMap(true);
+			elevation = this.currentElevation;
 
 			// change elevation with script updates
 			this.changeElevation(this.currentElevation, true, true)
 		}
 
 		// TODO: is map_enter_p_proc called on elevation change?
-		console.log("loaded (" + map.levels.length + " levels, " +this.getObjects().length + " objects on elevation " + elevation + ")")
+		console.log("loaded (" + map.levels.length + " levels, " +this.getObjects().length + " objects on elevation " + elevation + ")");
 
 		// load some testing art
-		load("art/critters/hmjmpsat")
-		load("hex_outline", (r: any) => { hexOverlay = r })
+		load("art/critters/hmjmpsat");
+		load("hex_outline", (r: any) => { hexOverlay = r });
 
-		loadingAssetsTotal-- // we should know all of the assets we need by now
+		loadingAssetsTotal--; // we should know all of the assets we need by now
 
 		// clear audio and use the map music
-		var curMapInfo = getCurrentMapInfo()
-		audioEngine.stopAll()
+		var curMapInfo = getCurrentMapInfo();
+		audioEngine.stopAll();
 		if(curMapInfo && curMapInfo.music)
-			audioEngine.playMusic(curMapInfo.music)
+			audioEngine.playMusic(curMapInfo.music);
 
 		Events.emit("loadMapPost");
 	}
 
 	loadMapByID(mapID: number, startingPosition?: Point, startingElevation?: number): void {
-		var mapName = lookupMapName(mapID)
+		var mapName = lookupMapName(mapID);
 		if(mapName !== null)
-			this.loadMap(mapName, startingPosition, startingElevation)
+			this.loadMap(mapName, startingPosition, startingElevation);
 		else
 			console.log("couldn't lookup map name for map ID " + mapID)
 	}
@@ -410,15 +410,15 @@ class GameMap {
 	}
 
 	deserialize(obj: SerializedMap): void {
-		this.name = obj.name
-		this.mapID = obj.mapID
-		this.numLevels = obj.numLevels
-		this.mapObj = obj.mapObj
-		this.mapScript = obj.mapScript ? Scripting.deserializeScript(obj.mapScript) : null
-		this.objects = obj.objects.map(level => level.map(obj => deserializeObj(obj)))
-		this.spatials = [[],[],[]] //obj.spatials // TODO: deserialize
-		this.roofMap = obj.roofMap
-		this.floorMap = obj.floorMap
+		this.name = obj.name;
+		this.mapID = obj.mapID;
+		this.numLevels = obj.numLevels;
+		this.mapObj = obj.mapObj;
+		this.mapScript = obj.mapScript ? Scripting.deserializeScript(obj.mapScript) : null;
+		this.objects = obj.objects.map(level => level.map(obj => deserializeObj(obj)));
+		this.spatials = [[],[],[]]; //obj.spatials // TODO: deserialize
+		this.roofMap = obj.roofMap;
+		this.floorMap = obj.floorMap;
 		this.currentElevation = 0 // TODO
 
 		//this.mapObj = {levels: [{tiles: {floor: this.floorMap, roof: this.roofMap}}]} // TODO: add dimension to roofMap

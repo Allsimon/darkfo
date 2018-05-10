@@ -22,7 +22,7 @@ function getPixelIndex(x: number, y: number, w: number) {
 }
 
 class CanvasRenderer extends Renderer {
-	tileDataCache: {[key: string]: any} = {}
+	tileDataCache: {[key: string]: any} = {};
 
 	init(): void {
 		heart.attach("cnv")
@@ -50,15 +50,15 @@ class CanvasRenderer extends Renderer {
 
 	renderLitFloor(matrix: string[][], useColorTable: boolean=false) {
 		// get the screen framebuffer
-		const imageData = heart.ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+		const imageData = heart.ctx.getImageData(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		const screenWidth = imageData.width;
-		let tmpCtx = null
-		let tileData
+		let tmpCtx = null;
+		let tileData;
 
 		if(useColorTable) {
 			// XXX: hack
 			if(Lighting.colorLUT === null) {
-				Lighting.colorLUT = getFileJSON("lut/color_lut.json")
+				Lighting.colorLUT = getFileJSON("lut/color_lut.json");
 				Lighting.colorRGB = getFileJSON("lut/color_rgb.json")
 			}
 		}
@@ -68,58 +68,58 @@ class CanvasRenderer extends Renderer {
 		// due to tile sizes being different and not overlapping properly
 		for(let i = matrix.length - 1; i >= 0; i--) {
 			for(let j = 0; j < matrix[0].length; j++) {
-				const tile = matrix[j][i]
-				if(tile === "grid000") continue
-				const img = "art/tiles/" + tile
+				const tile = matrix[j][i];
+				if(tile === "grid000") continue;
+				const img = "art/tiles/" + tile;
 
 				if(images[img] !== undefined) {
-					const scr = tileToScreen(i, j)
+					const scr = tileToScreen(i, j);
 					if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
 					   scr.x >= cameraX+SCREEN_WIDTH || scr.y >= cameraY+SCREEN_HEIGHT)
-						continue
+						continue;
 
-					const sx = scr.x - cameraX
-					const sy = scr.y - cameraY
+					const sx = scr.x - cameraX;
+					const sy = scr.y - cameraY;
 
 					// XXX: how correct is this?
 					const hex = hexFromScreen(scr.x - 13,
-						                      scr.y + 13)
+						                      scr.y + 13);
 
 					if(this.tileDataCache[img] === undefined) {
 						// temp canvas to get tile framebuffer
 						if(!tmpCtx)
-							tmpCtx = document.createElement("canvas").getContext("2d")
+							tmpCtx = document.createElement("canvas").getContext("2d");
 
-						tmpCtx.drawImage(images[img].img, 0, 0)
-						tileData = tmpCtx.getImageData(0, 0, images[img].img.width, images[img].img.height)
+						tmpCtx.drawImage(images[img].img, 0, 0);
+						tileData = tmpCtx.getImageData(0, 0, images[img].img.width, images[img].img.height);
 						this.tileDataCache[img] = tileData
 					}
 					else
-						tileData = this.tileDataCache[img]
+						tileData = this.tileDataCache[img];
 
-					const tileWidth = tileData.width
+					const tileWidth = tileData.width;
 
-					const isTriangleLit = Lighting.initTile(hex)
-					let framebuffer
-					let intensity_
+					const isTriangleLit = Lighting.initTile(hex);
+					let framebuffer;
+					let intensity_;
 
 					if(isTriangleLit)
-						framebuffer = Lighting.computeFrame()
+						framebuffer = Lighting.computeFrame();
 
 					// render tile
 
-					const w = Math.min(SCREEN_WIDTH - sx, 80)
-					const h = Math.min(SCREEN_HEIGHT - sy, 36)
+					const w = Math.min(SCREEN_WIDTH - sx, 80);
+					const h = Math.min(SCREEN_HEIGHT - sy, 36);
 
 					for(var y = 0; y < h; y++) {
 						for(var x = 0; x < w; x++) {
 							if((sx + x) < 0 || (sy + y) < 0)
-								continue
+								continue;
 
-							const tileIndex = getPixelIndex(x, y, tileWidth)
+							const tileIndex = getPixelIndex(x, y, tileWidth);
 
 							if(tileData.data[tileIndex + 3] === 0) // transparent pixel, skip
-								continue
+								continue;
 
 							if(isTriangleLit) {
 								intensity_ = framebuffer[160 + 80*y + x]
@@ -128,24 +128,24 @@ class CanvasRenderer extends Renderer {
 								intensity_ = Lighting.vertices[3]
 							}
 
-							const screenIndex = getPixelIndex(sx + x, sy + y, screenWidth)
-							const intensity = Math.min(1.0, intensity_/65536) // tile intensity [0, 1]
+							const screenIndex = getPixelIndex(sx + x, sy + y, screenWidth);
+							const intensity = Math.min(1.0, intensity_/65536); // tile intensity [0, 1]
 
 							// blit to the framebuffer
 							if(useColorTable) { // TODO: optimize
-								const orig_color = (tileData.data[tileIndex + 0] << 16) | (tileData.data[tileIndex + 1] << 8) | tileData.data[tileIndex + 2]
-								const palIdx = Lighting.colorLUT[orig_color] // NOTE: substitue 221 for white for drawing just the lightbuffer
-								const tableIdx = palIdx*256 + (intensity_/512 | 0)
-								const colorPal = Lighting.intensityColorTable[tableIdx]
-								const color = Lighting.colorRGB[colorPal]
+								const orig_color = (tileData.data[tileIndex + 0] << 16) | (tileData.data[tileIndex + 1] << 8) | tileData.data[tileIndex + 2];
+								const palIdx = Lighting.colorLUT[orig_color]; // NOTE: substitue 221 for white for drawing just the lightbuffer
+								const tableIdx = palIdx*256 + (intensity_/512 | 0);
+								const colorPal = Lighting.intensityColorTable[tableIdx];
+								const color = Lighting.colorRGB[colorPal];
 
-								imageData.data[screenIndex + 0] = color[0]
-								imageData.data[screenIndex + 1] = color[1]
+								imageData.data[screenIndex + 0] = color[0];
+								imageData.data[screenIndex + 1] = color[1];
 								imageData.data[screenIndex + 2] = color[2]
 							}
 							else { // just draw the source pixel with the light intensity
-								imageData.data[screenIndex + 0] = tileData.data[tileIndex + 0] * intensity | 0
-								imageData.data[screenIndex + 1] = tileData.data[tileIndex + 1] * intensity | 0
+								imageData.data[screenIndex + 0] = tileData.data[tileIndex + 0] * intensity | 0;
+								imageData.data[screenIndex + 1] = tileData.data[tileIndex + 1] * intensity | 0;
 								imageData.data[screenIndex + 2] = tileData.data[tileIndex + 2] * intensity | 0
 							}
 						}
@@ -161,16 +161,16 @@ class CanvasRenderer extends Renderer {
 	drawTileMap(matrix: TileMap, offsetY: number): void {
 		for(var i = 0; i < matrix.length; i++) {
 			for(var j = 0; j < matrix[0].length; j++) {
-				var tile = matrix[j][i]
-				if(tile === "grid000") continue
-				var img = "art/tiles/" + tile
+				var tile = matrix[j][i];
+				if(tile === "grid000") continue;
+				var img = "art/tiles/" + tile;
 
 				if(images[img] !== undefined) {
-					var scr = tileToScreen(i, j)
-					scr.y += offsetY
+					var scr = tileToScreen(i, j);
+					scr.y += offsetY;
 					if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
 					   scr.x >= cameraX+SCREEN_WIDTH || scr.y >= cameraY+SCREEN_HEIGHT)
-						continue
+						continue;
 					heart.graphics.draw(images[img], scr.x - cameraX, scr.y - cameraY)
 				}
 				else { // Try to lazy-load the missing tile
@@ -186,7 +186,7 @@ class CanvasRenderer extends Renderer {
 
 	renderFloor(floor: TileMap): void {
 		if(Config.engine.doFloorLighting)
-			this.renderLitFloor(floor, Config.engine.useLightColorLUT)
+			this.renderLitFloor(floor, Config.engine.useLightColorLUT);
 		else
 			this.drawTileMap(floor, 0)
 	}

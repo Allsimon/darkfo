@@ -21,7 +21,7 @@ limitations under the License.
 let _lastObjectUID = 0;
 
 function objectGetMoney(obj: Obj): number {
-	const MONEY_PID = 41
+	const MONEY_PID = 41;
 	for(var i = 0; i < obj.inventory.length; i++) {
 		if(obj.inventory[i].pid === MONEY_PID) {
 			return obj.inventory[i].amount
@@ -32,21 +32,21 @@ function objectGetMoney(obj: Obj): number {
 }
 
 function objectSingleAnim(obj: Obj, reversed?: boolean, callback?: () => void): void {
-	if(reversed) obj.frame = imageInfo[obj.art].numFrames - 1
-	else obj.frame = 0
-	obj.lastFrameTime = 0
-	obj.anim = reversed ? "reverse" : "single"
+	if(reversed) obj.frame = imageInfo[obj.art].numFrames - 1;
+	else obj.frame = 0;
+	obj.lastFrameTime = 0;
+	obj.anim = reversed ? "reverse" : "single";
 	obj.animCallback = callback || (() => { obj.anim = null })
 }
 
 function canUseObject(obj: Obj, source?: Obj): boolean {
 	if(obj._script !== undefined && obj._script.use_p_proc !== undefined)
-		return true
+		return true;
 	else if(obj.type === "item" || obj.type === "scenery")
 		if(objectIsDoor(obj) || objectIsStairs(obj) || objectIsLadder(obj))
-			return true
+			return true;
 		else
-			return (obj.pro.extra.actionFlags & 8) != 0
+			return (obj.pro.extra.actionFlags & 8) != 0;
 	return false
 }
 
@@ -70,7 +70,7 @@ function objectIsContainer(obj: Obj): boolean {
 
 function objectIsWeapon(obj: any): boolean {
 	if(obj === undefined || obj === null)
-		return false
+		return false;
 	//return obj.type === "item" && obj.pro.extra.subType === 3 // weapon subtype
 	return obj.weapon !== undefined
 }
@@ -91,49 +91,49 @@ function cloneItem(item: Obj): Obj { return Object.assign({}, item); }
 
 function objectSwapItem(a: Obj, item: Obj, b: Obj, amount: number) {
 	// swap item from a -> b
-	if(amount === 0) return
+	if(amount === 0) return;
 
-	var idx = objectFindItemIndex(a, item)
+	var idx = objectFindItemIndex(a, item);
 	if(idx === -1)
-		throw "item (" + item + ") does not exist in a"
+		throw "item (" + item + ") does not exist in a";
 	if(amount !== undefined && amount < item.amount) {
 		// just deduct amount from a and give amount to b
-		item.amount -= amount
+		item.amount -= amount;
 		b.addInventoryItem(cloneItem(item), amount)
 	}
 	else { // just swap them
-		a.inventory.splice(idx, 1)
+		a.inventory.splice(idx, 1);
 		b.addInventoryItem(item, amount || 1)
 	}
 }
 
 function objectGetDamageType(obj: any): string { // TODO: any (where does dmgType go? WeaponObj?)
 	if(obj.dmgType !== undefined)
-		return obj.dmgType
+		return obj.dmgType;
 	throw "no damage type for obj: " + obj
 }
 
 function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): void {
-	var damage = maxDmg
-	var explosion = createObjectWithPID(makePID(5 /* misc */, 14 /* Explosion */), -1)
-	explosion.position.x = obj.position.x
+	var damage = maxDmg;
+	var explosion = createObjectWithPID(makePID(5 /* misc */, 14 /* Explosion */), -1);
+	explosion.position.x = obj.position.x;
 	explosion.position.y = obj.position.y;
-	(<any>obj).dmgType = "explosion" // TODO: any (WeaponObj?)
+	(<any>obj).dmgType = "explosion"; // TODO: any (WeaponObj?)
 
 	lazyLoadImage(explosion.art, function() {
-		gMap.addObject(explosion)
+		gMap.addObject(explosion);
 
-		console.log("adding explosion")
+		console.log("adding explosion");
 		objectSingleAnim(explosion, false, function() {
-			gMap.destroyObject(explosion)
+			gMap.destroyObject(explosion);
 
 			// damage critters in a radius
-			var hexes = hexesInRadius(obj.position, 8 /* explosion radius */) // TODO: radius
+			var hexes = hexesInRadius(obj.position, 8 /* explosion radius */); // TODO: radius
 			for(var i = 0; i < hexes.length; i++) {
-				var objs = objectsAtPosition(hexes[i])
+				var objs = objectsAtPosition(hexes[i]);
 				for(var j = 0; j < objs.length; j++) {
 					if(objs[j].type === "critter")
-						console.log("todo: damage", (<Critter>objs[j]).name)
+						console.log("todo: damage", (<Critter>objs[j]).name);
 
 					Scripting.damage(objs[j], obj, obj /*source*/, damage)
 				}
@@ -146,27 +146,27 @@ function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): v
 }
 
 function useExplosive(obj: Obj, source: Critter): void {
-	if(source.isPlayer !== true) return // ?
-	var mins, secs
+	if(source.isPlayer !== true) return; // ?
+	var mins, secs;
 
 	while(true) {
-		var time = prompt("Time to detonate?", "1:00")
-		if(time === null) return // cancel
-		var s = time.split(':')
-		if(s.length !== 2) continue
+		var time = prompt("Time to detonate?", "1:00");
+		if(time === null) return; // cancel
+		var s = time.split(':');
+		if(s.length !== 2) continue;
 
-		mins = parseInt(s[0])
-		secs = parseInt(s[1])
+		mins = parseInt(s[0]);
+		secs = parseInt(s[1]);
 
-		if(isNaN(mins) || isNaN(secs)) continue
+		if(isNaN(mins) || isNaN(secs)) continue;
 		break
 	}
 
 	// TODO: skill rolls
 
-	var ticks = (mins*60*10) + secs*10 // game ticks until detonation
+	var ticks = (mins*60*10) + secs*10; // game ticks until detonation
 
-	console.log("arming explosive for " + ticks + " ticks")
+	console.log("arming explosive for " + ticks + " ticks");
 
 	Scripting.timeEventList.push({ticks: ticks, obj: null, userdata: null, fn: function() {
 		// explode!
@@ -194,7 +194,7 @@ function setObjectOpen(obj: Obj, open: boolean, loot: boolean=true, signalEvent:
 
 	// Animate open/closed
 	objectSingleAnim(obj, !open, function() {
-		obj.anim = null
+		obj.anim = null;
 		if(loot && objectIsContainer(obj) && open) {
 			// loot a container
 			uiLoot(obj);
@@ -212,23 +212,23 @@ function toggleObjectOpen(obj: Obj, loot: boolean=true, signalEvent: boolean=tru
 // Returns whether or not the object was used
 function useObject(obj: Obj, source?: Critter, useScript?: boolean): boolean {
 	if(canUseObject(obj, source) === false) {
-		console.log("can't use object")
+		console.log("can't use object");
 		return false
 	}
 
 	if(useScript !== false && obj._script && obj._script.use_p_proc !== undefined) {
 		if(source === undefined)
-			source = player
+			source = player;
 		if(Scripting.use(obj, source) === true) {
-			console.log("useObject: overriden")
+			console.log("useObject: overriden");
 			return true // script overrided us
 		}
 	}
 	else if(obj.script !== undefined && !obj._script)
-		console.log("object used has script but is not loaded: " + obj.script)
+		console.log("object used has script but is not loaded: " + obj.script);
 
 	if(objectIsExplosive(obj)) {
-		useExplosive(obj, source)
+		useExplosive(obj, source);
 		return true
 	}
 
@@ -236,35 +236,35 @@ function useObject(obj: Obj, source?: Critter, useScript?: boolean): boolean {
 		toggleObjectOpen(obj, true, true);
 	}
 	else if(objectIsStairs(obj)) {
-		var destTile = fromTileNum(obj.extra.destination & 0xffff)
-		var destElev = ((obj.extra.destination >> 28) & 0xf) >> 1
+		var destTile = fromTileNum(obj.extra.destination & 0xffff);
+		var destElev = ((obj.extra.destination >> 28) & 0xf) >> 1;
 
 		if(obj.extra.destinationMap === -1 && obj.extra.destination !== -1) {
 			// same map, new destination
-			console.log("stairs: tile: " + destTile.x + ", " + destTile.y + ", elev: " + destElev)
+			console.log("stairs: tile: " + destTile.x + ", " + destTile.y + ", elev: " + destElev);
 
-			player.position = destTile
+			player.position = destTile;
 			gMap.changeElevation(destElev)
 		}
 		else {
 			console.log("stairs -> " + obj.extra.destinationMap + " @ " + destTile.x +
-				        ", " + destTile.y  + ", elev: " + destElev)
+				        ", " + destTile.y  + ", elev: " + destElev);
 			gMap.loadMapByID(obj.extra.destinationMap, destTile, destElev)
 		}
 	}
 	else if(objectIsLadder(obj)) {
-		var isTop = (obj.pro.extra.subType === 4)
-		var level = isTop ? currentElevation + 1 : currentElevation - 1
-		var destTile = fromTileNum(obj.extra.destination & 0xffff)
+		var isTop = (obj.pro.extra.subType === 4);
+		var level = isTop ? currentElevation + 1 : currentElevation - 1;
+		var destTile = fromTileNum(obj.extra.destination & 0xffff);
 		// TODO: destination also supposedly contains elevation and map
-		console.log("ladder (" + (isTop ? "top" : "bottom") + " -> level " + level + ")")
-		player.position = destTile
+		console.log("ladder (" + (isTop ? "top" : "bottom") + " -> level " + level + ")");
+		player.position = destTile;
 		gMap.changeElevation(level)
 	}
 	else
-		objectSingleAnim(obj)
+		objectSingleAnim(obj);
 
-	gMap.updateMap()
+	gMap.updateMap();
 	return true
 }
 
@@ -273,45 +273,45 @@ function objectFindIndex(obj: Obj): number {
 }
 
 function objectZCompare(a: Obj, b: Obj): number {
-	var aY = a.position.y
-	var bY = b.position.y
+	var aY = a.position.y;
+	var bY = b.position.y;
 
-	var aX = a.position.x
-	var bX = b.position.x
+	var aX = a.position.x;
+	var bX = b.position.x;
 
 	if(aY === bY) {
-		if(aX < bX) return -1
-		else if(aX > bX) return 1
+		if(aX < bX) return -1;
+		else if(aX > bX) return 1;
 		else if(aX === bX) {
-			if(a.type === "wall") return -1
-			else if(b.type === "wall") return 1
+			if(a.type === "wall") return -1;
+			else if(b.type === "wall") return 1;
 			else return 0
 		}
 	}
-	else if(aY < bY) return -1
-	else if(aY > bY) return 1
+	else if(aY < bY) return -1;
+	else if(aY > bY) return 1;
 
 	throw "unreachable"
 }
 
 function objectZOrder(obj: Obj, index: number): void {
-	var oldIdx = (index !== undefined) ? index : objectFindIndex(obj)
+	var oldIdx = (index !== undefined) ? index : objectFindIndex(obj);
 	if(oldIdx === -1) {
-		console.log("objectZOrder: no such object...")
+		console.log("objectZOrder: no such object...");
 		return
 	}
 
 	// TOOD: mutable/potentially unsafe usage of getObjects
-	var objects = gMap.getObjects()
+	var objects = gMap.getObjects();
 
-	objects.splice(oldIdx, 1) // remove the object...
+	objects.splice(oldIdx, 1); // remove the object...
 
-	var inserted = false
+	var inserted = false;
 	for(var i = 0; i < objects.length; i++) {
-		var zc = objectZCompare(obj, objects[i])
+		var zc = objectZCompare(obj, objects[i]);
 		if(zc === -1) {
-			objects.splice(i, 0, obj) // insert at new index
-			inserted = true
+			objects.splice(i, 0, obj); // insert at new index
+			inserted = true;
 			break
 		}
 	}
@@ -331,33 +331,33 @@ function useElevator(): void {
 	// in the range of 11. The original engine uses a square
 	// of size 11x11, but we don't do that.
 
-	console.log("[elevator]")
+	console.log("[elevator]");
 
-	var center = player.position
-	var hexes = hexesInRadius(center, 11)
-	var elevatorStub = null
+	var center = player.position;
+	var hexes = hexesInRadius(center, 11);
+	var elevatorStub = null;
 	for(var i = 0; i < hexes.length; i++) {
-		var objs = objectsAtPosition(hexes[i])
+		var objs = objectsAtPosition(hexes[i]);
 		for(var j = 0; j < objs.length; j++) {
-			var obj = objs[j]
+			var obj = objs[j];
 			if(obj.type === "scenery" && obj.pidID === 1293) {
 				console.log("elevator stub @ " + hexes[i].x +
-					        ", " + hexes[i].y)
-				elevatorStub = obj
+					        ", " + hexes[i].y);
+				elevatorStub = obj;
 				break
 			}
 		}
 	}
 
 	if(elevatorStub === null)
-		throw "couldn't find elevator stub near " + center.x + ", " + center.y
+		throw "couldn't find elevator stub near " + center.x + ", " + center.y;
 
 	console.log("elevator type: " + elevatorStub.extra.type + ", " +
-		        "level: " + elevatorStub.extra.level)
+		        "level: " + elevatorStub.extra.level);
 
-	var elevator = getElevator(elevatorStub.extra.type)
+	var elevator = getElevator(elevatorStub.extra.type);
 	if(!elevator)
-		throw "no elevator: " + elevatorStub.extra.type
+		throw "no elevator: " + elevatorStub.extra.type;
 	
 	uiElevator(elevator)
 }
@@ -446,34 +446,34 @@ class Obj {
 	}
 
 	static fromPID_<T extends Obj>(obj: T, pid: number, sid?: number): T {
-		console.log(`fromPID: pid=${pid}, sid=${sid}`)
-		var pidType = (pid >> 24) & 0xff
-		var pidID = pid & 0xffff
+		console.log(`fromPID: pid=${pid}, sid=${sid}`);
+		var pidType = (pid >> 24) & 0xff;
+		var pidID = pid & 0xffff;
 
-		var pro: any = loadPRO(pid, pidID) // TODO: any
-		obj.type = getPROTypeName(pidType)
-		obj.pid = pid
-		obj.pro = pro
-		obj.flags = obj.pro.flags
+		var pro: any = loadPRO(pid, pidID); // TODO: any
+		obj.type = getPROTypeName(pidType);
+		obj.pid = pid;
+		obj.pro = pro;
+		obj.flags = obj.pro.flags;
 
 		// TODO: Subclasses
 		if(pidType == 0) { // item
-			obj.subtype = getPROSubTypeName(pro.extra.subtype)
-			obj.name = getMessage("pro_item", pro.textID)
+			obj.subtype = getPROSubTypeName(pro.extra.subtype);
+			obj.name = getMessage("pro_item", pro.textID);
 
-			var invPID = pro.extra.invFRM & 0xffff
-			console.log(`invPID: ${invPID}, pid=${pid}`)
+			var invPID = pro.extra.invFRM & 0xffff;
+			console.log(`invPID: ${invPID}, pid=${pid}`);
 			if(invPID !== 0xffff)
 				obj.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
 		}
 
 		if(obj.pro !== undefined)
-			obj.art = lookupArt(makePID(obj.pro.frmType, obj.pro.frmPID))
+			obj.art = lookupArt(makePID(obj.pro.frmType, obj.pro.frmPID));
 		else
-			obj.art = "art/items/RESERVED"
+			obj.art = "art/items/RESERVED";
 
-		obj.init()
-		obj.loadScript(sid)
+		obj.init();
+		obj.loadScript(sid);
 		return obj
 	}
 
@@ -485,32 +485,32 @@ class Obj {
 		// Load an Obj from a map object
 		//console.log("fromMapObject: %o", mobj)
 		if(mobj.uid) obj.uid = mobj.uid;
-		obj.pid = mobj.pid
-		obj.pidID = mobj.pidID
-		obj.frmPID = mobj.frmPID
-		obj.orientation = mobj.orientation
+		obj.pid = mobj.pid;
+		obj.pidID = mobj.pidID;
+		obj.frmPID = mobj.frmPID;
+		obj.orientation = mobj.orientation;
 		if(obj.type === null)
-			obj.type = mobj.type
-		obj.art = mobj.art
-		obj.position = mobj.position
-		obj.lightRadius = mobj.lightRadius
-		obj.lightIntensity = mobj.lightIntensity
-		obj.subtype = mobj.subtype
-		obj.amount = mobj.amount
-		obj.inventory = mobj.inventory
-		obj.script = mobj.script
-		obj.extra = mobj.extra
+			obj.type = mobj.type;
+		obj.art = mobj.art;
+		obj.position = mobj.position;
+		obj.lightRadius = mobj.lightRadius;
+		obj.lightIntensity = mobj.lightIntensity;
+		obj.subtype = mobj.subtype;
+		obj.amount = mobj.amount;
+		obj.inventory = mobj.inventory;
+		obj.script = mobj.script;
+		obj.extra = mobj.extra;
 
-		obj.pro = mobj.pro || loadPRO(obj.pid, obj.pidID)
-		obj.flags = mobj.flags // NOTE: Tested with two objects in Mapper, map object flags seem to inherit PROs already and should thus use them
+		obj.pro = mobj.pro || loadPRO(obj.pid, obj.pidID);
+		obj.flags = mobj.flags; // NOTE: Tested with two objects in Mapper, map object flags seem to inherit PROs already and should thus use them
 
 		// etc? TODO: check this!
 
-		obj.init()
+		obj.init();
 
 		if(deserializing) {
-			obj.inventory = mobj.inventory.map((obj: SerializedObj) => deserializeObj(obj))
-			obj.script = mobj.script
+			obj.inventory = mobj.inventory.map((obj: SerializedObj) => deserializeObj(obj));
+			obj.script = mobj.script;
 
 			if(mobj._script)
 				obj._script = Scripting.deserializeScript(mobj._script)
@@ -518,7 +518,7 @@ class Obj {
 			// TODO: Should we load the script if mobj._script does not exist?
 		}
 		else if(Config.engine.doLoadScripts)
-			obj.loadScript()
+			obj.loadScript();
 
 		return obj
 	}
@@ -533,12 +533,12 @@ class Obj {
 	}
 
 	loadScript(sid:number=-1): void {
-		var scriptName = null
+		var scriptName = null;
 
 		if(sid >= 0)
-			scriptName = lookupScriptName(sid)
+			scriptName = lookupScriptName(sid);
 		else if(this.script)
-			scriptName = this.script
+			scriptName = this.script;
 		else if(this.pro) {
 			if(this.pro.extra !== undefined && this.pro.extra.scriptID >= 0) {
 				// scriptName = lookupScriptName(this.pro.extra.scriptID & 0xffff)
@@ -552,14 +552,14 @@ class Obj {
 
 		if(scriptName != null) {
 			if(Config.engine.doLogScriptLoads)
-				console.log("loadScript: loading %s (sid=%d)", scriptName, sid)
+				console.log("loadScript: loading %s (sid=%d)", scriptName, sid);
 			// console.trace();
-			var script = Scripting.loadScript(scriptName)
+			var script = Scripting.loadScript(scriptName);
 			if(!script) {
 				console.log("loadScript: load script failed for %s (sid=%d)", scriptName, sid)
 			} else {
-				this.script = scriptName
-				this._script = script
+				this.script = scriptName;
+				this._script = script;
 				Scripting.initScript(this._script, this)
 			}
 		}
@@ -576,44 +576,44 @@ class Obj {
 	}
 
 	setAmount(amount: number): Obj {
-		this.amount = amount
+		this.amount = amount;
 		return this
 	}
 
 	// Moves the object; returns `true` if successfully moved,
 	// or `false` if interrupted (such as by an exit grid).
 	move(position: Point, curIdx?: number, signalEvents: boolean=true): boolean {
-		this.position = position
+		this.position = position;
 
 		if(signalEvents)
-			Events.emit("objMove", { obj: this, position })
+			Events.emit("objMove", { obj: this, position });
 
 		// rebuild the lightmap
 		if(Config.engine.doFloorLighting)
-			Lightmap.rebuildLight()
+			Lightmap.rebuildLight();
 		
 		// give us a new z-order
 		if(Config.engine.doZOrder !== false)
-			objectZOrder(this, curIdx)
+			objectZOrder(this, curIdx);
 
 		return true
 	}
 
 	updateAnim(): void {
-		if(!this.anim) return
-		var time = heart.timer.getTime()
-		var fps = imageInfo[this.art].fps
-		if(fps === 0) fps = 10 // XXX: ?
+		if(!this.anim) return;
+		var time = heart.timer.getTime();
+		var fps = imageInfo[this.art].fps;
+		if(fps === 0) fps = 10; // XXX: ?
 
 		if(time - this.lastFrameTime >= 1000/fps) {
-			if(this.anim === "reverse") this.frame--
-			else this.frame++
-			this.lastFrameTime = time
+			if(this.anim === "reverse") this.frame--;
+			else this.frame++;
+			this.lastFrameTime = time;
 
 			if(this.frame === -1 || this.frame === imageInfo[this.art].numFrames) {
 				// animation is done
-				if(this.anim === "reverse") this.frame++
-				else this.frame--
+				if(this.anim === "reverse") this.frame++;
+				else this.frame--;
 				if(this.animCallback)
 					this.animCallback()
 			}
@@ -624,10 +624,10 @@ class Obj {
 		// TODO: We could make use of subclass polymorphism to reduce the cases here
 		// NOTE: This may be overloaded in subclasses
 
-		if(this.type === "misc") return false
-		if(!this.pro) return true // XXX: ?
-		if(this.subtype === "door") return !this.open
-		if(this.visible === false) return false
+		if(this.type === "misc") return false;
+		if(!this.pro) return true; // XXX: ?
+		if(this.subtype === "door") return !this.open;
+		if(this.visible === false) return false;
 
 		return !(this.pro.flags & 0x00000010 /* NoBlock */)
 	}
@@ -638,9 +638,9 @@ class Obj {
 
 	// Clear any animation the object has
 	clearAnim(): void {
-		this.frame = 0
-		this.animCallback = null
-		this.anim = null
+		this.frame = 0;
+		this.animCallback = null;
+		this.anim = null;
 		this.shift = null
 	}
 
@@ -655,12 +655,12 @@ class Obj {
 		// If we have a script, temporarily remove it so that we may clone the
 		// object without the script, and then re-load it for a new instance.
 		if(this._script) {
-			console.log("cloning an object with a script: %o", this)
-			var _script = this._script
-			this._script = null
-			var obj = deepClone(this)
-			this._script = _script
-			obj.loadScript() // load new copy of the script
+			console.log("cloning an object with a script: %o", this);
+			var _script = this._script;
+			this._script = null;
+			var obj = deepClone(this);
+			this._script = _script;
+			obj.loadScript(); // load new copy of the script
 			return obj
 
 		}
@@ -672,7 +672,7 @@ class Obj {
 	addInventoryItem(item: Obj, count: number=1): void {
 		for(var i = 0; i < this.inventory.length; i++) {
 			if(this.inventory[i].approxEq(item)) {
-				this.inventory[i].amount += count
+				this.inventory[i].amount += count;
 				return
 			}
 		}
@@ -694,7 +694,7 @@ class Obj {
 
 	getDescription(): string {
 		if(!this.pro)
-			return null
+			return null;
 
 		return getMessage(this.getMessageCategory(), this.pro.textID + 1) || null
 	}
@@ -738,14 +738,14 @@ class Item extends Obj {
 	}
 
 	init() {
-		super.init()
+		super.init();
 
 		// load item inventory art
 		if(this.pro === null)
-			return
-		this.name = getMessage("pro_item", this.pro.textID)
+			return;
+		this.name = getMessage("pro_item", this.pro.textID);
 
-		var invPID = this.pro.extra.invFRM & 0xffff
+		var invPID = this.pro.extra.invFRM & 0xffff;
 		if(invPID !== 0xffff)
 			this.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
 	}
@@ -761,7 +761,7 @@ class WeaponObj extends Item {
 	}
 
 	init() {
-		super.init()
+		super.init();
 		// TODO: Weapon initialization
 		//console.log("Weapon init")
 		this.weapon = new Weapon(this)
@@ -808,20 +808,20 @@ class Door extends Scenery {
 
 // Creates an object of a relevant type from a Prototype ID and an optional Script ID
 function createObjectWithPID(pid: number, sid?: number) {
-	var pidType = (pid >> 24) & 0xff
+	var pidType = (pid >> 24) & 0xff;
 	if(pidType == 1) // critter
-		return Critter.fromPID(pid, sid)
+		return Critter.fromPID(pid, sid);
 	else if(pidType == 0) { // item
-		var pro = loadPRO(pid, pid & 0xffff)
+		var pro = loadPRO(pid, pid & 0xffff);
 		if(pro && pro.extra && pro.extra.subType == 3)
-			return WeaponObj.fromPID(pid, sid)
+			return WeaponObj.fromPID(pid, sid);
 		else
 			return Item.fromPID(pid, sid)
 	}
 	else if(pidType == 2) { // scenery
-		var pro = loadPRO(pid, pid & 0xffff)
+		var pro = loadPRO(pid, pid & 0xffff);
 		if(pro && pro.extra && pro.extra.subType == 0)
-			return Door.fromPID(pid, sid)
+			return Door.fromPID(pid, sid);
 		else
 			return Scenery.fromPID(pid, sid)
 	}
@@ -830,22 +830,22 @@ function createObjectWithPID(pid: number, sid?: number) {
 }
 
 function objFromMapObject(mobj: any, deserializing: boolean=false) {
-	var pid = mobj.pid
-	var pidType = (pid >> 24) & 0xff
+	var pid = mobj.pid;
+	var pidType = (pid >> 24) & 0xff;
 
 	if(pidType == 1) // critter
-		return Critter.fromMapObject(mobj, deserializing)
+		return Critter.fromMapObject(mobj, deserializing);
 	else if(pidType == 0) { // item
-		var pro = mobj.pro || loadPRO(pid, pid & 0xffff)
+		var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
 		if(pro && pro.extra && pro.extra.subType == 3)
-			return WeaponObj.fromMapObject(mobj, deserializing)
+			return WeaponObj.fromMapObject(mobj, deserializing);
 		else
 			return Item.fromMapObject(mobj, deserializing)
 	}
 	else if(pidType == 2) { // scenery
-		var pro = mobj.pro || loadPRO(pid, pid & 0xffff)
+		var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
 		if(pro && pro.extra && pro.extra.subType == 0)
-			return Door.fromMapObject(mobj, deserializing)
+			return Door.fromMapObject(mobj, deserializing);
 		else
 			return Scenery.fromMapObject(mobj, deserializing)
 	}

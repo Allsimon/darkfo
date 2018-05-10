@@ -35,25 +35,25 @@ interface IntFile {
 
 // parse .INT files
 function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
-	reader.seek(0x2A) // seek to procedure table
+	reader.seek(0x2A); // seek to procedure table
 
 	// read procedure table
-	var numProcs = reader.read32()
-	var procs: Procedure[] = []
-	var procedures: { [name: string]: Procedure } = {}
+	var numProcs = reader.read32();
+	var procs: Procedure[] = [];
+	var procedures: { [name: string]: Procedure } = {};
 	//console.log("procs: %d", numProcs)
 	//console.log("")
 
 	for(var i = 0; i < numProcs; i++) {
-		var nameIndex = reader.read32()
-		var flags = reader.read32()
+		var nameIndex = reader.read32();
+		var flags = reader.read32();
 		//console.log("name index: %d", nameIndex)
 		//console.log("flags: %d", flags)
-		assertEq(reader.read32(), 0, "unk0 != 0")
-		assertEq(reader.read32(), 0, "unk1 != 0")
-		var offset = reader.read32()
+		assertEq(reader.read32(), 0, "unk0 != 0");
+		assertEq(reader.read32(), 0, "unk1 != 0");
+		var offset = reader.read32();
 		//console.log("offset: %d", offset)
-		var argc = reader.read32()
+		var argc = reader.read32();
 		//console.log("argc: %d", argc)
 		//console.log("")
 
@@ -66,21 +66,21 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 	}
 
 	// offset->identifier table
-	var identEnd = reader.read32()
-	var identifiers: { [offset: number]: string } = {}
+	var identEnd = reader.read32();
+	var identifiers: { [offset: number]: string } = {};
 
-	var baseOffset = reader.offset
+	var baseOffset = reader.offset;
 	while(true) {
 		if(reader.offset - baseOffset >= identEnd)
-			break
+			break;
 
-		var len = reader.read16()
-		var offset = reader.offset - baseOffset + 4
-		var str = ""
+		var len = reader.read16();
+		var offset = reader.offset - baseOffset + 4;
+		var str = "";
 		// console.log("len=%d, offset=%d", len, offset)
 
 		for(var j = 0; j < len; j++) {
-			var c = reader.read8()
+			var c = reader.read8();
 			if(c)
 				str += String.fromCharCode(c)
 		}
@@ -89,13 +89,13 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 		identifiers[offset] = str
 	}
 
-	assertEq(reader.read32(), 0xFFFFFFFF, "did not get 0xFFFFFFFF signature")
+	assertEq(reader.read32(), 0xFFFFFFFF, "did not get 0xFFFFFFFF signature");
 
 	// give procedures their names from the identifier table
-	procs.forEach(proc => proc.name = identifiers[proc.nameIndex])
+	procs.forEach(proc => proc.name = identifiers[proc.nameIndex]);
 
 	// and populate the procedures table
-	procs.forEach(proc => procedures[proc.name] = proc)
+	procs.forEach(proc => procedures[proc.name] = proc);
 
 	// procs.forEach(proc => console.log("proc: %o", proc))
 
@@ -104,25 +104,25 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 	console.log("")*/
 
 	// offset->strings table
-	var stringEnd = reader.read32()
-	var strings: { [offset: number]: string } = {}
+	var stringEnd = reader.read32();
+	var strings: { [offset: number]: string } = {};
 
 	//assertEq(stringEnd, 0xFFFFFFFF, "TODO: string table")
 
 	if(stringEnd !== 0xFFFFFFFF) {
 		// read string table
-		var baseOffset = reader.offset
+		var baseOffset = reader.offset;
 		while(true) {
 			if(reader.offset - baseOffset >= stringEnd)
-				break
+				break;
 
-			var len = reader.read16()
-			var offset = reader.offset - baseOffset + 4
-			var str = ""
+			var len = reader.read16();
+			var offset = reader.offset - baseOffset + 4;
+			var str = "";
 			// console.log("len=%d, offset=%d, stringEnd=%d", len, offset, stringEnd)
 
 			for(var j = 0; j < len; j++) {
-				var c = reader.read8()
+				var c = reader.read8();
 				if(c)
 					str += String.fromCharCode(c)
 			}
@@ -132,7 +132,7 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 		}
 	}
 
-	var codeOffset = reader.offset
+	var codeOffset = reader.offset;
 
 	return {procedures: procedures
 		   ,proceduresTable: procs
