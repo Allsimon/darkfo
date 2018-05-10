@@ -129,7 +129,7 @@ module CriticalEffects {
 		}
 
 		doEffectsOn(target: any): void {
-			for(var i = 0; i < this.effects.length; i++)
+			for(let i = 0; i < this.effects.length; i++)
 				this.effects[i](target)
 		}
 	}
@@ -154,8 +154,8 @@ module CriticalEffects {
 			if(this.stat === undefined)
 				return {success: false};
 
-			var statToRollAgainst = critterGetStat(target, this.stat);
-			statToRollAgainst += this.modifier;
+            let statToRollAgainst = critterGetStat(target, this.stat);
+            statToRollAgainst += this.modifier;
 
 			// if our target fails their skillcheck, they have to suffer the added effects.
 			// We do *10 so we can reuse the skillCheck function which goes from 0 to 100, while stat is 1 to 10
@@ -182,11 +182,11 @@ module CriticalEffects {
 		}
 
 		doEffectsOn(target: Critter) {
-			var returnMsgID = this.msgID;
-			//we need to check for results before we apply the other effects, to ensure the checks in statCheck aren't modified by the effects of the crit.
-			var statCheckResults = this.statCheck.doEffectsOn(target);
+            let returnMsgID = this.msgID;
+            //we need to check for results before we apply the other effects, to ensure the checks in statCheck aren't modified by the effects of the crit.
+            const statCheckResults = this.statCheck.doEffectsOn(target);
 
-			this.effects.doEffectsOn(target);
+            this.effects.doEffectsOn(target);
 
 			//did statCheck do its effects as well?
 			if(statCheckResults.success === true)
@@ -204,28 +204,28 @@ module CriticalEffects {
 	}
 
 	function parseCritLevel(critLevel: CritLevelData): CritType {
-		var stat = critLevel.statCheck;
-		var statVal : string = undefined;
-		if(stat.stat != -1)
+        const stat = critLevel.statCheck;
+        let statVal: string = undefined;
+        if(stat.stat != -1)
 			statVal = StatType[stat.stat];
-		var tempStatCheck = new StatCheck(statVal, stat.checkModifier, parseEffects(stat.failureEffect), stat.failureMessage);
-		var retCritLevel = new CritType(critLevel.dmgMultiplier, parseEffects(critLevel.critEffect), tempStatCheck, critLevel.msg);
-		return retCritLevel
+        const tempStatCheck = new StatCheck(statVal, stat.checkModifier, parseEffects(stat.failureEffect), stat.failureMessage);
+        const retCritLevel = new CritType(critLevel.dmgMultiplier, parseEffects(critLevel.critEffect), tempStatCheck, critLevel.msg);
+        return retCritLevel
 	}
 
 	// takes a List of effect names, gets the appropriate effects from the table and stores it in a Effects object
 	function parseEffects(effects: string[]): Effects {
-		var tempEffects = [];
-		for(var i = 0; i < effects.length; i++)
+        const tempEffects = [];
+        for(let i = 0; i < effects.length; i++)
 			tempEffects[i] = critterEffects[effects[i]]
 		return new Effects(tempEffects)
 	}
 
 	// tries to obtain the CritType object partaining to the critLevel of the region of the critterType in question, returns a default CritType object otherwise
 	export function getCritical(critterKillType: number, region: string, critLevel: number): CritType {
-		var ret: CritType = undefined;
+        let ret: CritType = undefined;
 
-		try {
+        try {
 			// ensure we aren't exceeding the highest crit level existing for this type of critter and region
 			const actualLevel = Math.min(critLevel, critterTable[critterKillType][region].length - 1);
 			// get the appropriate CritType from the table
@@ -250,8 +250,8 @@ module CriticalEffects {
 
 	export function getCriticalFail(weaponType: string, failLevel: number): EffectsFunction[]
 	{
-		var ret: EffectsFunction[] = undefined;
-		try {
+        let ret: EffectsFunction[] = undefined;
+        try {
 			// get the appropriate Critical Fail from the table
 			ret = criticalFailTable[weaponType][failLevel]
 		}
@@ -267,26 +267,26 @@ module CriticalEffects {
 
 	export function loadTable() {
 		// read in the global table
-		var haveTable = true;
+        let haveTable = true;
 
-		//console.log("loading critical table...");
-		var table = getFileJSON("lut/criticalTables.json", () => {
-			haveTable = false;
-		});
+        //console.log("loading critical table...");
+        const table = getFileJSON("lut/criticalTables.json", () => {
+            haveTable = false;
+        });
 
-		if(!haveTable) {
+        if(!haveTable) {
 			console.log("lut/criticalTables.json not found, not loading critical hit/miss table");
 			return;
 		}
 
 		critterTable = new Array(table.length);
-		for(var i = 0; i < table.length; i++) {
+		for(let i = 0; i < table.length; i++) {
 			critterTable[i] = {};
 
-			for(var region in table[i]) {
+			for(let region in table[i]) {
 				critterTable[i][region] = new Array(table[i][region].length);
 
-				for(var critLevel = 0; critLevel < table[i][region].length; critLevel++)
+				for(let critLevel = 0; critLevel < table[i][region].length; critLevel++)
 					critterTable[i][region][critLevel] = parseCritLevel(table[i][region][critLevel]);
 			}
 		}
@@ -346,7 +346,7 @@ module CriticalEffects {
 	};
 
 	export function temporaryDoCritFail(critFail: EffectsFunction[], target: Critter) {
-		for (var i = 0; i < critFail.length; i++) {
+		for (let i = 0; i < critFail.length; i++) {
 			critFail[i](target)
 		}
 	}

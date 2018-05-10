@@ -28,14 +28,14 @@ class ActionPoints {
 	}
 
 	resetAP() {
-		var AP = this.getMaxAP();
-		this.combat = AP.combat;
+        const AP = this.getMaxAP();
+        this.combat = AP.combat;
 		this.move = AP.move
 	}
 
 	getMaxAP(): {combat: number; move: number} {
-		var bonusCombatAP = 0; // TODO: replace with get function
-		var bonusMoveAP = 0; // TODO: replace with get function
+        const bonusCombatAP = 0; // TODO: replace with get function
+        const bonusMoveAP = 0; // TODO: replace with get function
 
 		return {combat: 5 + Math.floor(critterGetStat(this.attachedCritter, "AGI") / 2) + bonusCombatAP, move: bonusMoveAP}
 	}
@@ -84,9 +84,9 @@ class AI {
 			return;
 
 		AI.aiTxt = {};
-		var ini = parseIni(getFileText("data/data/ai.txt"));
-		if(ini === null) throw "couldn't load AI.TXT";
-		for(var key in ini) {
+        const ini = parseIni(getFileText("data/data/ai.txt"));
+        if(ini === null) throw "couldn't load AI.TXT";
+		for(let key in ini) {
 			ini[key].keyName = key;
 			AI.aiTxt[ini[key].packet_num] = ini[key]
 		}
@@ -171,17 +171,17 @@ class Combat {
 
 	    // 4 if weapon has long_range perk
 	    // 5 if weapon has scope_range perk
-		var distModifier = 2;
-		// 8 if weapon has scope_range perk
-		var minDistance = 0;
-		var perception = critterGetStat(obj, "PER");
-		var distance = hexDistance(obj.position, target.position);
-		if(distance < minDistance)
+        const distModifier = 2;
+        // 8 if weapon has scope_range perk
+        const minDistance = 0;
+        const perception = critterGetStat(obj, "PER");
+        let distance = hexDistance(obj.position, target.position);
+        if(distance < minDistance)
 			distance += minDistance; // yes supposedly += not =, this means 7 grid distance is the worst
 		else
 		{
-			var tempPER = perception;
-			if(obj.isPlayer === true)
+            let tempPER = perception;
+            if(obj.isPlayer === true)
 				tempPER -= 2; // supposedly player gets nerfed like this. WTF?
 			distance -= tempPER * distModifier
 		}
@@ -197,8 +197,8 @@ class Combat {
 		// then we multiply a magic number on top. More if there is eye damage involved by the attacker
 		// this means for each field distance after PER modification we lose 4 points of hitchance
 		// 12 if we have eyedamage
-		var objHasEyeDamage = false;
-		if(distance >= 0 && objHasEyeDamage)
+        const objHasEyeDamage = false;
+        if(distance >= 0 && objHasEyeDamage)
 			distance *= 12;
 		else 
 			distance *= 4;
@@ -214,29 +214,29 @@ class Combat {
 
 	getHitChance(obj: Critter, target: Critter, region: string) {
 		// TODO: visibility (= light conditions) and distance
-		var weaponObj = critterGetEquippedWeapon(obj);
-		if(weaponObj === null) // no weapon equipped (not even melee)
+        const weaponObj = critterGetEquippedWeapon(obj);
+        if(weaponObj === null) // no weapon equipped (not even melee)
 			return {hit: -1, crit: -1};
 
-		var weapon = weaponObj.weapon;
-		var weaponSkill;
+        const weapon = weaponObj.weapon;
+        let weaponSkill;
 
-		if(weapon.weaponSkillType === undefined) {
+        if(weapon.weaponSkillType === undefined) {
 			this.log("weaponSkillType is undefined");
 			weaponSkill = 0
 		}
 		else
 			weaponSkill = critterGetSkill(obj, weapon.weaponSkillType);
 
-		var hitDistanceModifier = this.getHitDistanceModifier(obj, target, weaponObj);
-		var bonusAC = 0; // TODO: AP at end of turn bonus
-		var AC = critterGetStat(target, "AC") + bonusAC;
-		var bonusCrit = 0; // TODO: perk bonuses, other crit influencing things
-		var baseCrit = critterGetStat(obj, "Critical Chance") + bonusCrit;
-		var hitChance = weaponSkill - AC - CriticalEffects.regionHitChanceDecTable[region] - hitDistanceModifier;
-		var critChance = baseCrit + CriticalEffects.regionHitChanceDecTable[region];
+        const hitDistanceModifier = this.getHitDistanceModifier(obj, target, weaponObj);
+        const bonusAC = 0; // TODO: AP at end of turn bonus
+        const AC = critterGetStat(target, "AC") + bonusAC;
+        const bonusCrit = 0; // TODO: perk bonuses, other crit influencing things
+        const baseCrit = critterGetStat(obj, "Critical Chance") + bonusCrit;
+        let hitChance = weaponSkill - AC - CriticalEffects.regionHitChanceDecTable[region] - hitDistanceModifier;
+        const critChance = baseCrit + CriticalEffects.regionHitChanceDecTable[region];
 
-		if(isNaN(hitChance))
+        if(isNaN(hitChance))
 			throw "something went wrong with hit chance calculation";
 
 		// 1 in 20 chance of failing needs to be preserved
@@ -246,32 +246,32 @@ class Combat {
 	}
 
 	rollHit(obj: Critter, target: Critter, region: string): any {
-		var critModifer = critterGetStat(obj, "Better Criticals");
-		var hitChance = this.getHitChance(obj, target, region);
+        const critModifer = critterGetStat(obj, "Better Criticals");
+        const hitChance = this.getHitChance(obj, target, region);
 
-		// hey kids! Did you know FO only rolls the dice once here and uses the results two times?
-		var roll = getRandomInt(1, 101);
+        // hey kids! Did you know FO only rolls the dice once here and uses the results two times?
+        const roll = getRandomInt(1, 101);
 
-		if(hitChance.hit - roll > 0) {
-			var isCrit = false;
+        if(hitChance.hit - roll > 0) {
+			let isCrit = false;
 			if(rollSkillCheck(Math.floor(hitChance.hit - roll) / 10, hitChance.crit, false) === true)
 				isCrit = true;
 
 			// TODO: if Slayer/Sniper perk -> second chance to crit
 			if(isCrit === true) {
-				var critLevel = Math.floor(Math.max(0, getRandomInt(critModifer, 100 + critModifer)) / 20);
-				this.log("crit level: " + critLevel);
-				var crit = CriticalEffects.getCritical(critterGetKillType(target), region, critLevel);
-				var critStatus = crit.doEffectsOn(target);
+                const critLevel = Math.floor(Math.max(0, getRandomInt(critModifer, 100 + critModifer)) / 20);
+                this.log("crit level: " + critLevel);
+                const crit = CriticalEffects.getCritical(critterGetKillType(target), region, critLevel);
+                const critStatus = crit.doEffectsOn(target);
 
-				return {hit: true, crit: true, DM: critStatus.DM, msgID: critStatus.msgID} // crit
+                return {hit: true, crit: true, DM: critStatus.DM, msgID: critStatus.msgID} // crit
 			}
 
 			return {hit: true, crit: false} // hit
 		}
 
 		// in reverse because miss -> roll > hitchance.hit
-		var isCrit = false;
+		let isCrit = false;
 		if(rollSkillCheck(Math.floor(roll - hitChance.hit) / 10, 0, false))
 			isCrit = true;
 		// TODO: jinxed/pariah dog give (nonstacking) 50% chance for critical miss upon miss
@@ -280,24 +280,24 @@ class Combat {
 	}
 
 	getDamageDone(obj: Critter, target: Critter, critModifer: number) {
-		var wep = critterGetEquippedWeapon(obj).weapon;
-		var damageType = wep.getDamageType();
+        const wep = critterGetEquippedWeapon(obj).weapon;
+        const damageType = wep.getDamageType();
 
-		var RD = getRandomInt(wep.minDmg, wep.maxDmg); // rand damage min..max
-		var RB = 0; // ranged bonus (via perk)
-		var CM = critModifer; // critical hit damage multiplier
-		var ADR = critterGetStat(target, "DR " + damageType); // damage resistance (TODO: armor)
-		var ADT = critterGetStat(target, "DT " + damageType); // damage threshold (TODO: armor)
-		var X = 2; // ammo dividend
-		var Y = 1; // ammo divisor
-		var RM = 0; // ammo resistance modifier
-		var CD = 100; // combat difficulty modifier (easy = 75%, normal = 100%, hard = 125%)
-		
-		var ammoDamageMult = X / Y;
-		
-		var baseDamage = (CM/2) * ammoDamageMult * (RD+RB) * (CD / 100);
-		var adjustedDamage = Math.max(0, baseDamage - ADT);
-		console.log(`RD: ${RD} | CM: ${CM} | ADR: ${ADR} | ADT: ${ADT} | Base Dmg: ${baseDamage} Adj Dmg: ${adjustedDamage} | Type: ${damageType}`);
+        const RD = getRandomInt(wep.minDmg, wep.maxDmg); // rand damage min..max
+        const RB = 0; // ranged bonus (via perk)
+        const CM = critModifer; // critical hit damage multiplier
+        const ADR = critterGetStat(target, "DR " + damageType); // damage resistance (TODO: armor)
+        const ADT = critterGetStat(target, "DT " + damageType); // damage threshold (TODO: armor)
+        const X = 2; // ammo dividend
+        const Y = 1; // ammo divisor
+        const RM = 0; // ammo resistance modifier
+        const CD = 100; // combat difficulty modifier (easy = 75%, normal = 100%, hard = 125%)
+
+        const ammoDamageMult = X / Y;
+
+        const baseDamage = (CM / 2) * ammoDamageMult * (RD + RB) * (CD / 100);
+        const adjustedDamage = Math.max(0, baseDamage - ADT);
+        console.log(`RD: ${RD} | CM: ${CM} | ADR: ${ADR} | ADT: ${ADT} | Base Dmg: ${baseDamage} Adj Dmg: ${adjustedDamage} | Type: ${damageType}`);
 
 		return Math.ceil(adjustedDamage * (1 - (ADR+RM)/100))
 	}
@@ -308,23 +308,23 @@ class Combat {
 
 	attack(obj: Critter, target: Critter, region="torso", callback?: () => void) {
 		// turn to face the target
-		var hex = hexNearestNeighbor(obj.position, target.position);
-		if(hex !== null)
+        const hex = hexNearestNeighbor(obj.position, target.position);
+        if(hex !== null)
 			obj.orientation = hex.direction;
 
 		// attack!
 		critterStaticAnim(obj, "attack", callback);
 
-		var who = obj.isPlayer ? "You" : obj.name;
-		var targetName = target.isPlayer ? "you" : target.name;
-		var hitRoll = this.rollHit(obj, target, region);
-		this.log("hit% is " + this.getHitChance(obj, target, region).hit);
+        const who = obj.isPlayer ? "You" : obj.name;
+        const targetName = target.isPlayer ? "you" : target.name;
+        const hitRoll = this.rollHit(obj, target, region);
+        this.log("hit% is " + this.getHitChance(obj, target, region).hit);
 
 		if(hitRoll.hit === true) {
-			var critModifier = hitRoll.crit ? hitRoll.DM : 2;
-			var damage = this.getDamageDone(obj, target, critModifier);
-			var extraMsg = hitRoll.crit === true ? (this.getCombatMsg(hitRoll.msgID) || "") : "";
-			this.log(who + " hit " + targetName + " for " + damage + " damage" + extraMsg);
+            const critModifier = hitRoll.crit ? hitRoll.DM : 2;
+            const damage = this.getDamageDone(obj, target, critModifier);
+            const extraMsg = hitRoll.crit === true ? (this.getCombatMsg(hitRoll.msgID) || "") : "";
+            this.log(who + " hit " + targetName + " for " + damage + " damage" + extraMsg);
 
 			critterDamage(target, damage, obj);
 
@@ -334,10 +334,10 @@ class Combat {
 		else {
 			this.log(who + " missed " + targetName + (hitRoll.crit === true ? " critically" : ""));
 			if(hitRoll.crit === true) {
-				var critFailMod = (critterGetStat(obj, "LUK") - 5) * - 5;
-				var critFailRoll = Math.floor(getRandomInt(1, 100) - critFailMod);
-				var critFailLevel = 1;
-				if(critFailRoll <= 20)
+                const critFailMod = (critterGetStat(obj, "LUK") - 5) * -5;
+                const critFailRoll = Math.floor(getRandomInt(1, 100) - critFailMod);
+                let critFailLevel = 1;
+                if(critFailRoll <= 20)
 					critFailLevel = 1;
 				else if(critFailRoll <= 50)
 					critFailLevel = 2;
@@ -351,8 +351,8 @@ class Combat {
 				this.log(who + " failed at fail level "+critFailLevel);
 
 				// TODO: map weapon type to crit fail table types
-				var critFailEffect = CriticalEffects.criticalFailTable.unarmed[critFailLevel];
-				CriticalEffects.temporaryDoCritFail(critFailEffect, obj)
+                const critFailEffect = CriticalEffects.criticalFailTable.unarmed[critFailLevel];
+                CriticalEffects.temporaryDoCritFail(critFailEffect, obj)
 			}
 		}
 	}
@@ -367,9 +367,9 @@ class Combat {
 
 	maybeTaunt(obj: Critter, type: string, roll: boolean) {
 		if(roll === false) return;
-		var msgID = getRandomInt(parseInt(obj.ai.info[type+"_start"]),
-		                         parseInt(obj.ai.info[type+"_end"]));
-		this.log("[TAUNT " + obj.name + ": " + this.getCombatAIMessage(msgID) + "]")
+        const msgID = getRandomInt(parseInt(obj.ai.info[type + "_start"]),
+            parseInt(obj.ai.info[type + "_end"]));
+        this.log("[TAUNT " + obj.name + ": " + this.getCombatAIMessage(msgID) + "]")
 	}
 
 	findTarget(obj: Critter): Critter|null {
@@ -401,14 +401,14 @@ class Combat {
 			console.warn(`Bailing out of ${depth}-deep AI turn recursion`);
 			return this.nextTurn();
 		}
-		
-		var that = this;
-		var target = this.findTarget(obj);
-		var distance = hexDistance(obj.position, target.position);
-		var AP = obj.AP;
-		var messageRoll = rollSkillCheck(obj.ai.info.chance, 0, false);
 
-		if(Config.engine.doLoadScripts === true && obj._script !== undefined) {
+        const that = this;
+        const target = this.findTarget(obj);
+        const distance = hexDistance(obj.position, target.position);
+        const AP = obj.AP;
+        const messageRoll = rollSkillCheck(obj.ai.info.chance, 0, false);
+
+        if(Config.engine.doLoadScripts === true && obj._script !== undefined) {
 			// notify the critter script of a combat event
 			if(Scripting.combatEvent(obj, "turnBegin") === true)
 				return // end of combat (script override)
@@ -437,23 +437,23 @@ class Combat {
 			return;
 		}
 
-		var weaponObj = critterGetEquippedWeapon(obj);
-		if(weaponObj === null) throw "AI has no weapon";
-		var weapon = weaponObj.weapon;
-		var fireDistance = weapon.getMaximumRange(1);
-		this.log("DEBUG: weapon: " + weapon + " fireDistance: " + fireDistance +
+        const weaponObj = critterGetEquippedWeapon(obj);
+        if(weaponObj === null) throw "AI has no weapon";
+        const weapon = weaponObj.weapon;
+        const fireDistance = weapon.getMaximumRange(1);
+        this.log("DEBUG: weapon: " + weapon + " fireDistance: " + fireDistance +
 			     " obj: " + obj.art + " distance: " + distance);
 
 		// are we in firing distance?
 		if(distance > fireDistance) {
 			this.log("[AI CREEPS]");
-			var neighbors = hexNeighbors(target.position);
-			var maxDistance = Math.min(AP.getAvailableMoveAP(), distance - fireDistance);
-			this.maybeTaunt(obj, "move", messageRoll);
+            const neighbors = hexNeighbors(target.position);
+            const maxDistance = Math.min(AP.getAvailableMoveAP(), distance - fireDistance);
+            this.maybeTaunt(obj, "move", messageRoll);
 
 			// TODO: check nearest direction first
-			var didCreep = false;
-			for(var i = 0; i < neighbors.length; i++) {
+            let didCreep = false;
+            for(let i = 0; i < neighbors.length; i++) {
 				if(obj.walkTo(neighbors[i], false, function() {
 					obj.clearAnim();
 					that.doAITurn(obj, idx, depth+1) // if we can, do another turn
@@ -521,8 +521,8 @@ class Combat {
 		if(obj.isPlayer)
 			this.whoseTurn = this.playerIdx - 1;
 		else {
-			var idx = this.combatants.indexOf(obj);
-			if(idx === -1) throw "forceTurn: no combatant '" + obj.name + '';
+            const idx = this.combatants.indexOf(obj);
+            if(idx === -1) throw "forceTurn: no combatant '" + obj.name + '';
 
 			this.whoseTurn = idx - 1
 		}
@@ -530,13 +530,13 @@ class Combat {
 
 	nextTurn(): void {
 		// update range checks
-		var numActive = 0;
-		for(var i = 0; i < this.combatants.length; i++) {
-			var obj = this.combatants[i];
-			if(obj.dead || obj.isPlayer) continue;
-			var inRange = hexDistance(obj.position, this.player.position) <= obj.ai.info.max_dist;
+        let numActive = 0;
+        for(let i = 0; i < this.combatants.length; i++) {
+            const obj = this.combatants[i];
+            if(obj.dead || obj.isPlayer) continue;
+            const inRange = hexDistance(obj.position, this.player.position) <= obj.ai.info.max_dist;
 
-			if(inRange || obj.hostile) {
+            if(inRange || obj.hostile) {
 				obj.hostile = true;
 				obj.outline = obj.teamNum !== player.teamNum ? "red" : "green";
 				numActive++;
@@ -560,8 +560,8 @@ class Combat {
 		}
 		else {
 			this.inPlayerTurn = false;
-			var critter = this.combatants[this.whoseTurn];
-			if(critter.dead === true || critter.hostile !== true)
+            const critter = this.combatants[this.whoseTurn];
+            if(critter.dead === true || critter.hostile !== true)
 				return this.nextTurn();
 
 			// TODO: convert unused AP into AC

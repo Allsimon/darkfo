@@ -18,127 +18,201 @@ limitations under the License.
 
 function binop(f: (x: any, y: any) => any) {
 	return function(this: ScriptVM) {
-		var rhs = this.pop();
-		this.push(f(this.pop(), rhs))
+        const rhs = this.pop();
+        this.push(f(this.pop(), rhs))
 	}
 }
 
-var opMap: { [opcode: number]: (this: ScriptVM) => void } = {
-             0x8002: function() { } // start critical (nop)
-            ,0xC001: function() { this.push(this.script.read32()) } // op_push_d
-            ,0x800D: function() { this.retStack.push(this.pop()) } // op_d_to_a
-            ,0x800C: function() { this.push(this.popAddr()) } // op_a_to_d
-            ,0x801A: function() { this.pop() } // op_pop
-            ,0x8004: function() { this.pc = this.pop() } // op_jmp
-            ,0x8003: function() { } // op_critical_done (nop)
-            ,0x802B: function() { // op_push_base
-            		var argc = this.pop();
-            		this.retStack.push(this.dvarBase);
-            		this.dvarBase = this.dataStack.length - argc
-            		// console.log("op_push_base (argc %d)", argc)
-            	}
-            ,0x8019: function() { // op_swapa
-	            	var a = this.popAddr();
-	            	var b = this.popAddr();
-	            	this.retStack.push(a);
-	            	this.retStack.push(b)
-            	}
-            ,0x802A: function() { this.dataStack.splice(this.dvarBase) } // op_pop_to_base
-            ,0x8029: function() { this.dvarBase = this.popAddr() } // op_pop_base
-            ,0x802C: function() { this.svarBase = this.dataStack.length } // op_set_global
-            ,0x8013: function() { var num = this.pop(); this.dataStack[this.svarBase + num] = this.pop() } // op_store_global
-            ,0x8012: function() { var num = this.pop(); this.push(this.dataStack[this.svarBase + num]) } // op_fetch_global
-            ,0x801C: function() { // op_pop_return
-	            	var addr = this.popAddr();
-	            	if(addr === -1)
-	            		this.halted = true;
-	            	else
-		            	this.pc = addr
-	            }
-            ,0x8010: function() { this.halted = true; /*console.log("op_exit_prog")*/ } // op_exit_prog
+const opMap: { [opcode: number]: (this: ScriptVM) => void } = {
+    0x8002: function () {
+    } // start critical (nop)
+    , 0xC001: function () {
+        this.push(this.script.read32())
+    } // op_push_d
+    , 0x800D: function () {
+        this.retStack.push(this.pop())
+    } // op_d_to_a
+    , 0x800C: function () {
+        this.push(this.popAddr())
+    } // op_a_to_d
+    , 0x801A: function () {
+        this.pop()
+    } // op_pop
+    , 0x8004: function () {
+        this.pc = this.pop()
+    } // op_jmp
+    , 0x8003: function () {
+    } // op_critical_done (nop)
+    , 0x802B: function () { // op_push_base
+        const argc = this.pop();
+        this.retStack.push(this.dvarBase);
+        this.dvarBase = this.dataStack.length - argc
+        // console.log("op_push_base (argc %d)", argc)
+    }
+    , 0x8019: function () { // op_swapa
+        const a = this.popAddr();
+        const b = this.popAddr();
+        this.retStack.push(a);
+        this.retStack.push(b)
+    }
+    , 0x802A: function () {
+        this.dataStack.splice(this.dvarBase)
+    } // op_pop_to_base
+    , 0x8029: function () {
+        this.dvarBase = this.popAddr()
+    } // op_pop_base
+    , 0x802C: function () {
+        this.svarBase = this.dataStack.length
+    } // op_set_global
+    , 0x8013: function () {
+        const num = this.pop();
+        this.dataStack[this.svarBase + num] = this.pop()
+    } // op_store_global
+    , 0x8012: function () {
+        const num = this.pop();
+        this.push(this.dataStack[this.svarBase + num])
+    } // op_fetch_global
+    , 0x801C: function () { // op_pop_return
+        const addr = this.popAddr();
+        if (addr === -1)
+            this.halted = true;
+        else
+            this.pc = addr
+    }
+    , 0x8010: function () {
+        this.halted = true;
+        /*console.log("op_exit_prog")*/
+    } // op_exit_prog
 
-            ,0x802F: function() { if(!this.pop()) { this.pc = this.pop() } else this.pop() } // op_if
-            ,0x8031: function() { var varNum = this.pop(); this.dataStack[this.dvarBase + varNum] = this.pop()  } // op_store
-            ,0x8032: function() { this.push(this.dataStack[this.dvarBase + this.pop()]) } // op_fetch
-            ,0x8046: function() { this.push(-this.pop()) } // op_negate
-            ,0x8044: function() { this.push(Math.floor(this.pop())) } // op_floor (TODO: should we truncate? Test negatives)
-            ,0x801B: function() { this.push(this.dataStack[this.dataStack.length-1]) } // op_dup
+    , 0x802F: function () {
+        if (!this.pop()) {
+            this.pc = this.pop()
+        } else this.pop()
+    } // op_if
+    , 0x8031: function () {
+        const varNum = this.pop();
+        this.dataStack[this.dvarBase + varNum] = this.pop()
+    } // op_store
+    , 0x8032: function () {
+        this.push(this.dataStack[this.dvarBase + this.pop()])
+    } // op_fetch
+    , 0x8046: function () {
+        this.push(-this.pop())
+    } // op_negate
+    , 0x8044: function () {
+        this.push(Math.floor(this.pop()))
+    } // op_floor (TODO: should we truncate? Test negatives)
+    , 0x801B: function () {
+        this.push(this.dataStack[this.dataStack.length - 1])
+    } // op_dup
 
-            ,0x8030: function() { // op_while
-            	var cond = this.pop();
-            	if(!cond) {
-	        		var pc = this.pop();
-            		this.pc = pc
-            	}
-            }
+    , 0x8030: function () { // op_while
+        let cond = this.pop();
+        if (!cond) {
+            const pc = this.pop();
+            this.pc = pc
+        }
+    }
 
-            ,0x8028: function() { // op_lookup_string_proc (look up procedure index by name)
-            	this.push(this.intfile.procedures[this.pop()].index)
-            }
-            ,0x8027: function() { // op_check_arg_count
-            	var argc = this.pop();
-            	var procIdx = this.pop();
-            	var proc = this.intfile.proceduresTable[procIdx];
-            	console.log("CHECK ARGS: argc=%d procIdx=%d, proc=%o", argc, procIdx, proc);
-            	if(argc !== proc.argc)
-            		throw `vm error: expected ${proc.argc} args, got ${argc} args when calling ${proc.name}`
-            }
+    , 0x8028: function () { // op_lookup_string_proc (look up procedure index by name)
+        this.push(this.intfile.procedures[this.pop()].index)
+    }
+    , 0x8027: function () { // op_check_arg_count
+        const argc = this.pop();
+        const procIdx = this.pop();
+        const proc = this.intfile.proceduresTable[procIdx];
+        console.log("CHECK ARGS: argc=%d procIdx=%d, proc=%o", argc, procIdx, proc);
+        if (argc !== proc.argc)
+            throw `vm error: expected ${proc.argc} args, got ${argc} args when calling ${proc.name}`
+    }
 
-            //,0x806B: function() { console.log("DISPLAY: %s", this.pop()) }
+    //,0x806B: function() { console.log("DISPLAY: %s", this.pop()) }
 
-            ,0x8005: function() { // op_call (TODO: verify)
-            	// the script should have already pushed the return value (and possibly argc)
-            	this.pc = this.intfile.proceduresTable[this.pop()].offset
-            }
-            ,0x9001: function() {
-            	// push a string from either the strings or identifiers table.
-            	// normally Fallout 2 checks the type of the operand per-instruction
-            	// and treats the actual operand however it wants. in this case,
-            	// it will either be treated like a string, or an identifier.
-            	//
-            	// we just check the next instruction and match it up with the set of
-            	// instructions who use it as an identifier (whom use interpretGetName).
+    , 0x8005: function () { // op_call (TODO: verify)
+        // the script should have already pushed the return value (and possibly argc)
+        this.pc = this.intfile.proceduresTable[this.pop()].offset
+    }
+    , 0x9001: function () {
+        // push a string from either the strings or identifiers table.
+        // normally Fallout 2 checks the type of the operand per-instruction
+        // and treats the actual operand however it wants. in this case,
+        // it will either be treated like a string, or an identifier.
+        //
+        // we just check the next instruction and match it up with the set of
+        // instructions who use it as an identifier (whom use interpretGetName).
 
-            	var num = this.script.read32();
-            	var nextOpcode = this.script.peek16();
+        const num = this.script.read32();
+        const nextOpcode = this.script.peek16();
 
-            	if(arrayIncludes([0x8014 // op_fetch_external
-				                 ,0x8015 // op_store_external
-				                 ,0x8016 // op_export_var
-				                 //,0x8017 // op_export_proc (TODO: verify)
-				                 //,0x8005: // op_call (TODO: verify, might need more operands)
-				                 ], nextOpcode)) {
-            		// fetch an identifier
-	            	if(this.intfile.identifiers[num] === undefined)
-	            		throw Error("ScriptVM: 9001 requested identifier " + num + " but it doesn't exist");
-	            	this.push(this.intfile.identifiers[num])
-            	}
-            	else {
-            		// fetch a string
-	            	if(this.intfile.strings[num] === undefined)
-	            		throw Error("ScriptVM: 9001 requested string " + num + " but it doesn't exist");
-	            	this.push(this.intfile.strings[num])
-            	}
-            }
+        if (arrayIncludes([0x8014 // op_fetch_external
+            , 0x8015 // op_store_external
+            , 0x8016 // op_export_var
+            //,0x8017 // op_export_proc (TODO: verify)
+            //,0x8005: // op_call (TODO: verify, might need more operands)
+        ], nextOpcode)) {
+            // fetch an identifier
+            if (this.intfile.identifiers[num] === undefined)
+                throw Error("ScriptVM: 9001 requested identifier " + num + " but it doesn't exist");
+            this.push(this.intfile.identifiers[num])
+        }
+        else {
+            // fetch a string
+            if (this.intfile.strings[num] === undefined)
+                throw Error("ScriptVM: 9001 requested string " + num + " but it doesn't exist");
+            this.push(this.intfile.strings[num])
+        }
+    }
 
-            // logic/comparison
-			,0x8045: function() { this.push(!this.pop()) }
-			,0x8033: binop(function(x,y) { return x == y })
-			,0x8034: binop(function(x,y) { return x != y })
-			,0x8035: binop(function(x,y) { return x <= y })
-			,0x8036: binop(function(x,y) { return x >= y })
-			,0x8037: binop(function(x,y) { return x < y })
-			,0x8038: binop(function(x,y) { return x > y })
-			,0x803E: binop(function(x,y) { return x && y })
-			,0x803F: binop(function(x,y) { return x || y })
-			,0x8040: binop(function(x,y) { return x & y })
-			,0x8041: binop(function(x,y) { return x | y })
-			,0x8039: binop(function(x,y) { return x + y })
-			,0x803A: binop(function(x,y) { return x - y })
-			,0x803B: binop(function(x,y) { return x * y })
-			,0x803d: binop(function(x,y) { return x % y })
-			,0x803C: binop(function(x,y) { return x / y | 0 }) // TODO: truncate or not?
-        	};
+    // logic/comparison
+    , 0x8045: function () {
+        this.push(!this.pop())
+    }
+    , 0x8033: binop(function (x, y) {
+        return x == y
+    })
+    , 0x8034: binop(function (x, y) {
+        return x != y
+    })
+    , 0x8035: binop(function (x, y) {
+        return x <= y
+    })
+    , 0x8036: binop(function (x, y) {
+        return x >= y
+    })
+    , 0x8037: binop(function (x, y) {
+        return x < y
+    })
+    , 0x8038: binop(function (x, y) {
+        return x > y
+    })
+    , 0x803E: binop(function (x, y) {
+        return x && y
+    })
+    , 0x803F: binop(function (x, y) {
+        return x || y
+    })
+    , 0x8040: binop(function (x, y) {
+        return x & y
+    })
+    , 0x8041: binop(function (x, y) {
+        return x | y
+    })
+    , 0x8039: binop(function (x, y) {
+        return x + y
+    })
+    , 0x803A: binop(function (x, y) {
+        return x - y
+    })
+    , 0x803B: binop(function (x, y) {
+        return x * y
+    })
+    , 0x803d: binop(function (x, y) {
+        return x % y
+    })
+    , 0x803C: binop(function (x, y) {
+        return x / y | 0
+    }) // TODO: truncate or not?
+};
 
 class ScriptVM {
 	script: BinaryReader;
@@ -172,16 +246,16 @@ class ScriptVM {
 	}
 
 	dis(): string {
-		var offset = this.script.offset;
-		var disassembly = disassemble(this.intfile, this.script);
-		this.script.seek(offset);
+        const offset = this.script.offset;
+        const disassembly = disassemble(this.intfile, this.script);
+        this.script.seek(offset);
 		return disassembly
 	}
 
 	// call a named procedure
 	call(procName: string, args: any[]=[]): any {
-		var proc = this.intfile.procedures[procName];
-		// console.log("CALL " + procName + " @ " + proc.offset + " from " + this.scriptObj.scriptName)
+        let proc = this.intfile.procedures[procName];
+        // console.log("CALL " + procName + " @ " + proc.offset + " from " + this.scriptObj.scriptName)
 		if(!proc)
 			throw "ScriptVM: unknown procedure " + procName;
 
@@ -204,11 +278,11 @@ class ScriptVM {
 			return false;
 
 		// fetch op
-		var pc = this.pc;
-		this.script.seek(pc);
-		var opcode = this.script.read16();
+        const pc = this.pc;
+        this.script.seek(pc);
+        const opcode = this.script.read16();
 
-		// dispatch based on opMap
+        // dispatch based on opMap
 		if(opMap[opcode] !== undefined)
 			opMap[opcode].call(this);
 		else {

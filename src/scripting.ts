@@ -19,26 +19,26 @@ Scripting system/engine for DarkFO
 "use strict";
 
 module Scripting {
-	var gameObjects: Obj[]|null = null;
-	var mapVars: any = null;
-	var globalVars: any = {
-		0: 50, // GVAR_PLAYER_REPUTATION
-		//10: 1, // GVAR_START_ARROYO_TRIAL (1 = TRIAL_FIGHT)
-		531: 1, // GVAR_TALKED_TO_ELDER
-		452: 2, // GVAR_DEN_VIC_KNOWN
-		88: 0, // GVAR_VAULT_RAIDERS
-		83: 2, // GVAR_VAULT_PLANT_STATUS (9 = PLANT_REPAIRED, 2 = PLANT_ACCEPTED_QUEST)
-		616: 0, // GVAR_GECKO_FIND_WOODY (0 = WOODY_UNKNOWN)
-		345: 16, // GVAR_NEW_RENO_FLAG_2 (16 = know_mordino_bit)
-		357: 2, // GVAR_NEW_RENO_LIL_JESUS_REFERS (lil_jesus_refers_yes)
-	};
-	var currentMapID: number|null = null;
-	var currentMapObject: Script|null = null;
-	var mapFirstRun = true;
-	var scriptMessages: { [scriptName: string]: { [msgID: number]: string } } = {};
-	var dialogueOptionProcs: (() => void)[] = []; // Maps dialogue options to handler callbacks
-	var currentDialogueObject: Obj|null = null;
-	export var timeEventList: TimedEvent[] = [];
+    let gameObjects: Obj[] | null = null;
+    let mapVars: any = null;
+    const globalVars: any = {
+        0: 50, // GVAR_PLAYER_REPUTATION
+        //10: 1, // GVAR_START_ARROYO_TRIAL (1 = TRIAL_FIGHT)
+        531: 1, // GVAR_TALKED_TO_ELDER
+        452: 2, // GVAR_DEN_VIC_KNOWN
+        88: 0, // GVAR_VAULT_RAIDERS
+        83: 2, // GVAR_VAULT_PLANT_STATUS (9 = PLANT_REPAIRED, 2 = PLANT_ACCEPTED_QUEST)
+        616: 0, // GVAR_GECKO_FIND_WOODY (0 = WOODY_UNKNOWN)
+        345: 16, // GVAR_NEW_RENO_FLAG_2 (16 = know_mordino_bit)
+        357: 2, // GVAR_NEW_RENO_LIL_JESUS_REFERS (lil_jesus_refers_yes)
+    };
+    let currentMapID: number | null = null;
+    let currentMapObject: Script | null = null;
+    let mapFirstRun = true;
+    const scriptMessages: { [scriptName: string]: { [msgID: number]: string } } = {};
+    let dialogueOptionProcs: (() => void)[] = []; // Maps dialogue options to handler callbacks
+    let currentDialogueObject: Obj | null = null;
+    export var timeEventList: TimedEvent[] = [];
 	let overrideStartPos: StartPos|null = null;
 
 	export interface StartPos {
@@ -54,18 +54,18 @@ module Scripting {
 		fn: () => void;
 	}
 
-	var statMap: { [stat: number]: string } = {
-		0: "STR", 1: "PER", 2: "END", 3: "CHA", 4: "INT",
-		5: "AGI", 6: "LUK",
-		35: "HP", 7: "Max HP"
-	};
+    const statMap: { [stat: number]: string } = {
+        0: "STR", 1: "PER", 2: "END", 3: "CHA", 4: "INT",
+        5: "AGI", 6: "LUK",
+        35: "HP", 7: "Max HP"
+    };
 
-	type DebugLogShowType = keyof typeof Config.scripting.debugLogShowType;
+    type DebugLogShowType = keyof typeof Config.scripting.debugLogShowType;
 
 	function stub(name: string, args: IArguments, type?: DebugLogShowType) {
 		if(Config.scripting.debugLogShowType.stub === false || Config.scripting.debugLogShowType[type] === false) return;
-		var a = "";
-		for(var i = 0; i < args.length; i++)
+        let a = "";
+        for(let i = 0; i < args.length; i++)
 			if(i === args.length-1) a += args[i];
 			else a += args[i] + ", ";
 		console.log("STUB: " + name + ": " + a)
@@ -73,8 +73,8 @@ module Scripting {
 
 	function log(name: string, args: IArguments, type?: DebugLogShowType) {
 		if(Config.scripting.debugLogShowType.log === false || Config.scripting.debugLogShowType[type] === false) return;
-		var a = "";
-		for(var i = 0; i < args.length; i++)
+        let a = "";
+        for(let i = 0; i < args.length; i++)
 			if(i === args.length-1) a += args[i];
 			else a += args[i] + ", ";
 		console.log("log: " + name + ": " + a)
@@ -139,8 +139,8 @@ module Scripting {
 		if(typeof msg === "string") // passed in a string message
 			return msg;
 
-		var name = getScriptName(id);
-		if(name === null) {
+        const name = getScriptName(id);
+        if(name === null) {
 			warn("getScriptMessage: no script with ID " + id);
 			return null
 		}
@@ -156,8 +156,8 @@ module Scripting {
 	}
 
 	export function dialogueReply(id: number): void {
-		var f = dialogueOptionProcs[id];
-		dialogueOptionProcs = [];
+        const f = dialogueOptionProcs[id];
+        dialogueOptionProcs = [];
 		f();
 		// by this point we may have already exited dialogue
 		if(currentDialogueObject !== null && dialogueOptionProcs.length === 0) {
@@ -180,8 +180,8 @@ module Scripting {
 
 		if(currentDialogueObject) {
 			// resume from when we halted in gsay_end
-			var vm = currentDialogueObject._script._vm;
-			vm.pc = vm.popAddr();
+            const vm = currentDialogueObject._script._vm;
+            vm.pc = vm.popAddr();
 			info(`[resuming from gsay_end (pc=0x${vm.pc.toString(16)})]`);
 			vm.run()
 		}
@@ -328,8 +328,8 @@ module Scripting {
 				warn("map_var: no map script");
 				return
 			}
-			var scriptName = this._mapScript.scriptName;
-			if(scriptName === undefined) {
+            const scriptName = this._mapScript.scriptName;
+            if(scriptName === undefined) {
 				warn("map_var: map script has no name");
 				return
 			}
@@ -342,8 +342,8 @@ module Scripting {
 			return mapVars[scriptName][mvar]
 		}
 		set_map_var(mvar: number, value: any) {
-			var scriptName = this._mapScript.scriptName;
-			if(scriptName === undefined) {
+            const scriptName = this._mapScript.scriptName;
+            if(scriptName === undefined) {
 				warn("map_var: map script has no name");
 				return
 			}
@@ -386,7 +386,7 @@ module Scripting {
 		}
 		metarule3(id: number, obj: any, userdata: any, radius: number): any {
 			if(id === 100) { // METARULE3_CLR_FIXED_TIMED_EVENTS
-				for(var i = 0; i < timeEventList.length; i++) {
+				for(let i = 0; i < timeEventList.length; i++) {
 					if(timeEventList[i].obj === obj && 
 					   timeEventList[i].userdata === userdata) { // todo: game object equals
 					   	info("removing timed event (userdata " + userdata + ")", "timer");
@@ -398,9 +398,9 @@ module Scripting {
 			else if(id === 106) { // METARULE3_TILE_GET_NEXT_CRITTER
 				// As far as I know, with lastCritter == 0, it just grabs the critter that is not the player at the tile. TODO: Test this!
 				// TODO: use elevation
-				var tile = obj, elevation = userdata, lastCritter = radius;
-				var objs = objectsAtPosition(fromTileNum(tile));
-				log("metarule3 106 (tile_get_next_critter)", arguments);
+                const tile = obj, elevation = userdata, lastCritter = radius;
+                const objs = objectsAtPosition(fromTileNum(tile));
+                log("metarule3 106 (tile_get_next_critter)", arguments);
 				for(var i = 0; i < objs.length; i++) {
 					if(objs[i].type === "critter" && !(<Critter>objs[i]).isPlayer)
 						return objs[i]
@@ -426,8 +426,8 @@ module Scripting {
 					return (<Player>obj).gender === "female" ? 1 : 0;
 				return 0 // Default to male
 			}
-			var namedStat = statMap[stat];
-			if(namedStat !== undefined)
+            const namedStat = statMap[stat];
+            if(namedStat !== undefined)
 				return critterGetStat(obj, namedStat);
 			stub("get_critter_stat", arguments);
 			return 5
@@ -514,8 +514,8 @@ module Scripting {
 			}
 
 			//info("obj_is_carrying_obj_pid: " + pid, "inventory")
-			var count = 0;
-			for(var i = 0; i < obj.inventory.length; i++) {
+            let count = 0;
+            for(let i = 0; i < obj.inventory.length; i++) {
 				if(obj.inventory[i].pid === pid) count++
 			}
 			return count
@@ -552,7 +552,7 @@ module Scripting {
 				return 0
 			}
 
-			for(var i = 0; i < obj.inventory.length; i++) {
+			for(let i = 0; i < obj.inventory.length; i++) {
 				if(obj.inventory[i].pid === pid)
 					return obj.inventory[i]
 			}	
@@ -602,8 +602,8 @@ module Scripting {
 				return 0
 			}
 
-			var state = 0;
-			if(obj.dead === true)
+            let state = 0;
+            if(obj.dead === true)
 				state |= 1;
 			// TODO: if obj is prone, state |= 2
 
@@ -721,8 +721,8 @@ module Scripting {
 			if(elev < 0 || elev > 2)
 				throw "create_object_sid: elev out of range: elev=" + elev;
 
-			var obj = createObjectWithPID(pid, sid);
-			if(!obj) {
+            let obj = createObjectWithPID(pid, sid);
+            if(!obj) {
 				warn("create_object_sid: couldn't create object", undefined, this);
 				return null
 			}
@@ -823,9 +823,9 @@ module Scripting {
 		}
 		set_exit_grids(onElev: number, mapID: number, elevation: number, tileNum: number, rotation: number) {
 			stub("set_exit_grids", arguments);
-			for(var i = 0; i < gameObjects.length; i++) {
-				var obj = gameObjects[i];
-				if(obj.type === "misc" && obj.extra && obj.extra.exitMapID !== undefined) {
+			for(let i = 0; i < gameObjects.length; i++) {
+                const obj = gameObjects[i];
+                if(obj.type === "misc" && obj.extra && obj.extra.exitMapID !== undefined) {
 					obj.extra.exitMapID = mapID;
 					obj.extra.startingPosition = tileNum;
 					obj.extra.startingElevation = elevation
@@ -855,9 +855,9 @@ module Scripting {
 		}
 		tile_contains_pid_obj(tile: number, elevation: number, pid: number): any {
 			stub("tile_contains_pid_obj", arguments, "tiles");
-			var pos = fromTileNum(tile);
-			var objects = gMap.getObjects(elevation);
-			for(var i = 0; i < objects.length; i++) {
+            const pos = fromTileNum(tile);
+            const objects = gMap.getObjects(elevation);
+            for(let i = 0; i < objects.length; i++) {
 				if(objects[i].position.x === pos.x && objects[i].position.y === pos.y &&
 				   objects[i].pid === pid) {
 					return objects[i]
@@ -875,7 +875,7 @@ module Scripting {
 				return -1
 			}
 			let newTile = hexInDirection(fromTileNum(tile), direction);
-			for(var i = 0; i < distance-1; i++) // repeat for each further distance
+			for(let i = 0; i < distance-1; i++) // repeat for each further distance
 				newTile = hexInDirection(newTile, direction)
 			return toTileNum(newTile)
 		}
@@ -891,17 +891,17 @@ module Scripting {
 				warn("tile_contains_obj_pid: not same elevation");
 				return 0
 			}
-			var objs = objectsAtPosition(fromTileNum(tile));
-			for(var i = 0; i < objs.length; i++) {
+            const objs = objectsAtPosition(fromTileNum(tile));
+            for(let i = 0; i < objs.length; i++) {
 				if(objs[i].pid === pid)
 					return 1
 			}
 			return 0
 		}
 		rotation_to_tile(srcTile: number, destTile: number) {
-			var src = fromTileNum(srcTile), dest = fromTileNum(destTile);
-			var hex = hexNearestNeighbor(src, dest);
-			if(hex !== null)
+            const src = fromTileNum(srcTile), dest = fromTileNum(destTile);
+            const hex = hexNearestNeighbor(src, dest);
+            if(hex !== null)
 				return hex.direction;
 			warn("rotation_to_tile: invalid hex: " + srcTile + " / " + destTile);
 			return -1 // TODO/XXX: what does this return if invalid?
@@ -956,16 +956,16 @@ module Scripting {
 		//gSay_Option(msgList, msgID, target, reaction) { stub("gSay_Option", arguments) },
 		gsay_reply(msgList: number, msgID: string|number) {
 			log("gSay_Reply", arguments);
-			var msg = getScriptMessage(msgList, msgID);
-			info("REPLY: " + msg, "dialogue");
+            const msg = getScriptMessage(msgList, msgID);
+            info("REPLY: " + msg, "dialogue");
 			uiSetDialogueReply(msg)
 		}
 		gsay_message(msgList: number, msgID: string|number, reaction: number) {
 			// TODO: update this for ui
 			log("gsay_message", arguments);
 			// message with [Done] option
-			var msg = msgID;
-			if(typeof msgID !== "string")
+            let msg = msgID;
+            if(typeof msgID !== "string")
 				msg = getScriptMessage(msgList, msgID)
 			
 			// TODO: XXX: This has bitrotted, #dialogue no longer exists. [Done] needs testing.
@@ -976,12 +976,12 @@ module Scripting {
 		end_dialogue() { stub("end_dialogue", arguments) }
 		giq_option(iqTest: number, msgList: number, msgID: string|number, target: any, reaction: number) {
 			log("giQ_Option", arguments);
-			var msg = getScriptMessage(msgList, msgID);
-			info("DIALOGUE OPTION: " + msg +
+            const msg = getScriptMessage(msgList, msgID);
+            info("DIALOGUE OPTION: " + msg +
 				 " [INT " + ((iqTest >= 0) ? (">="+iqTest) : ("<="+-iqTest)) + "]", "dialogue");
 
-			var INT = critterGetStat(player, "INT");
-			if((iqTest > 0 && INT < iqTest) || (iqTest < 0 && INT > -iqTest))
+            const INT = critterGetStat(player, "INT");
+            if((iqTest > 0 && INT < iqTest) || (iqTest < 0 && INT > -iqTest))
 				return; // not enough intelligence for this option
 
 			dialogueOptionProcs.push(target.bind(this));
@@ -1002,24 +1002,24 @@ module Scripting {
 				warn("float_msg: not game object: " + obj);
 				return
 			}
-			var colorMap: { [color: number]: string } = {
-				// todo: take the exact values from some palette. also, yellow is ugly.
-				0: "white", //0: "yellow",
-				1: "black",
-				2: "red",
-				3: "green",
-				4: "blue",
-				5: "purple",
-				6: "white",
-				7: "red",
-				8: "white",//8: "yellow",
-				9: "white",
-				10: "dark gray",
-				11: "dark gray",
-				12: "light gray"
-			};
-			var color = colorMap[type];
-			if(type === -2 /* FLOAT_MSG_WARNING */ || type === -1 /* FLOAT_MSG_SEQUENTIAL */)
+            const colorMap: { [color: number]: string } = {
+                // todo: take the exact values from some palette. also, yellow is ugly.
+                0: "white", //0: "yellow",
+                1: "black",
+                2: "red",
+                3: "green",
+                4: "blue",
+                5: "purple",
+                6: "white",
+                7: "red",
+                8: "white",//8: "yellow",
+                9: "white",
+                10: "dark gray",
+                11: "dark gray",
+                12: "light gray"
+            };
+            let color = colorMap[type];
+            if(type === -2 /* FLOAT_MSG_WARNING */ || type === -1 /* FLOAT_MSG_SEQUENTIAL */)
 				color = colorMap[9];
 			floatMessages.push({msg: msg, obj: this.self_obj as Obj, startTime: heart.timer.getTime(),
 			                    color: color})
@@ -1056,8 +1056,8 @@ module Scripting {
 				return
 			}
 
-			var tile = fromTileNum(tileNum);
-			if(tile.x < 0 || tile.x >= 200 || tile.y < 0 || tile.y >= 200) {
+            const tile = fromTileNum(tileNum);
+            if(tile.x < 0 || tile.x >= 200 || tile.y < 0 || tile.y >= 200) {
 				warn("animate_move_obj_to_tile: invalid tile: " + tile.x +
 				      ", " + tile.y + " (" + tileNum + ")", "movement", this);
 				return
@@ -1079,8 +1079,8 @@ module Scripting {
 
 			// TODO: objectExplode should defer to an auxillary tile explode function, which we should use
 			// Make dummy object so we can explode at the tile
-			var explosives = createObjectWithPID(makePID(0 /* items */, 85 /* Plastic Explosives */), -1);
-			explosives.position = fromTileNum(tile);
+            const explosives = createObjectWithPID(makePID(0 /* items */, 85 /* Plastic Explosives */), -1);
+            explosives.position = fromTileNum(tile);
 			gMap.addObject(explosives);
 			objectExplode(explosives, explosives, 0, 100); // TODO: min/max dmg?
 			gMap.removeObject(explosives)
@@ -1105,7 +1105,7 @@ module Scripting {
 		rm_timer_event(obj: Obj) {
 		   	log("rm_timer_event", arguments);
 		   	info("rm_timer_event: " + obj + ", " + obj.pid);
-			for(var i = 0; i < timeEventList.length; i++) {
+			for(let i = 0; i < timeEventList.length; i++) {
 				if(timeEventList[i].obj.pid === obj.pid) { // TODO: better object equality
 					info("removing timed event for obj");
 				   	timeEventList.splice(i--, 1);
@@ -1176,8 +1176,8 @@ module Scripting {
 	}
 
 	export function deserializeScript(obj: SerializedScript): Script {
-		var script = loadScript(obj.name);
-		script.lvars = obj.lvars;
+        const script = loadScript(obj.name);
+        script.lvars = obj.lvars;
 		// TODO: do some kind of logic like enterMap/updateMap
 		return script
 	}
@@ -1185,14 +1185,14 @@ module Scripting {
 	function loadMessageFile(name: string) {
 		name = name.toLowerCase();
 		info("loading message file: " + name, "load");
-		var msg = getFileText("data/text/english/dialog/" + name + ".msg");
-		if(scriptMessages[name] === undefined)
+        const msg = getFileText("data/text/english/dialog/" + name + ".msg");
+        if(scriptMessages[name] === undefined)
 			scriptMessages[name] = {};
 
 		// parse message file
-		var lines = msg.split(/\r|\n/);
+        const lines = msg.split(/\r|\n/);
 
-		// preprocess and merge lines
+        // preprocess and merge lines
 		for(var i = 0; i < lines.length; i++) {
 			// comments/blanks
 			if(lines[i][0] === '#' || lines[i].trim() === '') {
@@ -1210,8 +1210,8 @@ module Scripting {
 
 		for(var i = 0; i < lines.length; i++) {
 			// e.g. {100}{}{You have entered a dark cave in the side of a mountain.}
-			var m = lines[i].match(/\{(\d+)\}\{.*\}\{(.*)\}/);
-			if(m === null)
+            const m = lines[i].match(/\{(\d+)\}\{.*\}\{(.*)\}/);
+            if(m === null)
 				throw "message parsing: not a valid line: " + lines[i];
 			// HACK: replace unicode replacement character with an apostrophe (because the Web sucks at character encodings)
 			scriptMessages[name][parseInt(m[1])] = m[2].replace(/\ufffd/g, "'")
@@ -1223,24 +1223,24 @@ module Scripting {
 	}
 
 	export function loadScript(name: string): Script {
-		var obj = null;
+        let obj = null;
 
-		info("loading script " + name, "load");
+        info("loading script " + name, "load");
 
-		var path = "data/scripts/" + name.toLowerCase() + ".int";
-		var data: DataView = getFileBinarySync(path);
-		var reader = new BinaryReader(data);
-		//console.log("[%s] loaded %d bytes", name, reader.length)
-		var intfile = parseIntFile(reader, name.toLowerCase());
+        const path = "data/scripts/" + name.toLowerCase() + ".int";
+        const data: DataView = getFileBinarySync(path);
+        const reader = new BinaryReader(data);
+        //console.log("[%s] loaded %d bytes", name, reader.length)
+        const intfile = parseIntFile(reader, name.toLowerCase());
 
-		//console.log("%s int file: %o", name, intfile)
+        //console.log("%s int file: %o", name, intfile)
 
 		if(!currentMapObject)
 			console.log("note: using current script (%s) as map script for this object", intfile.name);
 		
 		reader.seek(0);
-		var vm = new ScriptVMBridge.GameScriptVM(reader, intfile, obj);
-		vm.scriptObj.scriptName = name;
+        const vm = new ScriptVMBridge.GameScriptVM(reader, intfile, obj);
+        vm.scriptObj.scriptName = name;
 		vm.scriptObj.lvars = {};
 		vm.scriptObj._mapScript = currentMapObject || vm.scriptObj; // map scripts are their own map scripts
 		vm.scriptObj._vm = vm;
@@ -1307,8 +1307,8 @@ module Scripting {
 	}
 
 	export function spatial(spatialObj: Obj, source: Obj) { // TODO: Spatial type
-		var script = spatialObj._script;
-		if(script.spatial_p_proc === undefined)
+        const script = spatialObj._script;
+        if(script.spatial_p_proc === undefined)
 			throw "spatial script without a spatial_p_proc triggered";
 
 		script.game_time = gameTickTime;
@@ -1365,8 +1365,8 @@ module Scripting {
 	}
 
 	export function combatEvent(obj: Obj, event: "turnBegin"): boolean {
-		var fixed_param = null;
-		switch(event) {
+        let fixed_param = null;
+        switch(event) {
 			case "turnBegin": fixed_param = 4; break; // COMBAT_SUBTYPE_TURN
 			default: throw "combatEvent: unknown event " + event
 		}
@@ -1387,7 +1387,7 @@ module Scripting {
 
 		// hack so that the procedure is allowed to finish before
 		// we actually terminate combat
-		var doTerminate: any = false; // did combat_p_proc terminate combat?
+        let doTerminate: any = false; // did combat_p_proc terminate combat?
 		obj._script.terminate_combat = function() { doTerminate = true };
 		obj._script.combat_p_proc();
 
@@ -1411,10 +1411,10 @@ module Scripting {
 			}
 		}
 
-		var updated = 0;
-		for(var i = 0; i < gameObjects.length; i++) {
-			var script = gameObjects[i]._script;
-			if(script !== undefined && script.map_update_p_proc !== undefined) {
+        let updated = 0;
+        for(let i = 0; i < gameObjects.length; i++) {
+            const script = gameObjects[i]._script;
+            if(script !== undefined && script.map_update_p_proc !== undefined) {
 				script.combat_is_initialized = inCombat ? 1 : 0;
 				script.self_obj = gameObjects[i];
 				script.game_time = Math.max(1, gameTickTime);
@@ -1454,8 +1454,8 @@ module Scripting {
 	}
 
 	export function objectEnterMap(obj: Obj, elevation: number, mapID: number) {
-		var script = obj._script;
-		if(script !== undefined && script.map_enter_p_proc !== undefined) {
+        const script = obj._script;
+        if(script !== undefined && script.map_enter_p_proc !== undefined) {
 			script.combat_is_initialized = 0;
 			script.self_obj = obj;
 			script.game_time = Math.max(1, gameTickTime);

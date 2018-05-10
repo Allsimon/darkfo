@@ -38,23 +38,23 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 	reader.seek(0x2A); // seek to procedure table
 
 	// read procedure table
-	var numProcs = reader.read32();
-	var procs: Procedure[] = [];
-	var procedures: { [name: string]: Procedure } = {};
-	//console.log("procs: %d", numProcs)
+    const numProcs = reader.read32();
+    const procs: Procedure[] = [];
+    const procedures: { [name: string]: Procedure } = {};
+    //console.log("procs: %d", numProcs)
 	//console.log("")
 
-	for(var i = 0; i < numProcs; i++) {
-		var nameIndex = reader.read32();
-		var flags = reader.read32();
-		//console.log("name index: %d", nameIndex)
+	for(let i = 0; i < numProcs; i++) {
+        const nameIndex = reader.read32();
+        const flags = reader.read32();
+        //console.log("name index: %d", nameIndex)
 		//console.log("flags: %d", flags)
 		assertEq(reader.read32(), 0, "unk0 != 0");
 		assertEq(reader.read32(), 0, "unk1 != 0");
-		var offset = reader.read32();
+		const offset = reader.read32();
 		//console.log("offset: %d", offset)
-		var argc = reader.read32();
-		//console.log("argc: %d", argc)
+        const argc = reader.read32();
+        //console.log("argc: %d", argc)
 		//console.log("")
 
 		procs.push({nameIndex: nameIndex
@@ -66,10 +66,10 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 	}
 
 	// offset->identifier table
-	var identEnd = reader.read32();
-	var identifiers: { [offset: number]: string } = {};
+    const identEnd = reader.read32();
+    const identifiers: { [offset: number]: string } = {};
 
-	var baseOffset = reader.offset;
+    var baseOffset = reader.offset;
 	while(true) {
 		if(reader.offset - baseOffset >= identEnd)
 			break;
@@ -104,10 +104,10 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 	console.log("")*/
 
 	// offset->strings table
-	var stringEnd = reader.read32();
-	var strings: { [offset: number]: string } = {};
+    const stringEnd = reader.read32();
+    const strings: { [offset: number]: string } = {};
 
-	//assertEq(stringEnd, 0xFFFFFFFF, "TODO: string table")
+    //assertEq(stringEnd, 0xFFFFFFFF, "TODO: string table")
 
 	if(stringEnd !== 0xFFFFFFFF) {
 		// read string table
@@ -132,9 +132,9 @@ function parseIntFile(reader: BinaryReader, name: string=""): IntFile {
 		}
 	}
 
-	var codeOffset = reader.offset;
+    const codeOffset = reader.offset;
 
-	return {procedures: procedures
+    return {procedures: procedures
 		   ,proceduresTable: procs
 		   ,identifiers: identifiers
 	       ,strings: strings

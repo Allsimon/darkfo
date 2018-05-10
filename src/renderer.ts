@@ -44,9 +44,9 @@ class Renderer {
 
 		if(isLoading) {
 			this.color(0, 0, 0);
-			var w = 256, h = 40;
-			var w2 = (loadingAssetsLoaded / loadingAssetsTotal) * w;
-			// draw a loading progress bar
+            const w = 256, h = 40;
+            const w2 = (loadingAssetsLoaded / loadingAssetsTotal) * w;
+            // draw a loading progress bar
 			this.rectangle(SCREEN_WIDTH/2 - w/2, SCREEN_HEIGHT/2,
 					w, h, false);
 			this.rectangle(SCREEN_WIDTH/2 - w/2 + 2, SCREEN_HEIGHT/2 + 2,
@@ -56,10 +56,10 @@ class Renderer {
 
 		this.color(255, 255, 255);
 
-		var mousePos = heart.mouse.getPosition();
-		var mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
-		var mouseSquare = tileFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
-		//var mouseTile = tileFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY)
+        const mousePos = heart.mouse.getPosition();
+        const mouseHex = hexFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
+        const mouseSquare = tileFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY);
+        //var mouseTile = tileFromScreen(mousePos[0] + cameraX, mousePos[1] + cameraY)
 
 		if(Config.ui.showFloor)   this.renderFloor(this.floorTiles);
 		if(Config.ui.showCursor && hexOverlay) {
@@ -70,15 +70,15 @@ class Renderer {
 		if(Config.ui.showRoof)    this.renderRoof(this.roofTiles);
 
 		if(inCombat) {
-			var whose = combat.inPlayerTurn ? "player" : combat.combatants[combat.whoseTurn].name;
-			var AP = combat.inPlayerTurn ? player.AP : combat.combatants[combat.whoseTurn].AP;
-			this.text("[turn " + combat.turnNum + " of " + whose + " AP: " + AP.getAvailableMoveAP() + "]", SCREEN_WIDTH - 200, 15)
+            const whose = combat.inPlayerTurn ? "player" : combat.combatants[combat.whoseTurn].name;
+            const AP = combat.inPlayerTurn ? player.AP : combat.combatants[combat.whoseTurn].AP;
+            this.text("[turn " + combat.turnNum + " of " + whose + " AP: " + AP.getAvailableMoveAP() + "]", SCREEN_WIDTH - 200, 15)
 		}
 
 		if(Config.ui.showSpatials && Config.engine.doSpatials) {
 			gMap.getSpatials().forEach(spatial => {
-				var scr = hexToScreen(spatial.position.x, spatial.position.y);
-				//heart.graphics.draw(hexOverlay, scr.x - 16 - cameraX, scr.y - 12 - cameraY)
+                const scr = hexToScreen(spatial.position.x, spatial.position.y);
+                //heart.graphics.draw(hexOverlay, scr.x - 16 - cameraX, scr.y - 12 - cameraY)
 				this.text(spatial.script, scr.x - 10 - cameraX, scr.y - 3 - cameraY)
 			})
 		}
@@ -90,12 +90,12 @@ class Renderer {
 
 		//this.text("fps: " + heart.timer.getFPS(), SCREEN_WIDTH - 50, 15)
 
-		for(var i = 0; i < floatMessages.length; i++) {
-			var bbox = objectBoundingBox(floatMessages[i].obj);
-			if(bbox === null) continue;
+		for(let i = 0; i < floatMessages.length; i++) {
+            const bbox = objectBoundingBox(floatMessages[i].obj);
+            if(bbox === null) continue;
 			heart.ctx.fillStyle = floatMessages[i].color;
-			var centerX = bbox.x - bbox.w/2 - cameraX;
-			this.text(floatMessages[i].msg, centerX, bbox.y - cameraY - 16)
+            const centerX = bbox.x - bbox.w / 2 - cameraX;
+            this.text(floatMessages[i].msg, centerX, bbox.y - cameraY - 16)
 		}
 
 		if(player.dead) {
@@ -105,28 +105,28 @@ class Renderer {
 	}
 
 	objectRenderInfo(obj: Obj): ObjectRenderInfo|null {
-		var scr = hexToScreen(obj.position.x, obj.position.y);
-		var visible = obj.visible;
+        const scr = hexToScreen(obj.position.x, obj.position.y);
+        let visible = obj.visible;
 
-		if(images[obj.art] === undefined) {
+        if(images[obj.art] === undefined) {
 			lazyLoadImage(obj.art); // try to load it in
 			return null
 		}
 
-		var info = imageInfo[obj.art];
-		if(info === undefined)
+        const info = imageInfo[obj.art];
+        if(info === undefined)
 			throw "No image map info for: " + obj.art;
 
 		if(!(obj.orientation in info.frameOffsets))
 			obj.orientation = 0; // ...
-		var frameInfo = info.frameOffsets[obj.orientation][obj.frame];
-		var dirOffset = info.directionOffsets[obj.orientation];
+        const frameInfo = info.frameOffsets[obj.orientation][obj.frame];
+        const dirOffset = info.directionOffsets[obj.orientation];
 
-		// Anchored from the bottom center
-		var offsetX = -(frameInfo.w / 2 | 0) + dirOffset.x;
-		var offsetY = -frameInfo.h + dirOffset.y;
+        // Anchored from the bottom center
+        let offsetX = -(frameInfo.w / 2 | 0) + dirOffset.x;
+        let offsetY = -frameInfo.h + dirOffset.y;
 
-		if(obj.shift) {
+        if(obj.shift) {
 			offsetX += obj.shift.x;
 			offsetY += obj.shift.y
 		}
@@ -135,16 +135,16 @@ class Renderer {
 			offsetY += frameInfo.oy
 		}
 
-		var scrX = scr.x + offsetX, scrY = scr.y + offsetY;
+        const scrX = scr.x + offsetX, scrY = scr.y + offsetY;
 
-		if(scrX + frameInfo.w < cameraX || scrY + frameInfo.h < cameraY ||
+        if(scrX + frameInfo.w < cameraX || scrY + frameInfo.h < cameraY ||
 		   scrX >= cameraX+SCREEN_WIDTH || scrY >= cameraY+SCREEN_HEIGHT)
 			visible = false; // out of screen bounds, no need to draw
 
-		var spriteFrameNum = info.numFrames * obj.orientation + obj.frame;
-		var sx = spriteFrameNum * info.frameWidth;
+        const spriteFrameNum = info.numFrames * obj.orientation + obj.frame;
+        const sx = spriteFrameNum * info.frameWidth;
 
-		return {x: scrX, y: scrY, spriteX: sx,
+        return {x: scrX, y: scrY, spriteX: sx,
 			   frameWidth: frameInfo.w, frameHeight: frameInfo.h,
 			   uniformFrameWidth: info.frameWidth,
 			   uniformFrameHeight: info.frameHeight,

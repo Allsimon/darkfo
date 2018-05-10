@@ -25,15 +25,15 @@ function parseIni(text: string) {
 	const lines = text.split('\n');
 	let category = null;
 
-	for(var i = 0; i < lines.length; i++) {
-		var line = lines[i].replace(/\s*;.*/, ""); // replace comments
+	for(let i = 0; i < lines.length; i++) {
+        const line = lines[i].replace(/\s*;.*/, ""); // replace comments
 		if(line.trim() === '') { }
 		else if(line[0] === '[')
 			category = line.trim().slice(1, -1);
 		else {
 			// key=value
-			var kv = line.match(/(.+?)=(.+)/);
-			if(kv === null) { // MAPS.TXT has one of these, so it's not an exception
+            const kv = line.match(/(.+?)=(.+)/);
+            if(kv === null) { // MAPS.TXT has one of these, so it's not an exception
 				console.log("warning: parseIni: not a key=value line: " + line);
 				continue
 			}
@@ -110,17 +110,17 @@ function rollSkillCheck(skill: number, modifier: number, isBounded: boolean) {
 }
 
 function rollVsSkill(who: Critter, skill: string, modifier: number=0) {
-	var skillLevel = critterGetSkill(who, skill) + modifier;
-	var roll = skillLevel - getRandomInt(1, 100);
+    const skillLevel = critterGetSkill(who, skill) + modifier;
+    let roll = skillLevel - getRandomInt(1, 100);
 
-	if(roll <= 0) { // failure
+    if(roll <= 0) { // failure
 		if((-roll)/10 > getRandomInt(1, 100))
 			return 0; // critical failure
 		return 1 // failure
 	}
 	else { // success
-		var critChance = critterGetStat(who, "Critical Chance");
-		if((roll/10 + critChance) > getRandomInt(1, 100))
+        const critChance = critterGetStat(who, "Critical Chance");
+        if((roll/10 + critChance) > getRandomInt(1, 100))
 			return 3; // critical success
 		return 2 // success
 	}
@@ -188,8 +188,12 @@ class BinaryReader {
 
 	seek(offset: number) { this.offset = offset }
 	read8(): number { return this.data.getUint8(this.offset++) }
-	read16(): number { var r = this.data.getUint16(this.offset); this.offset += 2; return r }
-	read32(): number { var r = this.data.getUint32(this.offset); this.offset += 4; return r }
+	read16(): number {
+        const r = this.data.getUint16(this.offset);
+        this.offset += 2; return r }
+	read32(): number {
+        const r = this.data.getUint32(this.offset);
+        this.offset += 4; return r }
 
 	peek8(): number { return this.data.getUint8(this.offset) }
 	peek16(): number { return this.data.getUint16(this.offset) }
@@ -207,9 +211,9 @@ function assertEq<T>(value: T, expected: T, message: string) {
 }
 
 function jQuery_isPlainObject(obj: any): boolean {
-	var proto, Ctor;
+    let proto, Ctor;
 
-	// Detect obvious negatives
+    // Detect obvious negatives
 	// Use toString instead of jQuery.type to catch host objects
 	if ( !obj || toString.call( obj ) !== "[object Object]" ) {
 		return false;

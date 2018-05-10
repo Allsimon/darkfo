@@ -80,9 +80,9 @@ class GameMap {
 		// TODO: use a removal queue instead of removing directory (indexing problems)
 
 		// TODO: better object equality testing
-		for(var level = 0; level < this.numLevels; level++) {
-			var objects = this.objects[level];
-			for(var i = 0; i < objects.length; i++) {
+		for(let level = 0; level < this.numLevels; level++) {
+            const objects = this.objects[level];
+            for(let i = 0; i < objects.length; i++) {
 				if(objects[i] === obj) {
 					console.log("removeObject: destroying index %d (%o/%o)", i, obj, objects[i]);
 					this.objects[level].splice(i, 1);
@@ -114,8 +114,8 @@ class GameMap {
 	}
 
 	changeElevation(level: number, updateScripts: boolean=false, isMapLoading: boolean=false) {
-		var oldElevation = this.currentElevation;
-		this.currentElevation = level;
+        const oldElevation = this.currentElevation;
+        this.currentElevation = level;
 		currentElevation = level; // TODO: Get rid of this global
 		this.floorMap = this.mapObj.levels[level].tiles.floor;
 		this.roofMap  = this.mapObj.levels[level].tiles.roof;
@@ -128,8 +128,8 @@ class GameMap {
 
 		// remove the player/party from the old objects list
 		// and add the them to the new one
-		var party = gParty.getPartyMembersAndPlayer();
-		party.forEach((obj: Critter) => {
+        const party = gParty.getPartyMembersAndPlayer();
+        party.forEach((obj: Critter) => {
 			arrayRemove(this.objects[oldElevation], obj);
 			this.objects[level].push(obj)
 		});
@@ -161,11 +161,11 @@ class GameMap {
 		// set up party members' positions
 		gParty.getPartyMembers().forEach((obj: Critter) => {
 			// attempt party member placement around player
-			var placed = false;
-			for(var dist = 1; dist < 3; dist++) {
-				for(var dir = 0; dir < 6; dir++) {
-					var pos = hexInDirectionDistance(player.position, dir, dist);
-					if(objectsAtPosition(pos).length === 0) {
+            let placed = false;
+            for(let dist = 1; dist < 3; dist++) {
+				for(let dir = 0; dir < 6; dir++) {
+                    const pos = hexInDirectionDistance(player.position, dir, dist);
+                    if(objectsAtPosition(pos).length === 0) {
 						obj.position = pos;
 						console.log("placed %o @ %o", obj, pos);
 						placed = true;
@@ -283,19 +283,19 @@ class GameMap {
 
 		console.log("loading map " + mapName);
 
-		var mapImages = getFileJSON("maps/" + mapName + ".images.json");
-		for(var i = 0; i < mapImages.length; i++)
+        const mapImages = getFileJSON("maps/" + mapName + ".images.json");
+        for(let i = 0; i < mapImages.length; i++)
 			load(mapImages[i])
 		console.log("loading " + mapImages.length + " images");
 
-		var map = getFileJSON("maps/"+mapName+".json");
-		this.mapObj = map;
+        const map = getFileJSON("maps/" + mapName + ".json");
+        this.mapObj = map;
 		this.mapID = map.mapID;
 		this.numLevels = map.levels.length;
 
-		var elevation = (startingElevation !== undefined) ? startingElevation : 0;
+        let elevation = (startingElevation !== undefined) ? startingElevation : 0;
 
-		if(Config.engine.doLoadScripts) {
+        if(Config.engine.doLoadScripts) {
 			Scripting.init(mapName);
 			try {
 				this.mapScript = Scripting.loadScript(mapName);
@@ -319,8 +319,8 @@ class GameMap {
 			if(Config.engine.doLoadScripts) {
 				// initialize spatial scripts
 				this.spatials.forEach((level: any) => level.forEach((spatial: Spatial) => {
-					var script = Scripting.loadScript(spatial.script);
-					if(script === null)
+                    const script = Scripting.loadScript(spatial.script);
+                    if(script === null)
 						console.log("load script failed for spatial " + spatial.script);
 					else {
 						spatial._script = script
@@ -347,9 +347,9 @@ class GameMap {
 
 		// TODO: when exactly are these called?
 		// TODO: when objectsAndSpatials is updated, the scripting engine won't know
-		var objectsAndSpatials = this.getObjectsAndSpatials();
+        const objectsAndSpatials = this.getObjectsAndSpatials();
 
-		if(Config.engine.doLoadScripts) {
+        if(Config.engine.doLoadScripts) {
 			// party member NPCs get the new map script
 			gParty.getPartyMembers().forEach((obj: Critter) => {
 				obj._script._mapScript = this.mapScript
@@ -372,8 +372,8 @@ class GameMap {
 		loadingAssetsTotal--; // we should know all of the assets we need by now
 
 		// clear audio and use the map music
-		var curMapInfo = getCurrentMapInfo();
-		audioEngine.stopAll();
+        const curMapInfo = getCurrentMapInfo();
+        audioEngine.stopAll();
 		if(curMapInfo && curMapInfo.music)
 			audioEngine.playMusic(curMapInfo.music);
 
@@ -381,8 +381,8 @@ class GameMap {
 	}
 
 	loadMapByID(mapID: number, startingPosition?: Point, startingElevation?: number): void {
-		var mapName = lookupMapName(mapID);
-		if(mapName !== null)
+        const mapName = lookupMapName(mapID);
+        if(mapName !== null)
 			this.loadMap(mapName, startingPosition, startingElevation);
 		else
 			console.log("couldn't lookup map name for map ID " + mapID)

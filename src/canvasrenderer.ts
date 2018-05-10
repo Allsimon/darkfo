@@ -111,8 +111,8 @@ class CanvasRenderer extends Renderer {
 					const w = Math.min(SCREEN_WIDTH - sx, 80);
 					const h = Math.min(SCREEN_HEIGHT - sy, 36);
 
-					for(var y = 0; y < h; y++) {
-						for(var x = 0; x < w; x++) {
+					for(let y = 0; y < h; y++) {
+						for(let x = 0; x < w; x++) {
 							if((sx + x) < 0 || (sy + y) < 0)
 								continue;
 
@@ -159,15 +159,15 @@ class CanvasRenderer extends Renderer {
 	}
 
 	drawTileMap(matrix: TileMap, offsetY: number): void {
-		for(var i = 0; i < matrix.length; i++) {
-			for(var j = 0; j < matrix[0].length; j++) {
-				var tile = matrix[j][i];
-				if(tile === "grid000") continue;
-				var img = "art/tiles/" + tile;
+		for(let i = 0; i < matrix.length; i++) {
+			for(let j = 0; j < matrix[0].length; j++) {
+                const tile = matrix[j][i];
+                if(tile === "grid000") continue;
+                const img = "art/tiles/" + tile;
 
-				if(images[img] !== undefined) {
-					var scr = tileToScreen(i, j);
-					scr.y += offsetY;
+                if(images[img] !== undefined) {
+                    const scr = tileToScreen(i, j);
+                    scr.y += offsetY;
 					if(scr.x+TILE_WIDTH < cameraX || scr.y+TILE_HEIGHT < cameraY ||
 					   scr.x >= cameraX+SCREEN_WIDTH || scr.y >= cameraY+SCREEN_HEIGHT)
 						continue;
