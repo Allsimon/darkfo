@@ -18,15 +18,15 @@ limitations under the License.
 
 class Party {
 	// party members
-	party: Critter[] = []
+	party: Critter[] = [];
 
 	addPartyMember(obj: Critter) {
-		console.log("party member %o added", obj)
+		console.log("party member %o added", obj);
 		this.party.push(obj)
 	}
 
 	removePartyMember(obj: Critter) {
-		console.log("party member %o removed", obj)
+		console.log("party member %o removed", obj);
 		if(!arrayRemove(this.party, obj))
 			throw Error("Could not remove party member");
 	}
@@ -52,10 +52,10 @@ class Party {
 	}
 
 	deserialize(objs: SerializedObj[]): void {
-		this.party.length = 0
+		this.party.length = 0;
 		for(const obj of objs)
 			this.party.push(<Critter>deserializeObj(obj))
 	}
 }
 
-var gParty = new Party()
+var gParty = new Party();

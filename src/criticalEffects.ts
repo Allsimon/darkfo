@@ -65,7 +65,7 @@ module CriticalEffects {
 		destroyWeapon: function(target: Critter) {
 			console.log(target.name + " has had their weapon blow up in their face. Ouch. This does not do anything yet")
 		}
-	}
+	};
 
 	const critterEffects: Dict<(target: Critter) => void> = {
 		knockout: function(target: Critter) {
@@ -119,10 +119,10 @@ module CriticalEffects {
 		random: function(target: Critter) {
 			console.log(target.name + " is affected by a random effect. How random! This does not do anything yet")
 		}
-	}
+	};
 
 	class Effects {
-		effects : EffectsFunction[]
+		effects : EffectsFunction[];
 
 		constructor(effectCallbackList : EffectsFunction[]) {
 			this.effects = effectCallbackList
@@ -142,9 +142,9 @@ module CriticalEffects {
 		//stat = number, probably
 
 		constructor(stat: string, modifier: number, effects: Effects, failEffectMessageID: number) {
-			this.stat = stat
-			this.modifier = modifier
-			this.effects = effects
+			this.stat = stat;
+			this.modifier = modifier;
+			this.effects = effects;
 			this.failEffectMessageID = failEffectMessageID
 		}
 
@@ -152,15 +152,15 @@ module CriticalEffects {
 		doEffectsOn(target: Critter): any {
 			// stat being undefined means there is no stat check to be done
 			if(this.stat === undefined)
-				return {success: false}
+				return {success: false};
 
-			var statToRollAgainst = critterGetStat(target, this.stat)
-			statToRollAgainst += this.modifier
+			var statToRollAgainst = critterGetStat(target, this.stat);
+			statToRollAgainst += this.modifier;
 
 			// if our target fails their skillcheck, they have to suffer the added effects.
 			// We do *10 so we can reuse the skillCheck function which goes from 0 to 100, while stat is 1 to 10
 			if(!rollSkillCheck(statToRollAgainst*10, 0, false)) {
-				this.effects.doEffectsOn(target)
+				this.effects.doEffectsOn(target);
 				return {success: true, msgID: this.failEffectMessageID}
 			}
 
@@ -169,28 +169,28 @@ module CriticalEffects {
 	}
 
 	class CritType {
-		DM: number
-		effects: Effects
-		statCheck: StatCheck
-		msgID: number
+		DM: number;
+		effects: Effects;
+		statCheck: StatCheck;
+		msgID: number;
 
 		constructor(damageMultiplier: number, effects: Effects, statCheck: StatCheck, effectMsg: number) {
-			this.DM = damageMultiplier
-			this.effects = effects
-			this.statCheck = statCheck
+			this.DM = damageMultiplier;
+			this.effects = effects;
+			this.statCheck = statCheck;
 			this.msgID = effectMsg
 		}
 
 		doEffectsOn(target: Critter) {
-			var returnMsgID = this.msgID
+			var returnMsgID = this.msgID;
 			//we need to check for results before we apply the other effects, to ensure the checks in statCheck aren't modified by the effects of the crit.
-			var statCheckResults = this.statCheck.doEffectsOn(target)
+			var statCheckResults = this.statCheck.doEffectsOn(target);
 
-			this.effects.doEffectsOn(target)
+			this.effects.doEffectsOn(target);
 
 			//did statCheck do its effects as well?
 			if(statCheckResults.success === true)
-				returnMsgID = statCheckResults.msgID
+				returnMsgID = statCheckResults.msgID;
 
 			return {DM: this.DM, msgID: returnMsgID}
 		}
@@ -204,18 +204,18 @@ module CriticalEffects {
 	}
 
 	function parseCritLevel(critLevel: CritLevelData): CritType {
-		var stat = critLevel.statCheck
-		var statVal : string = undefined
+		var stat = critLevel.statCheck;
+		var statVal : string = undefined;
 		if(stat.stat != -1)
-			statVal = StatType[stat.stat]
-		var tempStatCheck = new StatCheck(statVal, stat.checkModifier, parseEffects(stat.failureEffect), stat.failureMessage)
-		var retCritLevel = new CritType(critLevel.dmgMultiplier, parseEffects(critLevel.critEffect), tempStatCheck, critLevel.msg)
+			statVal = StatType[stat.stat];
+		var tempStatCheck = new StatCheck(statVal, stat.checkModifier, parseEffects(stat.failureEffect), stat.failureMessage);
+		var retCritLevel = new CritType(critLevel.dmgMultiplier, parseEffects(critLevel.critEffect), tempStatCheck, critLevel.msg);
 		return retCritLevel
 	}
 
 	// takes a List of effect names, gets the appropriate effects from the table and stores it in a Effects object
 	function parseEffects(effects: string[]): Effects {
-		var tempEffects = []
+		var tempEffects = [];
 		for(var i = 0; i < effects.length; i++)
 			tempEffects[i] = critterEffects[effects[i]]
 		return new Effects(tempEffects)
@@ -223,11 +223,11 @@ module CriticalEffects {
 
 	// tries to obtain the CritType object partaining to the critLevel of the region of the critterType in question, returns a default CritType object otherwise
 	export function getCritical(critterKillType: number, region: string, critLevel: number): CritType {
-		var ret: CritType = undefined
+		var ret: CritType = undefined;
 
 		try {
 			// ensure we aren't exceeding the highest crit level existing for this type of critter and region
-			const actualLevel = Math.min(critLevel, critterTable[critterKillType][region].length - 1)
+			const actualLevel = Math.min(critLevel, critterTable[critterKillType][region].length - 1);
 			// get the appropriate CritType from the table
 			ret = critterTable[critterKillType][region][actualLevel]
 		}
@@ -235,7 +235,7 @@ module CriticalEffects {
 		}
 
 		if(ret === undefined) {
-			console.log("error: could not find critical: " + critterKillType + "/" + region + "/" + critLevel)
+			console.log("error: could not find critical: " + critterKillType + "/" + region + "/" + critLevel);
 			ret = defaultCritType(critterKillType, region, critLevel)
 		}
 
@@ -250,7 +250,7 @@ module CriticalEffects {
 
 	export function getCriticalFail(weaponType: string, failLevel: number): EffectsFunction[]
 	{
-		var ret: EffectsFunction[] = undefined
+		var ret: EffectsFunction[] = undefined;
 		try {
 			// get the appropriate Critical Fail from the table
 			ret = criticalFailTable[weaponType][failLevel]
@@ -343,7 +343,7 @@ module CriticalEffects {
 			4: [critFailEffects.destroyWeapon],
 			5: [critFailEffects.destroyWeapon, critterEffects.loseNextTurn, critterEffects.onFire]
 		}
-	}
+	};
 
 	export function temporaryDoCritFail(critFail: EffectsFunction[], target: Critter) {
 		for (var i = 0; i < critFail.length; i++) {

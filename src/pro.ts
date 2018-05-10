@@ -17,33 +17,33 @@ limitations under the License.
 // Functions handling FO2 prototypes and lookups performed on them
 
 function getPROType(pid: number) {
-	const map: { [pid: number]: string } = {0: 'items', 1: 'critters', 2: 'scenery', 3: 'walls', 4: 'tiles', 5: 'misc'}
+	const map: { [pid: number]: string } = {0: 'items', 1: 'critters', 2: 'scenery', 3: 'walls', 4: 'tiles', 5: 'misc'};
 	return map[(pid >> 24) & 0xff]
 }
 
 function loadPRO(pid: number, pidID: number) {
 	if(!proMap)
-		return null
+		return null;
 
 	// use the proto/ .lst files to look up type/pid
-	const type = getPROType(pid)
+	const type = getPROType(pid);
 	const lsts: { [lst: string]: string } = {
 		        "items": "proto/items/items", "critters": "proto/critters/critters",
                 "scenery": "proto/scenery/scenery", "misc": "proto/misc/misc",
-                "walls": "proto/walls/walls"}
-	const id = lsts[type] ? parseInt(getLstId(lsts[type], pidID - 1).split(".")[0], 10) : pidID
+                "walls": "proto/walls/walls"};
+	const id = lsts[type] ? parseInt(getLstId(lsts[type], pidID - 1).split(".")[0], 10) : pidID;
 
 	return proMap[type][id]
 }
 
 function getPROTypeName(type: number) {
 	// singular
-	const map: { [type: number]: string } = {0: 'item', 1: 'critter', 2: 'scenery', 3: 'wall', 4: 'tile', 5: 'misc'}
+	const map: { [type: number]: string } = {0: 'item', 1: 'critter', 2: 'scenery', 3: 'wall', 4: 'tile', 5: 'misc'};
 	return map[type]
 }
 
 function getPROSubTypeName(type: number): string {
-	const map: { [type: number]: string } = {0: 'armor', 1: 'container', 2: 'drug', 3: 'weapon', 4: 'ammo', 5: 'misc', 6: 'key'}
+	const map: { [type: number]: string } = {0: 'armor', 1: 'container', 2: 'drug', 3: 'weapon', 4: 'ammo', 5: 'misc', 6: 'key'};
 	return map[type]
 }
 
@@ -52,10 +52,10 @@ function makePID(type: number, pid: number) {
 }
 
 function getCritterArtPath(frmPID: number) {
-	console.log("FRM PID: " + frmPID)
-	var idx = (frmPID & 0x00000fff)
-	var id1 = (frmPID & 0x0000f000) >> 12
-	var id2 = (frmPID & 0x00ff0000) >> 16
+	console.log("FRM PID: " + frmPID);
+	var idx = (frmPID & 0x00000fff);
+	var id1 = (frmPID & 0x0000f000) >> 12;
+	var id2 = (frmPID & 0x00ff0000) >> 16;
 	//var id3 = (frmPID & 0x70000000) >> 28
 
 	if (id2 == 0x1b || id2 == 0x1d ||
@@ -65,21 +65,21 @@ function getCritterArtPath(frmPID: number) {
 		throw "reindex(?)"
 	}
 
-	var path = "art/critters/" + getLstId("art/critters/critters", idx).split(',')[0].toLowerCase()
+	var path = "art/critters/" + getLstId("art/critters/critters", idx).split(',')[0].toLowerCase();
 
 	if(id1 >= 0x0b)
-		throw "?"
+		throw "?";
 
 	if(id2 >= 0x26 && id2 <= 0x2f)
-		throw ("0x26 and 0x2f")
+		throw ("0x26 and 0x2f");
 	else if(id2 === 0x24)
-		path += "ch"
+		path += "ch";
 	else if(id2 === 0x25)
-		path += "cj"
+		path += "cj";
 	else if(id2 >= 0x30)
-		path += 'r' + String.fromCharCode(id2 + 0x31)
+		path += 'r' + String.fromCharCode(id2 + 0x31);
 	else if(id2 >= 0x14)
-		throw "0x14"
+		throw "0x14";
 	else if (id2 === 0x12) {
 		throw "0x12"
 		/*if(id1 === 0x01)
@@ -90,14 +90,14 @@ function getCritterArtPath(frmPID: number) {
 			path += "as"*/
 	}
 	else if(id2 === 0x0d)
-		throw "0x0d"
+		throw "0x0d";
 	else {
 		if(id2 <= 1 && id1 > 0) {
-			console.log("ID1: " + id1)
+			console.log("ID1: " + id1);
 			path += String.fromCharCode(id1 + 'c'.charCodeAt(0))
 		}
 		else
-			path += 'a'
+			path += 'a';
 		path += String.fromCharCode(id2 + 'a'.charCodeAt(0))
 	}
 
@@ -109,16 +109,16 @@ function lookupInterfaceArt(idx: number) {
 }
 
 function lookupArt(frmPID: number) {
-	var type = getPROType(frmPID)
-	var pidID = frmPID & 0xffff
+	var type = getPROType(frmPID);
+	var pidID = frmPID & 0xffff;
 
     if(type === "critters")
-    	return getCritterArtPath(frmPID)
+    	return getCritterArtPath(frmPID);
 
 	var lsts: { [lst: string]: string } = {
 		        "items": "art/items/items",
-                "scenery": "art/scenery/scenery", "misc": "art/misc/misc"}
-	var path = "art/" + type + "/" + getLstId(lsts[type], pidID).split('.')[0]
+                "scenery": "art/scenery/scenery", "misc": "art/misc/misc"};
+	var path = "art/" + type + "/" + getLstId(lsts[type], pidID).split('.')[0];
 
 	// console.log("LOOKUP ART: " + path)
 	return path.toLowerCase()

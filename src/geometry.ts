@@ -17,9 +17,9 @@ limitations under the License.
 // Geometry-related functions, for the hex and isometric grids
 
 // geometry constants
-const TILE_WIDTH = 80
-const TILE_HEIGHT = 36
-const HEX_GRID_SIZE = 200 // hex grid is 200x200
+const TILE_WIDTH = 80;
+const TILE_HEIGHT = 36;
+const HEX_GRID_SIZE = 200; // hex grid is 200x200
 
 interface Point {
 	x: number;
@@ -48,24 +48,24 @@ function fromTileNum(tile: number): Point {
 }
 
 function tileToScreen(x: number, y: number): Point {
-	x = 99 - x // this algorithm expects x to be reversed
-	var sx = 4752 + (32 * y) - (48 * x)
-	var sy = (24 * y) + (12 * x)
+	x = 99 - x; // this algorithm expects x to be reversed
+	var sx = 4752 + (32 * y) - (48 * x);
+	var sy = (24 * y) + (12 * x);
 
    return {x: sx, y: sy}
 }
 
 function tileFromScreen(x: number, y: number): Point {
-	var off_x = -4800 + x
-	var off_y = y
-	var xx = off_x - off_y * 4 / 3
-	var tx = xx / 64
+	var off_x = -4800 + x;
+	var off_y = y;
+	var xx = off_x - off_y * 4 / 3;
+	var tx = xx / 64;
 
-	if (xx >= 0) tx++
-	tx = -tx
-	var yy = off_y + off_x / 4
-	var ty = yy / 32
-	if (yy < 0) ty--
+	if (xx >= 0) tx++;
+	tx = -tx;
+	var yy = off_y + off_x / 4;
+	var ty = yy / 32;
+	if (yy < 0) ty--;
 
 	return {x: 99 - Math.round(tx), y: Math.round(ty)}
 }
@@ -84,7 +84,7 @@ function centerTile(): Point {
 		                 cameraY + Math.floor((SCREEN_HEIGHT - 16) / 2))*/
 }
 
-var tile_center = {x: 0, y: 0}
+var tile_center = {x: 0, y: 0};
 
 function setCenterTile() {
 	tile_center = centerTile()
@@ -96,29 +96,29 @@ function setCenterTile() {
 
 function tile_coord(tileNum: number): Point {
 	if(tileNum < 0 || tileNum >= 200*200)
-		return null
+		return null;
 
 	//var tile_x = 0x62 // todo: ?
 	//var tile_y = 0x64 // todo: ?
-	setCenterTile()
-	var tile_x = /*199 -*/ tile_center.x
-	var tile_y = tile_center.y
+	setCenterTile();
+	var tile_x = /*199 -*/ tile_center.x;
+	var tile_y = tile_center.y;
 
-	var tile_offx = 272
-	var tile_offy = 182
+	var tile_offx = 272;
+	var tile_offy = 182;
 
-	var a2 = tile_offx // x (normally this would be cameraX aka tile_offx)
-	var a3 = tile_offy // y (normally this would be cameraY aka tile_offy)
+	var a2 = tile_offx; // x (normally this would be cameraX aka tile_offx)
+	var a3 = tile_offy; // y (normally this would be cameraY aka tile_offy)
 
-	var v3 = 200 - 1 - (tileNum % 200)
-	var v4 = Math.floor(tileNum / 200)
+	var v3 = 200 - 1 - (tileNum % 200);
+	var v4 = Math.floor(tileNum / 200);
 
-	var v5 = Math.floor((v3 - tile_x) / -2)
+	var v5 = Math.floor((v3 - tile_x) / -2);
 
-	a2 += 48 * Math.ceil((v3 - tile_x) / 2) // TODO: ceil, round or floor?
-	a3 += 12 * v5
+	a2 += 48 * Math.ceil((v3 - tile_x) / 2); // TODO: ceil, round or floor?
+	a3 += 12 * v5;
 
-	console.log("v3:", v3, "=", v3&1)
+	console.log("v3:", v3, "=", v3&1);
 
 	if ( v3 & 1 )
 	{
@@ -128,14 +128,14 @@ function tile_coord(tileNum: number): Point {
 	  }
 	  else
 	  {
-	    a2 -= 16
+	    a2 -= 16;
 	    a3 += 12
 	  }
 	}
 
-	var v6 = v4 - tile_y
-	a2 += 16 * v6
-	a3 += 12 * v6
+	var v6 = v4 - tile_y;
+	a2 += 16 * v6;
+	a3 += 12 * v6;
 
 	return {x: a2, y: a3}
 }
@@ -179,38 +179,38 @@ function tile_coord(tileNum: number): Point {
 }*/
 
 function hexToScreen(x: number, y: number): Point {
-	var sx = 4816 - ((((x + 1) >> 1) << 5) + ((x >> 1) << 4) - (y << 4))
-	var sy = ((12 * (x >> 1)) + (y * 12)) + 11
+	var sx = 4816 - ((((x + 1) >> 1) << 5) + ((x >> 1) << 4) - (y << 4));
+	var sy = ((12 * (x >> 1)) + (y * 12)) + 11;
 
 	return {x: sx, y: sy}
 }
 
 function hexFromScreen(x: number, y: number): Point {
-	var x0 = 4800
-	var y0 = 0
-	var nx, ny
+	var x0 = 4800;
+	var y0 = 0;
+	var nx, ny;
 
 	if (x - x0 < 0)
-		nx = (x - x0 + 1) / 16 - 1
+		nx = (x - x0 + 1) / 16 - 1;
 	else
-		nx = (x - x0) / 16
+		nx = (x - x0) / 16;
 
 	if (y - y0 < 0)
-		ny = (y - y0 + 1) / 12 - 1
+		ny = (y - y0 + 1) / 12 - 1;
 	else
-		ny = (y - y0) / 12
+		ny = (y - y0) / 12;
 
 	if (Math.abs(nx) % 2 != Math.abs(ny) % 2)
 		nx--;
 
-	var xhBase = x0 + 16 * nx
-	var yhBase = y0 + 12 * ny
+	var xhBase = x0 + 16 * nx;
+	var yhBase = y0 + 12 * ny;
 
-	var hx = (4 * (yhBase - y0) - 3 * (xhBase - x0)) / 96
-	var hy = (yhBase - y0) / 12 - hx / 2
+	var hx = (4 * (yhBase - y0) - 3 * (xhBase - x0)) / 96;
+	var hy = (yhBase - y0) / 12 - hx / 2;
 
-	var dx = x - xhBase
-	var dy = y - yhBase
+	var dx = x - xhBase;
+	var dy = y - yhBase;
 
 	// XXX: Some of these cases fall through, should be inspected.
 
@@ -266,27 +266,27 @@ function hexFromScreen(x: number, y: number): Point {
 }
 
 function hexNeighbors(position: Point): Point[] {
-	const neighbors: Point[] = []
-	var x = position.x
-	var y = position.y
+	const neighbors: Point[] = [];
+	var x = position.x;
+	var y = position.y;
 
 	function n(x: number, y: number) {
 		neighbors.push({x: x, y: y})
 	}
 
 	if(x % 2 === 0) {
-	  n(x-1,y)
-	  n(x-1,y+1)
-	  n(x,y+1)
-	  n(x+1,y+1)
-	  n(x+1,y)
+	  n(x-1,y);
+	  n(x-1,y+1);
+	  n(x,y+1);
+	  n(x+1,y+1);
+	  n(x+1,y);
 	  n(x,y-1)
 	} else {
-	  n(x-1,y-1)
-	  n(x-1,y)
-	  n(x,y+1)
-	  n(x+1,y)
-	  n(x+1,y-1)
+	  n(x-1,y-1);
+	  n(x-1,y);
+	  n(x,y+1);
+	  n(x+1,y);
+	  n(x+1,y-1);
 	  n(x,y-1)
 	}
 
@@ -299,18 +299,18 @@ function hexInDirection(position: Point, dir: number): Point {
 
 function hexInDirectionDistance(position: Point, dir: number, distance: number): Point {
 	if(distance === 0) {
-		console.log("hexInDirectionDistance: distance=0")
+		console.log("hexInDirectionDistance: distance=0");
 		return position
 	}
 
-	var tile = hexInDirection(position, dir)
+	var tile = hexInDirection(position, dir);
 	for(var i = 0; i < distance-1; i++) // repeat for each further distance
 		tile = hexInDirection(tile, dir)
 	return tile
 }
 
 function directionOfDelta(xa: number, ya: number, xb: number, yb: number): number|null {
-	var neighbors = hexNeighbors({x: xa, y: ya})
+	var neighbors = hexNeighbors({x: xa, y: ya});
 	for(var i = 0; i < neighbors.length; i++) {
 		if(neighbors[i].x === xb && neighbors[i].y === yb)
 			return i
@@ -321,8 +321,8 @@ function directionOfDelta(xa: number, ya: number, xb: number, yb: number): numbe
 
 function hexGridToCube(grid: Point): Point3 {
 	//even-q layout -> cube layout
-	var z = grid.y - (grid.x + (grid.x & 1)) / 2
-	var y = -grid.x - z
+	var z = grid.y - (grid.x + (grid.x & 1)) / 2;
+	var y = -grid.x - z;
 	return {x: grid.x, y: y, z: z}
 }
 
@@ -330,8 +330,8 @@ function hexDistance(a: Point, b: Point): number {
 	// we convert our hex coordinates into cube coordinates and then
 	// we only have to see which of the 3 axes is the longest
 
-    var cubeA = hexGridToCube(a)
-    var cubeB = hexGridToCube(b)
+    var cubeA = hexGridToCube(a);
+    var cubeB = hexGridToCube(b);
 	return Math.max(Math.abs(cubeA.x - cubeB.x),
 	                Math.abs(cubeA.y - cubeB.y),
 	                Math.abs(cubeA.z - cubeB.z))
@@ -360,32 +360,32 @@ function hexOppositeDirection(direction: number) {
 
 // The adjacent hex around a nearest to b
 function hexNearestNeighbor(a: Point, b: Point) {
-	var neighbors = hexNeighbors(a)
-	var min = Infinity, minIdx = -1
+	var neighbors = hexNeighbors(a);
+	var min = Infinity, minIdx = -1;
 	for(var i = 0; i < neighbors.length; i++) {
-		var dist = hexDistance(neighbors[i], b)
+		var dist = hexDistance(neighbors[i], b);
 		if(dist < min) {
-			min = dist
+			min = dist;
 			minIdx = i
 		}
 	}
 	if(minIdx === -1)
-		return null
+		return null;
 	return {hex: neighbors[minIdx], distance: min, direction: minIdx}
 }
 
 // Draws a line between a and b, returning the list of coordinates (including b)
 function hexLine(a: Point, b: Point) {
-	var path = []
-	var position = {x: a.x, y: a.y}
+	var path = [];
+	var position = {x: a.x, y: a.y};
 
 	while(true) {
-		path.push(position)
+		path.push(position);
 		if(position.x === b.x && position.y === b.y)
-			return path
-		var nearest = hexNearestNeighbor(position, b)
+			return path;
+		var nearest = hexNearestNeighbor(position, b);
 		if(nearest === null)
-			return null
+			return null;
 		position = nearest.hex
 	}
 
@@ -393,11 +393,11 @@ function hexLine(a: Point, b: Point) {
 }
 
 function hexesInRadius(center: Point, radius: number) {
-	var hexes = []
+	var hexes = [];
 	for(var x = 0; x < 200; x++) {
 		for(var y = 0; y < 200; y++) {
-			if(x === center.x && y === center.y) continue
-			var pos = {x: x, y: y}
+			if(x === center.x && y === center.y) continue;
+			var pos = {x: x, y: y};
 			if(hexDistance(center, pos) <= radius)
 				hexes.push(pos)
 		}
@@ -440,28 +440,28 @@ function tile_in_tile_rect(tile: Point, a: Point, b: Point, c: Point, d: Point) 
 	//b = min x, max y
 	//c = max x, max y
 	//d = max x, min y
-	var error = false
+	var error = false;
 	if(c.x != d.x || a.x != b.x || a.x > c.x)
-		error = true
+		error = true;
 	if(a.y != d.y || b.y != c.y || a.y > c.y)
-		error = true
+		error = true;
 	if(error)
 	{
-		console.log("This is not a rectangle: (" + a.x +"," + a.y +"), (" + b.x +"," + b.y +"), (" + c.x +"," + c.y +"), (" + d.x +"," + d.y +")")
+		console.log("This is not a rectangle: (" + a.x +"," + a.y +"), (" + b.x +"," + b.y +"), (" + c.x +"," + c.y +"), (" + d.x +"," + d.y +")");
 		return false
 	}
-	var inside = true
+	var inside = true;
 	if(tile.x <= a.x || tile.x >= c.x)
-		inside = false
+		inside = false;
 	if(tile.y <= a.y || tile.y >= c.y)
-		inside = false
+		inside = false;
 
 	return inside
 }
 
 function tile_in_tile_rect2(tile: Point, a: Point, c: Point) {
-	var b = {x: a.x, y: c.y}
-	var d = {x: c.x, y: a.y}
+	var b = {x: a.x, y: c.y};
+	var d = {x: c.x, y: a.y};
 	return tile_in_tile_rect(tile, a, b, c, d)
 }
 

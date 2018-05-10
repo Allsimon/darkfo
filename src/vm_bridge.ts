@@ -20,12 +20,12 @@ module ScriptVMBridge {
 	// create a bridged function that calls procedures on scriptObj
 	function bridged(procName: string, argc: number, pushResult: boolean=true) {
 		return function(this: GameScriptVM) {
-			var args = []
+			var args = [];
 			for(var i = 0; i < argc; i++)
 				args.push(this.pop())
-			args.reverse()
+			args.reverse();
 
-			var r = (<any>this.scriptObj)[procName].apply(this.scriptObj, args)
+			var r = (<any>this.scriptObj)[procName].apply(this.scriptObj, args);
             if(pushResult)
                 this.push(r)
 		}
@@ -33,7 +33,7 @@ module ScriptVMBridge {
 
     function varName(this: ScriptVM, value: any): string {
         if(typeof value === "number")
-            return this.intfile.identifiers[value]
+            return this.intfile.identifiers[value];
         return value
     }
 
@@ -173,44 +173,44 @@ module ScriptVMBridge {
             // halt where we are, saving our return address.
             // we will resume when the dialogue system resumes us on dialogue exit
             // usually to run cleanup code.
-            console.log("halting in gsay_end (pc=0x%s)", this.pc.toString(16))
-            this.retStack.push(this.pc + 2)
-            this.halted = true
+            console.log("halting in gsay_end (pc=0x%s)", this.pc.toString(16));
+            this.retStack.push(this.pc + 2);
+            this.halted = true;
             this.scriptObj.gsay_end()
        }
 
        //,0x8121: bridged("giq_option", 5) // TODO: wrap this so that target becomes a function
        // giq_option
        ,0x8121: function() { // giq_option
-       		var reaction = this.pop()
-       		var target = this.pop()
-       		var msgId = this.pop()
-       		var msgList = this.pop()
-       		var iqTest = this.pop()
+       		var reaction = this.pop();
+       		var target = this.pop();
+       		var msgId = this.pop();
+       		var msgList = this.pop();
+       		var iqTest = this.pop();
 
        		// wrap target in a function
        		//var targetFn = () => { this.call() }
        		//console.log("TARGET=%o, proc=%o this=%o", targetFn, this.intfile.proceduresTable[target], this)
-       		var targetProc = this.intfile.proceduresTable[target].name
+       		var targetProc = this.intfile.proceduresTable[target].name;
        		// TODO: do we save the current PC as the return address?
        		// otherwise when end_dialogue is reached, we will have
        		// interrupted to this targetFn, and have no way back
-       		var targetFn = () => { this.call(targetProc) }
+       		var targetFn = () => { this.call(targetProc) };
 
        		this.scriptObj.giq_option(iqTest, msgList, msgId, targetFn, reaction)
        	}
-    }
+    };
 
     // update VM opMap with our bridgeOpMap
-    Object.assign(opMap, bridgeOpMap)
+    Object.assign(opMap, bridgeOpMap);
 
     // define a game-oriented Script VM that has a ScriptProto instance
     export class GameScriptVM extends ScriptVM {
-    	scriptObj = new Scripting.Script()
+    	scriptObj = new Scripting.Script();
 
     	constructor(script: BinaryReader, intfile: IntFile, obj: Obj) {
-    	    super(script, intfile)
-    	    this.scriptObj.self_obj = obj
+    	    super(script, intfile);
+    	    this.scriptObj.self_obj = obj;
 
     	    // patch scriptObj to allow transparent procedure calls
     	    // TODO: maybe we should check if we're interrupting the VM
@@ -221,7 +221,7 @@ module ScriptVMBridge {
 
         mapScript(): any {
             if(this.scriptObj._mapScript)
-                return this.scriptObj._mapScript
+                return this.scriptObj._mapScript;
             return this.scriptObj
         }
     }

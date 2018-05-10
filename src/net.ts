@@ -257,12 +257,12 @@ module Netcode {
 
 		teamNum = 0;
 
-		position = {x: 94, y: 109}
-		orientation = 3
-		gender = "male"
+		position = {x: 94, y: 109};
+		orientation = 3;
+		gender = "male";
 
-		lightRadius = 4
-		lightIntensity = 65536
+		lightRadius = 4;
+		lightIntensity = 65536;
 
 		toString() { return "The Dude, Mk.II" }
 	}

@@ -21,25 +21,25 @@ limitations under the License.
 
 function parseIni(text: string) {
 	// Parse a .ini-style categorized key-value format
-	const ini: { [category: string]: any } = {}
-	const lines = text.split('\n')
-	let category = null
+	const ini: { [category: string]: any } = {};
+	const lines = text.split('\n');
+	let category = null;
 
 	for(var i = 0; i < lines.length; i++) {
-		var line = lines[i].replace(/\s*;.*/, "") // replace comments
+		var line = lines[i].replace(/\s*;.*/, ""); // replace comments
 		if(line.trim() === '') { }
 		else if(line[0] === '[')
-			category = line.trim().slice(1, -1)
+			category = line.trim().slice(1, -1);
 		else {
 			// key=value
-			var kv = line.match(/(.+?)=(.+)/)
+			var kv = line.match(/(.+?)=(.+)/);
 			if(kv === null) { // MAPS.TXT has one of these, so it's not an exception
-				console.log("warning: parseIni: not a key=value line: " + line)
+				console.log("warning: parseIni: not a key=value line: " + line);
 				continue
 			}
-			if(category === null) throw "parseIni: key=value not in category: " + line
+			if(category === null) throw "parseIni: key=value not in category: " + line;
 
-			if(ini[category] === undefined) ini[category] = {}
+			if(ini[category] === undefined) ini[category] = {};
 			ini[category][kv[1]] = kv[2]
 		}
 	}
@@ -101,27 +101,27 @@ function getRandomInt(min: number, max: number) {
 }
 
 function rollSkillCheck(skill: number, modifier: number, isBounded: boolean) {
-	const tempSkill = skill + modifier
+	const tempSkill = skill + modifier;
 	if(isBounded)
-		clamp(0, 95, tempSkill)
+		clamp(0, 95, tempSkill);
 
-	const roll = getRandomInt(0,100)
+	const roll = getRandomInt(0,100);
 	return roll < tempSkill
 }
 
 function rollVsSkill(who: Critter, skill: string, modifier: number=0) {
-	var skillLevel = critterGetSkill(who, skill) + modifier
-	var roll = skillLevel - getRandomInt(1, 100)
+	var skillLevel = critterGetSkill(who, skill) + modifier;
+	var roll = skillLevel - getRandomInt(1, 100);
 
 	if(roll <= 0) { // failure
 		if((-roll)/10 > getRandomInt(1, 100))
-			return 0 // critical failure
+			return 0; // critical failure
 		return 1 // failure
 	}
 	else { // success
-		var critChance = critterGetStat(who, "Critical Chance")
+		var critChance = critterGetStat(who, "Critical Chance");
 		if((roll/10 + critChance) > getRandomInt(1, 100))
-			return 3 // critical success
+			return 3; // critical success
 		return 2 // success
 	}
 }
@@ -135,9 +135,9 @@ function rollIsCritical(roll: number) {
 }
 
 function arrayRemove<T>(array: T[], value: T) {
-	const index = array.indexOf(value)
+	const index = array.indexOf(value);
 	if(index !== -1) {
-		array.splice(index, 1)
+		array.splice(index, 1);
 		return true
 	}
 	return false
@@ -157,11 +157,11 @@ function clamp(min: number, max: number, value: number) {
 
 function getMessage(name: string, id: number): string|null {
 	if(messageFiles[name] !== undefined && messageFiles[name][id] !== undefined)
-		return messageFiles[name][id]
+		return messageFiles[name][id];
 	else {
-		loadMessage(name)
+		loadMessage(name);
 		if(messageFiles[name] !== undefined && messageFiles[name][id] !== undefined)
-			return messageFiles[name][id]
+			return messageFiles[name][id];
 		else return null
 	}
 }
@@ -177,12 +177,12 @@ function pad(n: any, width: number, z?: string) {
 }
 
 class BinaryReader {
-	data: DataView
-	offset: number = 0
-	length: number
+	data: DataView;
+	offset: number = 0;
+	length: number;
 
 	constructor(data: DataView) {
-	    this.data = data
+	    this.data = data;
 	    this.length = data.byteLength
 	}
 

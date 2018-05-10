@@ -116,7 +116,7 @@ const statDependencies: { [name: string]: Stat } = {
 //statDependencies['Perk Rate'] = new Skill(1, Math.pow(2, 31-1), 0, [new Dependency('One', 3)])
 
 //helper
-statDependencies['One'] = new Stat(1, 1, 1, [])
+statDependencies['One'] = new Stat(1, 1, 1, []);
 
 function skillImprovementCost(skillPoints: number): number {
     // Fallout 2 specific, in FO1 it's always 1

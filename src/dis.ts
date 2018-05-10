@@ -21,7 +21,7 @@ limitations under the License.
 const opArgs: { [opcode: number]: (reader: BinaryReader) => number[] } = {
                 0xC001: function(reader: BinaryReader) { return [reader.read32()] } // op_push_d
                ,0x9001: function(reader: BinaryReader) { return [reader.read32()]} // 9001 op_push_d
-               }
+               };
 
 const opNames: { [opcode: number]: string } = {
                0x8004: "op_jmp"
@@ -107,52 +107,52 @@ const opNames: { [opcode: number]: string } = {
               ,0x8036: "op_gte"
               ,0x8037: "op_lt"
               ,0x8038: "op_gt"
-}
+};
 
 function disassemble(intfile: IntFile, reader: BinaryReader): string {
-	var str = ""
+	var str = "";
 	function emit(msg: string, t: number=0) {
 		for(var i = 0; i < t; i++)
 			str += " "
 		str += msg + "\n"
 	}
 	function emitOp(opcode: number, offset: number, args: any[], t: number=0) {
-		var sargs = args.map(x => "0x" + x.toString(16))
-		var p = ""
+		var sargs = args.map(x => "0x" + x.toString(16));
+		var p = "";
 		if(opcode === 0x9001)
-			p = ` ("${intfile.strings[args[0]]}" | ${intfile.identifiers[args[0]]})`
+			p = ` ("${intfile.strings[args[0]]}" | ${intfile.identifiers[args[0]]})`;
 		emit(`0x${offset.toString(16)}: ${opcode.toString(16)} ${opNames[opcode]} ${sargs}` + p, t)
 	}
 
 	function disasm(t: number=0): number {
-		var offset = reader.offset
-		var opcode = reader.read16()
-		var args = opArgs[opcode] ? opArgs[opcode](reader) : []
-		emitOp(opcode, offset, args, t)
+		var offset = reader.offset;
+		var opcode = reader.read16();
+		var args = opArgs[opcode] ? opArgs[opcode](reader) : [];
+		emitOp(opcode, offset, args, t);
 		return opcode
 	}
 
-	reader.seek(0)
+	reader.seek(0);
 
 	// disassemble __start (the code at 00x0-0x2A)
-	emit("__start:")
+	emit("__start:");
 	for(; reader.offset < 0x2A;)
 		disasm(2)
-	emit("")
+	emit("");
 
-	const procOffsets: { [offset: number]: string } = {}
+	const procOffsets: { [offset: number]: string } = {};
 	for(var procName in intfile.procedures) {
-		var proc = intfile.procedures[procName]
+		var proc = intfile.procedures[procName];
 		procOffsets[proc.offset] = procName
 	}
 
 	// disassemble the rest of the code, marking procedures
-	reader.seek(intfile.codeOffset)
-	var t = 0
+	reader.seek(intfile.codeOffset);
+	var t = 0;
 	for(; reader.offset < reader.data.byteLength;) {
 		if(procOffsets[reader.offset] !== undefined) {
-			emit("")
-			emit(procOffsets[reader.offset] + ":")
+			emit("");
+			emit(procOffsets[reader.offset] + ":");
 			t = 2
 		}
 
