@@ -17,7 +17,7 @@ limitations under the License.
 // Floor lighting
 
 module Lighting {
-	// length 15
+    // length 15
     const rightside_up_triangles = [2, 3, 0, 3, 4, 1, 5, 6, 3, 6, 7, 4, 8, 9, 6];
     const upside_down_triangles = [0, 3, 1, 2, 5, 3, 3, 6, 4, 5, 8, 6, 6, 9, 7];
 
@@ -81,96 +81,96 @@ module Lighting {
     ];
 
     // length 40
-	export var vertices = [
-		0x10,
-		-1,
-		-201,
-		0x0,
-		0x30,
-		-2,
-		-2,
-		0x0,
-		0x3C0,
-		0x0,
-		0x0,
-		0x0,
-		0x3E0,
-		0x0C7,
-		-1,
-		0x0,
-		0x400,
-		0x0C6,
-		0x0C6,
-		0x0,
-		0x790,
-		0x0C8,
-		0x0C8,
-		0x0,
-		0x7B0,
-		0x18F,
-		0x0C7,
-		0x0,
-		0x7D0,
-		0x18E,
-		0x18E,
-		0x0,
-		0x0B60,
-		0x190,
-		0x190,
-		0x0,
-		0x0B80,
-		0x257,
-		0x18F,
-		0x0
-	];
+    export var vertices = [
+        0x10,
+        -1,
+        -201,
+        0x0,
+        0x30,
+        -2,
+        -2,
+        0x0,
+        0x3C0,
+        0x0,
+        0x0,
+        0x0,
+        0x3E0,
+        0x0C7,
+        -1,
+        0x0,
+        0x400,
+        0x0C6,
+        0x0C6,
+        0x0,
+        0x790,
+        0x0C8,
+        0x0C8,
+        0x0,
+        0x7B0,
+        0x18F,
+        0x0C7,
+        0x0,
+        0x7D0,
+        0x18E,
+        0x18E,
+        0x0,
+        0x0B60,
+        0x190,
+        0x190,
+        0x0,
+        0x0B80,
+        0x257,
+        0x18F,
+        0x0
+    ];
 
-	// Framebuffer for triangle-lit tiles
-	// XXX: what size should this be?
-	export var intensity_map = new Array(1024*12);
+    // Framebuffer for triangle-lit tiles
+    // XXX: what size should this be?
+    export var intensity_map = new Array(1024*12);
 
-	// zero array
-	for(var i = 0; i < intensity_map.length; i++)
-		intensity_map[i] = 0
+    // zero array
+    for(var i = 0; i < intensity_map.length; i++)
+        intensity_map[i] = 0
 
     const ambient = 0xA000; // ambient light level
 
-	// Color look-up table by light intensity
-	export declare var intensityColorTable: number[];
+    // Color look-up table by light intensity
+    export declare var intensityColorTable: number[];
 
-	export var colorLUT: any = null; // string color integer -> palette index
-	export var colorRGB: any = null; // palette index -> string color integer
+    export var colorLUT: any = null; // string color integer -> palette index
+    export var colorRGB: any = null; // palette index -> string color integer
 
-	function light_get_tile(tilenum: number): number {
-		return Math.min(65536, Lightmap.tile_intensity[tilenum])
-	}
+    function light_get_tile(tilenum: number): number {
+        return Math.min(65536, Lightmap.tile_intensity[tilenum])
+    }
 
-	function init(tilenum: number): boolean {
+    function init(tilenum: number): boolean {
         const start = (tilenum & 1); // even/odd
 
-		for(let i = 0, j = start; i <= 36; i += 4, j += 4) {
+        for(let i = 0, j = start; i <= 36; i += 4, j += 4) {
             const offset = vertices[1 + j];
             const t = tilenum + offset;
             const light = Math.max(light_get_tile(t), ambient);
 
             vertices[3 + i] = light
-		}
+        }
 
-		// do a uniformly-lit check
-		// true means it's triangle lit
+        // do a uniformly-lit check
+        // true means it's triangle lit
 
-		if(vertices[7] !== vertices[3])
-			return true;
+        if(vertices[7] !== vertices[3])
+            return true;
 
         let uni = 1;
         for(let i = 4; i < 36; i += 4) {
-			if(vertices[7 + i] === vertices[3 + i])
-				uni++ //return true
-		}
+            if(vertices[7 + i] === vertices[3 + i])
+                uni++ //return true
+        }
 
-		return (uni !== 9)
-	}
+        return (uni !== 9)
+    }
 
-	function renderTris(isRightsideUp: boolean): void {
+    function renderTris(isRightsideUp: boolean): void {
         const tris = isRightsideUp ? rightside_up_triangles : upside_down_triangles;
         const table = isRightsideUp ? rightside_up_table : upside_down_table;
 
@@ -186,42 +186,42 @@ module Lighting {
             let inc, intensityIdx, baseLight, lightInc;
 
             if(isRightsideUp) { // rightside up triangles
-			    inc = (x - z) / 13 | 0;
-			    lightInc = (y - x) / 32 | 0;
-			    intensityIdx = vertices[4*c];
-			    baseLight = z
-			}
-			else { // upside down triangles
-				inc = (y - x) / 13 | 0;
-				lightInc = (z - x) / 32 | 0;
-				intensityIdx = vertices[4*a];
-				baseLight = x
-			}
+                inc = (x - z) / 13 | 0;
+                lightInc = (y - x) / 32 | 0;
+                intensityIdx = vertices[4*c];
+                baseLight = z
+            }
+            else { // upside down triangles
+                inc = (y - x) / 13 | 0;
+                lightInc = (z - x) / 32 | 0;
+                intensityIdx = vertices[4*a];
+                baseLight = x
+            }
 
-			for(let j = 0; j < 26; j += 2) {
+            for(let j = 0; j < 26; j += 2) {
                 const edx = table[1 + j];
                 intensityIdx += table[j];
 
                 let light = baseLight;
                 for(let k = 0; k < edx; k++) {
-					if(intensityIdx < 0 || intensityIdx >= intensity_map.length)
-						throw "guard";
-					intensity_map[intensityIdx++] = light;
-					light += lightInc
-				}
+                    if(intensityIdx < 0 || intensityIdx >= intensity_map.length)
+                        throw "guard";
+                    intensity_map[intensityIdx++] = light;
+                    light += lightInc
+                }
 
-				baseLight += inc
-			}
-		}
-	}
+                baseLight += inc
+            }
+        }
+    }
 
-	export function initTile(hex: Point): boolean  {
-		return init(toTileNum(hex));
-	}
+    export function initTile(hex: Point): boolean  {
+        return init(toTileNum(hex));
+    }
 
-	export function computeFrame(): number[] {
-		renderTris(true);
-		renderTris(false);
-		return intensity_map
-	}
+    export function computeFrame(): number[] {
+        renderTris(true);
+        renderTris(false);
+        return intensity_map
+    }
 }

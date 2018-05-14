@@ -17,10 +17,10 @@ limitations under the License.
 // Scripting VM for .INT files
 
 function binop(f: (x: any, y: any) => any) {
-	return function(this: ScriptVM) {
+    return function(this: ScriptVM) {
         const rhs = this.pop();
         this.push(f(this.pop(), rhs))
-	}
+    }
 }
 
 const opMap: { [opcode: number]: (this: ScriptVM) => void } = {
@@ -215,92 +215,92 @@ const opMap: { [opcode: number]: (this: ScriptVM) => void } = {
 };
 
 class ScriptVM {
-	script: BinaryReader;
-	intfile: IntFile;
-	pc: number = 0;
-	dataStack: any[] = [];
-	retStack: number[] = [];
-	svarBase: number = 0;
-	dvarBase: number = 0;
-	halted: boolean = false;
+    script: BinaryReader;
+    intfile: IntFile;
+    pc: number = 0;
+    dataStack: any[] = [];
+    retStack: number[] = [];
+    svarBase: number = 0;
+    dvarBase: number = 0;
+    halted: boolean = false;
 
-	constructor(script: BinaryReader, intfile: IntFile) {
-		this.script = script;
-		this.intfile = intfile
-	}
+    constructor(script: BinaryReader, intfile: IntFile) {
+        this.script = script;
+        this.intfile = intfile
+    }
 
-	push(value: any): void {
-		this.dataStack.push(value)
-	}
+    push(value: any): void {
+        this.dataStack.push(value)
+    }
 
-	pop(): any {
-		if(this.dataStack.length === 0)
-			throw "VM data stack underflow";
-		return this.dataStack.pop()
-	}
+    pop(): any {
+        if(this.dataStack.length === 0)
+            throw "VM data stack underflow";
+        return this.dataStack.pop()
+    }
 
-	popAddr(): any {
-		if(this.retStack.length === 0)
-			throw "VM return stack underflow";
-		return this.retStack.pop()
-	}
+    popAddr(): any {
+        if(this.retStack.length === 0)
+            throw "VM return stack underflow";
+        return this.retStack.pop()
+    }
 
-	dis(): string {
+    dis(): string {
         const offset = this.script.offset;
         const disassembly = disassemble(this.intfile, this.script);
         this.script.seek(offset);
-		return disassembly
-	}
+        return disassembly
+    }
 
-	// call a named procedure
-	call(procName: string, args: any[]=[]): any {
+    // call a named procedure
+    call(procName: string, args: any[]=[]): any {
         let proc = this.intfile.procedures[procName];
         // console.log("CALL " + procName + " @ " + proc.offset + " from " + this.scriptObj.scriptName)
-		if(!proc)
-			throw "ScriptVM: unknown procedure " + procName;
+        if(!proc)
+            throw "ScriptVM: unknown procedure " + procName;
 
-		// TODO: which way are args passed on the stack?
-		args.reverse();
-		args.forEach(arg => this.push(arg));
-		this.push(args.length);
+        // TODO: which way are args passed on the stack?
+        args.reverse();
+        args.forEach(arg => this.push(arg));
+        this.push(args.length);
 
-		this.retStack.push(-1); // push return address (TODO: how is this handled?)
+        this.retStack.push(-1); // push return address (TODO: how is this handled?)
 
-		// run procedure code
-		this.pc = proc.offset;
-		this.run();
+        // run procedure code
+        this.pc = proc.offset;
+        this.run();
 
-		return this.pop()
-	}
+        return this.pop()
+    }
 
-	step(): boolean {
-		if(this.halted)
-			return false;
+    step(): boolean {
+        if(this.halted)
+            return false;
 
-		// fetch op
+        // fetch op
         const pc = this.pc;
         this.script.seek(pc);
         const opcode = this.script.read16();
 
         // dispatch based on opMap
-		if(opMap[opcode] !== undefined)
-			opMap[opcode].call(this);
-		else {
-			console.warn("unimplemented opcode %s (pc=%s) in %s", opcode.toString(16), this.pc.toString(16), this.intfile.name);
-			if(Config.engine.doDisasmOnUnimplOp) {
-				console.log("disassembly:");
-				console.log(disassemble(this.intfile, this.script))
-			}
-			return false
-		}
+        if(opMap[opcode] !== undefined)
+            opMap[opcode].call(this);
+        else {
+            console.warn("unimplemented opcode %s (pc=%s) in %s", opcode.toString(16), this.pc.toString(16), this.intfile.name);
+            if(Config.engine.doDisasmOnUnimplOp) {
+                console.log("disassembly:");
+                console.log(disassemble(this.intfile, this.script))
+            }
+            return false
+        }
 
-		if(this.pc === pc) // PC wasn't explicitly set, let's advance it to the current file offset
-			this.pc = this.script.offset;
-		return true
-	}
+        if(this.pc === pc) // PC wasn't explicitly set, let's advance it to the current file offset
+            this.pc = this.script.offset;
+        return true
+    }
 
-	run(): void {
-		this.halted = false;
-		while(this.step()) { }
-	}
+    run(): void {
+        this.halted = false;
+        while(this.step()) { }
+    }
 }

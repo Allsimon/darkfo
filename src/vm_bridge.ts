@@ -17,19 +17,19 @@ limitations under the License.
 // Bridge between Scripting API and the Scripting VM
 
 module ScriptVMBridge {
-	// create a bridged function that calls procedures on scriptObj
-	function bridged(procName: string, argc: number, pushResult: boolean=true) {
-		return function(this: GameScriptVM) {
+    // create a bridged function that calls procedures on scriptObj
+    function bridged(procName: string, argc: number, pushResult: boolean=true) {
+        return function(this: GameScriptVM) {
             const args = [];
             for(let i = 0; i < argc; i++)
-				args.push(this.pop())
-			args.reverse();
+                args.push(this.pop())
+            args.reverse();
 
             const r = (<any>this.scriptObj)[procName].apply(this.scriptObj, args);
             if(pushResult)
                 this.push(r)
-		}
-	}
+        }
+    }
 
     function varName(this: ScriptVM, value: any): string {
         if(typeof value === "number")
@@ -239,18 +239,18 @@ module ScriptVMBridge {
 
     // define a game-oriented Script VM that has a ScriptProto instance
     export class GameScriptVM extends ScriptVM {
-    	scriptObj = new Scripting.Script();
+        scriptObj = new Scripting.Script();
 
-    	constructor(script: BinaryReader, intfile: IntFile, obj: Obj) {
-    	    super(script, intfile);
-    	    this.scriptObj.self_obj = obj;
+        constructor(script: BinaryReader, intfile: IntFile, obj: Obj) {
+            super(script, intfile);
+            this.scriptObj.self_obj = obj;
 
-    	    // patch scriptObj to allow transparent procedure calls
-    	    // TODO: maybe we should check if we're interrupting the VM
-    	    for(const procName in this.intfile.procedures) {
+            // patch scriptObj to allow transparent procedure calls
+            // TODO: maybe we should check if we're interrupting the VM
+            for(const procName in this.intfile.procedures) {
                 (<any>this.scriptObj)[procName] = () => { this.call(procName) }
-    	    }
-    	}
+            }
+        }
 
         mapScript(): any {
             if(this.scriptObj._mapScript)

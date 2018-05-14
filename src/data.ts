@@ -53,27 +53,27 @@ interface AreaEntrance {
 }
 
 interface MapInfo {
-	name: string;
-	lookupName: string;
-	ambientSfx: [string, number][];
-	music: string;
-	randomStartPoints: { elevation: number, tileNum: number }[];
+    name: string;
+    lookupName: string;
+    ambientSfx: [string, number][];
+    music: string;
+    randomStartPoints: { elevation: number, tileNum: number }[];
 }
 
 interface Elevator {
-	buttons: { tileNum: number; mapID: number; level: number; }[];
-	buttonCount: number;
-	labels: number;
-	type: number;
+    buttons: { tileNum: number; mapID: number; level: number; }[];
+    buttonCount: number;
+    labels: number;
+    type: number;
 }
 
 function getElevator(type: number): Elevator {
-	if(!elevatorInfo) {
-		console.log("loading elevator info");
-		elevatorInfo = getFileJSON("lut/elevators.json")
-	}
+    if(!elevatorInfo) {
+        console.log("loading elevator info");
+        elevatorInfo = getFileJSON("lut/elevators.json")
+    }
 
-	return elevatorInfo.elevators[type]
+    return elevatorInfo.elevators[type]
 }
 
 function parseAreas(data: string): AreaMap {
@@ -102,15 +102,15 @@ function parseAreas(data: string): AreaMap {
 
         //console.log(mapArtIdx + " - " + labelArtIdx)
 
-		if(mapArtIdx !== -1)
-			newArea.mapArt = lookupInterfaceArt(mapArtIdx);
-		if(labelArtIdx !== -1)
-			newArea.labelArt = lookupInterfaceArt(labelArtIdx);
+        if(mapArtIdx !== -1)
+            newArea.mapArt = lookupInterfaceArt(mapArtIdx);
+        if(labelArtIdx !== -1)
+            newArea.labelArt = lookupInterfaceArt(labelArtIdx);
 
-		// entrances
-		for(let _key in area) {
-			// entrance_N
-			// e.g.: entrance_0=On,345,230,Destroyed Arroyo Bridge,-1,26719,0
+        // entrances
+        for(let _key in area) {
+            // entrance_N
+            // e.g.: entrance_0=On,345,230,Destroyed Arroyo Bridge,-1,26719,0
 
             let s = _key.split("_");
             if(s[0] === "entrance") {
@@ -128,115 +128,115 @@ function parseAreas(data: string): AreaMap {
                     orientation: parseInt(s[6])
                 };
                 newArea.entrances.push(entrance)
-			}
-		}
+            }
+        }
 
-		out[areaID] = newArea
-	}
+        out[areaID] = newArea
+    }
 
-	return out
+    return out
 }
 
 function areaContainingMap(mapName: string) {
-	for(let area in mapAreas) {
+    for(let area in mapAreas) {
         const entrances = mapAreas[area].entrances;
         for(let i = 0; i < entrances.length; i++) {
-			if(entrances[i].mapName === mapName)
-				return mapAreas[area]
-		}
-	}
-	return null
+            if(entrances[i].mapName === mapName)
+                return mapAreas[area]
+        }
+    }
+    return null
 }
 
 function loadAreas() {
-	return parseAreas(getFileText("data/data/city.txt"))
+    return parseAreas(getFileText("data/data/city.txt"))
 }
 
 function allAreas() {
-	if(mapAreas === null)
-		mapAreas = loadAreas();
+    if(mapAreas === null)
+        mapAreas = loadAreas();
     const areas = [];
     for(let area in mapAreas)
-		areas.push(mapAreas[area])
-	return areas
+        areas.push(mapAreas[area])
+    return areas
 }
 
 function loadMessage(name: string) {
-	name = name.toLowerCase();
+    name = name.toLowerCase();
     const msg = getFileText("data/text/english/game/" + name + ".msg");
     if(messageFiles[name] === undefined)
-		messageFiles[name] = {};
+        messageFiles[name] = {};
 
-	// parse message file
+    // parse message file
     const lines = msg.split(/\r|\n/);
 
     // preprocess and merge lines
-	for(let i = 0; i < lines.length; i++) {
-		// comments/blanks
-		if(lines[i][0] === '#' || lines[i].trim() === '') {
-			lines.splice(i--, 1);
-			continue
-		}
+    for(let i = 0; i < lines.length; i++) {
+        // comments/blanks
+        if(lines[i][0] === '#' || lines[i].trim() === '') {
+            lines.splice(i--, 1);
+            continue
+        }
 
-		// probably a continuation -- merge it with the last line
-		if(lines[i][0] !== '{') {
-			lines[i-1] += lines[i];
-			lines.splice(i--, 1);
-			continue
-		}
-	}
+        // probably a continuation -- merge it with the last line
+        if(lines[i][0] !== '{') {
+            lines[i-1] += lines[i];
+            lines.splice(i--, 1);
+            continue
+        }
+    }
 
-	for(let i = 0; i < lines.length; i++) {
-		// e.g. {100}{}{You have entered a dark cave in the side of a mountain.}
+    for(let i = 0; i < lines.length; i++) {
+        // e.g. {100}{}{You have entered a dark cave in the side of a mountain.}
         const m = lines[i].match(/\{(\d+)\}\{.*\}\{(.*)\}/);
         if(m === null)
-			throw "message parsing: not a valid line: " + lines[i];
-		// HACK: replace unicode replacement character with an apostrophe (because the Web sucks at character encodings)
-		messageFiles[name][m[1]] = m[2].replace(/\ufffd/g, "'")
-	}
+            throw "message parsing: not a valid line: " + lines[i];
+        // HACK: replace unicode replacement character with an apostrophe (because the Web sucks at character encodings)
+        messageFiles[name][m[1]] = m[2].replace(/\ufffd/g, "'")
+    }
 }
 
 
 function loadLst(lst: string): string[] {
-	return getFileText("data/" + lst + ".lst").split('\n')
+    return getFileText("data/" + lst + ".lst").split('\n')
 }
 
 function getLstId(lst: string, id: number): string {
-	if(lstFiles[lst] === undefined)
-		lstFiles[lst] = loadLst(lst);
-	if(lstFiles[lst] === undefined)
-		return null;
+    if(lstFiles[lst] === undefined)
+        lstFiles[lst] = loadLst(lst);
+    if(lstFiles[lst] === undefined)
+        return null;
 
-	return lstFiles[lst][id]
+    return lstFiles[lst][id]
 }
 
 // Map info (data/data/maps.txt)
 
 function parseMapInfo() {
-	if(mapInfo !== null)
-		return;
-	
-	// parse map info from data/data/maps.txt
-	mapInfo = {};
+    if(mapInfo !== null)
+        return;
+
+    // parse map info from data/data/maps.txt
+    mapInfo = {};
     const text = getFileText("data/data/maps.txt");
     const ini: any = parseIni(text);
     for(let category in ini) {
         let id: any = category.match(/Map (\d+)/)[1];
         if(id === null) throw "maps.txt: invalid category: " + category;
-		id = parseInt(id);
+        id = parseInt(id);
 
         const randomStartPoints = [];
         for(let key in ini[category]) {
-			if(key.indexOf("random_start_point_") === 0) {
+            if(key.indexOf("random_start_point_") === 0) {
                 const startPoint = ini[category][key].match(/elev:(\d), tile_num:(\d+)/);
                 if(startPoint === null)
-					throw "invalid random_start_point: " + ini[category][key];
-				randomStartPoints.push({elevation: parseInt(startPoint[1]),
-					                    tileNum: parseInt(startPoint[2])})
-			}
-		}
+                    throw "invalid random_start_point: " + ini[category][key];
+                randomStartPoints.push({elevation: parseInt(startPoint[1]),
+                    tileNum: parseInt(startPoint[2])})
+            }
+        }
 
-		// parse ambient sfx list
+        // parse ambient sfx list
         const ambientSfx: [string, number][] = [];
         const ambient_sfx = ini[category].ambient_sfx;
         if(ambient_sfx) {
@@ -244,57 +244,57 @@ function parseMapInfo() {
             for(let i = 0; i < s.length; i++) {
                 const kv = s[i].trim().split(":");
                 ambientSfx.push([kv[0].toLowerCase(), parseInt(kv[1].toLowerCase())])
-			}
-		}
+            }
+        }
 
-		mapInfo[id] = {name: ini[category].map_name,
-			           lookupName: ini[category].lookup_name,
-			           ambientSfx: ambientSfx,
-			           music: (ini[category].music || "").trim().toLowerCase(),
-			           randomStartPoints: randomStartPoints}
-	}
+        mapInfo[id] = {name: ini[category].map_name,
+            lookupName: ini[category].lookup_name,
+            ambientSfx: ambientSfx,
+            music: (ini[category].music || "").trim().toLowerCase(),
+            randomStartPoints: randomStartPoints}
+    }
 }
 
 function lookupMapFromLookup(lookupName: string) {
-	if(mapInfo === null)
-		parseMapInfo();
+    if(mapInfo === null)
+        parseMapInfo();
 
-	for(let mapID in mapInfo) {
-		if(mapInfo[mapID].lookupName === lookupName)
-			return mapInfo[mapID]
-	}
-	return null
+    for(let mapID in mapInfo) {
+        if(mapInfo[mapID].lookupName === lookupName)
+            return mapInfo[mapID]
+    }
+    return null
 }
 
 function lookupMapNameFromLookup(lookupName: string) {
-	if(mapInfo === null)
-		parseMapInfo();
+    if(mapInfo === null)
+        parseMapInfo();
 
-	for(let mapID in mapInfo) {
-		if(mapInfo[mapID].lookupName.toLowerCase() === lookupName.toLowerCase())
-			return mapInfo[mapID].name
-	}
-	return null
+    for(let mapID in mapInfo) {
+        if(mapInfo[mapID].lookupName.toLowerCase() === lookupName.toLowerCase())
+            return mapInfo[mapID].name
+    }
+    return null
 }
 
 function lookupMapName(mapID: number): string|null {
-	if(mapInfo === null)
-		parseMapInfo();
+    if(mapInfo === null)
+        parseMapInfo();
 
-	return mapInfo[mapID].name || null
+    return mapInfo[mapID].name || null
 }
 
 function getMapInfo(mapName: string) {
-	if(mapInfo === null)
-		parseMapInfo();
+    if(mapInfo === null)
+        parseMapInfo();
 
-	for(let mapID in mapInfo) {
-		if(mapInfo[mapID].name.toLowerCase() === mapName.toLowerCase())
-			return mapInfo[mapID]
-	}
-	return null
+    for(let mapID in mapInfo) {
+        if(mapInfo[mapID].name.toLowerCase() === mapName.toLowerCase())
+            return mapInfo[mapID]
+    }
+    return null
 }
 
 function getCurrentMapInfo() {
-	return getMapInfo(gMap.name)
+    return getMapInfo(gMap.name)
 }

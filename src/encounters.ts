@@ -25,15 +25,15 @@ module Encounters {
         OP = 4,
         INT = 5
     }
-        
+
     type Token = [Tok, string /* Matched text */, number /* length (or number value for Tok.INT tokens) */];
-    
+
     interface IfNode { type: "if", cond: Node }
     interface OpNode { type: "op", op: string, lhs: Node, rhs: Node }
     interface CallNode { type: "call", name: string, arg: Node }
     interface VarNode { type: "var", name: string }
     interface IntNode { type: "int", value: number }
-    
+
     export type Node = IfNode | OpNode | CallNode | VarNode | IntNode;
 
     function tokenizeCond(data: string): Token[] {
@@ -77,7 +77,7 @@ module Encounters {
         function expect(t: Tok) {
             if(tokens[curTok++][0] !== t)
                 throw "expect: expected " + t + ", got " + tokens[curTok-1] +
-                      ", input: " + data
+                ", input: " + data
         }
 
         function next() {
@@ -367,7 +367,7 @@ module Encounters {
                         // use some arbitrary formation
                         critter.position = {x: pos.x, y: pos.y};
                         pos.x--;
-                        
+
                         break
                 }
             })
@@ -433,9 +433,9 @@ module Encounters {
         console.log("groups: %o", groups);
 
         return {mapName: mapName,
-                mapLookupName: mapLookupName,
-                encounter: encounter,
-                encounterType: encounter.enc.type,
-                groups: groups}
+            mapLookupName: mapLookupName,
+            encounter: encounter,
+            encounterType: encounter.enc.type,
+            groups: groups}
     }
 }

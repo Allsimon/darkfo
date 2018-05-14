@@ -39,14 +39,14 @@ module SaveLoad {
         const curMap = gMap.serialize();
 
         return { version: 1
-               , name
-               , timestamp: Date.now()
-               , currentElevation
-               , currentMap: curMap.name
-               , player: {position: player.position, orientation: player.orientation, inventory: player.inventory.map(obj => obj.serialize())}
-               , party: gParty.serialize()
-               , savedMaps: {[curMap.name]: curMap, ...dirtyMapCache}
-               };
+            , name
+            , timestamp: Date.now()
+            , currentElevation
+            , currentMap: curMap.name
+            , player: {position: player.position, orientation: player.orientation, inventory: player.inventory.map(obj => obj.serialize())}
+            , party: gParty.serialize()
+            , savedMaps: {[curMap.name]: curMap, ...dirtyMapCache}
+        };
     }
 
     export function formatSaveDate(save: SaveGame): string {
@@ -65,13 +65,13 @@ module SaveLoad {
         const out: T[] = [];
 
         store.openCursor().onsuccess = function(e) {
-          const cursor = (<any>e.target).result;
-          if (cursor) {
-            out.push(cursor.value);
-            cursor.continue();
-          }
-          else
-              callback(out);
+            const cursor = (<any>e.target).result;
+            if (cursor) {
+                out.push(cursor.value);
+                cursor.continue();
+            }
+            else
+                callback(out);
         };
     }
 
@@ -126,7 +126,7 @@ module SaveLoad {
                 player.position = save.player.position;
                 player.orientation = save.player.orientation;
                 player.inventory = save.player.inventory.map(obj => deserializeObj(obj));
-                
+
                 gParty.deserialize(save.party);
 
                 gMap.changeElevation(save.currentElevation, false);

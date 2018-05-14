@@ -21,132 +21,132 @@ limitations under the License.
 let _lastObjectUID = 0;
 
 function objectGetMoney(obj: Obj): number {
-	const MONEY_PID = 41;
-	for(let i = 0; i < obj.inventory.length; i++) {
-		if(obj.inventory[i].pid === MONEY_PID) {
-			return obj.inventory[i].amount
-		}
-	}
+    const MONEY_PID = 41;
+    for(let i = 0; i < obj.inventory.length; i++) {
+        if(obj.inventory[i].pid === MONEY_PID) {
+            return obj.inventory[i].amount
+        }
+    }
 
-	return 0
+    return 0
 }
 
 function objectSingleAnim(obj: Obj, reversed?: boolean, callback?: () => void): void {
-	if(reversed) obj.frame = imageInfo[obj.art].numFrames - 1;
-	else obj.frame = 0;
-	obj.lastFrameTime = 0;
-	obj.anim = reversed ? "reverse" : "single";
-	obj.animCallback = callback || (() => { obj.anim = null })
+    if(reversed) obj.frame = imageInfo[obj.art].numFrames - 1;
+    else obj.frame = 0;
+    obj.lastFrameTime = 0;
+    obj.anim = reversed ? "reverse" : "single";
+    obj.animCallback = callback || (() => { obj.anim = null })
 }
 
 function canUseObject(obj: Obj, source?: Obj): boolean {
-	if(obj._script !== undefined && obj._script.use_p_proc !== undefined)
-		return true;
-	else if(obj.type === "item" || obj.type === "scenery")
-		if(objectIsDoor(obj) || objectIsStairs(obj) || objectIsLadder(obj))
-			return true;
-		else
-			return (obj.pro.extra.actionFlags & 8) != 0;
-	return false
+    if(obj._script !== undefined && obj._script.use_p_proc !== undefined)
+        return true;
+    else if(obj.type === "item" || obj.type === "scenery")
+        if(objectIsDoor(obj) || objectIsStairs(obj) || objectIsLadder(obj))
+            return true;
+        else
+            return (obj.pro.extra.actionFlags & 8) != 0;
+    return false
 }
 
 function objectIsDoor(obj: Obj): boolean {
-	return (obj.type === "scenery" && obj.pro.extra.subType === 0) // SCENERY_DOOR
+    return (obj.type === "scenery" && obj.pro.extra.subType === 0) // SCENERY_DOOR
 }
 
 function objectIsStairs(obj: Obj): boolean {
-	return (obj.type === "scenery" && obj.pro.extra.subType === 1) // SCENERY_STAIRS
+    return (obj.type === "scenery" && obj.pro.extra.subType === 1) // SCENERY_STAIRS
 }
 
 function objectIsLadder(obj: Obj): boolean {
-	return (obj.type === "scenery" &&
-	       (obj.pro.extra.subType === 3 || // SCENERY_LADDER_BOTTOM
-	       	obj.pro.extra.subType === 4)) // SCENERY_LADDER_TOP
+    return (obj.type === "scenery" &&
+        (obj.pro.extra.subType === 3 || // SCENERY_LADDER_BOTTOM
+            obj.pro.extra.subType === 4)) // SCENERY_LADDER_TOP
 }
 
 function objectIsContainer(obj: Obj): boolean {
-	return (obj.type === "item" && obj.pro.extra.subType === 1) // SUBTYPE_CONTAINER
+    return (obj.type === "item" && obj.pro.extra.subType === 1) // SUBTYPE_CONTAINER
 }
 
 function objectIsWeapon(obj: any): boolean {
-	if(obj === undefined || obj === null)
-		return false;
-	//return obj.type === "item" && obj.pro.extra.subType === 3 // weapon subtype
-	return obj.weapon !== undefined
+    if(obj === undefined || obj === null)
+        return false;
+    //return obj.type === "item" && obj.pro.extra.subType === 3 // weapon subtype
+    return obj.weapon !== undefined
 }
 
 function objectIsExplosive(obj: Obj): boolean {
-	return (obj.pid === 85 /* Plastic Explosives */ || obj.pid === 51 /* Dynamite */)
+    return (obj.pid === 85 /* Plastic Explosives */ || obj.pid === 51 /* Dynamite */)
 }
 
 function objectFindItemIndex(obj: Obj, item: Obj): number {
-	for(let i = 0; i < obj.inventory.length; i++) {
-		if(obj.inventory[i].pid === item.pid)
-			return i
-	}
-	return -1
+    for(let i = 0; i < obj.inventory.length; i++) {
+        if(obj.inventory[i].pid === item.pid)
+            return i
+    }
+    return -1
 }
 
 function cloneItem(item: Obj): Obj { return Object.assign({}, item); }
 
 function objectSwapItem(a: Obj, item: Obj, b: Obj, amount: number) {
-	// swap item from a -> b
-	if(amount === 0) return;
+    // swap item from a -> b
+    if(amount === 0) return;
 
     const idx = objectFindItemIndex(a, item);
     if(idx === -1)
-		throw "item (" + item + ") does not exist in a";
-	if(amount !== undefined && amount < item.amount) {
-		// just deduct amount from a and give amount to b
-		item.amount -= amount;
-		b.addInventoryItem(cloneItem(item), amount)
-	}
-	else { // just swap them
-		a.inventory.splice(idx, 1);
-		b.addInventoryItem(item, amount || 1)
-	}
+        throw "item (" + item + ") does not exist in a";
+    if(amount !== undefined && amount < item.amount) {
+        // just deduct amount from a and give amount to b
+        item.amount -= amount;
+        b.addInventoryItem(cloneItem(item), amount)
+    }
+    else { // just swap them
+        a.inventory.splice(idx, 1);
+        b.addInventoryItem(item, amount || 1)
+    }
 }
 
 function objectGetDamageType(obj: any): string { // TODO: any (where does dmgType go? WeaponObj?)
-	if(obj.dmgType !== undefined)
-		return obj.dmgType;
-	throw "no damage type for obj: " + obj
+    if(obj.dmgType !== undefined)
+        return obj.dmgType;
+    throw "no damage type for obj: " + obj
 }
 
 function objectExplode(obj: Obj, source: Obj, minDmg: number, maxDmg: number): void {
     const damage = maxDmg;
     const explosion = createObjectWithPID(makePID(5 /* misc */, 14 /* Explosion */), -1);
     explosion.position.x = obj.position.x;
-	explosion.position.y = obj.position.y;
-	(<any>obj).dmgType = "explosion"; // TODO: any (WeaponObj?)
+    explosion.position.y = obj.position.y;
+    (<any>obj).dmgType = "explosion"; // TODO: any (WeaponObj?)
 
-	lazyLoadImage(explosion.art, function() {
-		gMap.addObject(explosion);
+    lazyLoadImage(explosion.art, function() {
+        gMap.addObject(explosion);
 
-		console.log("adding explosion");
-		objectSingleAnim(explosion, false, function() {
-			gMap.destroyObject(explosion);
+        console.log("adding explosion");
+        objectSingleAnim(explosion, false, function() {
+            gMap.destroyObject(explosion);
 
-			// damage critters in a radius
+            // damage critters in a radius
             const hexes = hexesInRadius(obj.position, 8 /* explosion radius */); // TODO: radius
-			for(let i = 0; i < hexes.length; i++) {
+            for(let i = 0; i < hexes.length; i++) {
                 const objs = objectsAtPosition(hexes[i]);
                 for(let j = 0; j < objs.length; j++) {
-					if(objs[j].type === "critter")
-						console.log("todo: damage", (<Critter>objs[j]).name);
+                    if(objs[j].type === "critter")
+                        console.log("todo: damage", (<Critter>objs[j]).name);
 
-					Scripting.damage(objs[j], obj, obj /*source*/, damage)
-				}
-			}
+                    Scripting.damage(objs[j], obj, obj /*source*/, damage)
+                }
+            }
 
-			// remove explosive
-			gMap.destroyObject(obj)
-		})
-	})
+            // remove explosive
+            gMap.destroyObject(obj)
+        })
+    })
 }
 
 function useExplosive(obj: Obj, source: Critter): void {
-	if(source.isPlayer !== true) return; // ?
+    if(source.isPlayer !== true) return; // ?
     let mins, secs;
 
     while(true) {
@@ -155,121 +155,121 @@ function useExplosive(obj: Obj, source: Critter): void {
         const s = time.split(':');
         if(s.length !== 2) continue;
 
-		mins = parseInt(s[0]);
-		secs = parseInt(s[1]);
+        mins = parseInt(s[0]);
+        secs = parseInt(s[1]);
 
-		if(isNaN(mins) || isNaN(secs)) continue;
-		break
-	}
+        if(isNaN(mins) || isNaN(secs)) continue;
+        break
+    }
 
-	// TODO: skill rolls
+    // TODO: skill rolls
 
     const ticks = (mins * 60 * 10) + secs * 10; // game ticks until detonation
 
-	console.log("arming explosive for " + ticks + " ticks");
+    console.log("arming explosive for " + ticks + " ticks");
 
-	Scripting.timeEventList.push({ticks: ticks, obj: null, userdata: null, fn: function() {
-		// explode!
-		// TODO: explosion damage calculations
-		objectExplode(obj, source, 10 /* min dmg */, 25 /* max dmg */)
-	}})
+    Scripting.timeEventList.push({ticks: ticks, obj: null, userdata: null, fn: function() {
+            // explode!
+            // TODO: explosion damage calculations
+            objectExplode(obj, source, 10 /* min dmg */, 25 /* max dmg */)
+        }})
 }
 
 // Set the object (door/container) open/closed; returns true if possible, false if not (e.g. locked)
 function setObjectOpen(obj: Obj, open: boolean, loot: boolean=true, signalEvent: boolean=true): boolean {
-	if(!objectIsDoor(obj) && !objectIsContainer(obj))
-		return false;
+    if(!objectIsDoor(obj) && !objectIsContainer(obj))
+        return false;
 
-	// Open/closable doors/containers
-	// TODO: Door/Container subclasses
-	if(obj.locked)
-		return false;
+    // Open/closable doors/containers
+    // TODO: Door/Container subclasses
+    if(obj.locked)
+        return false;
 
-	obj.open = open;
+    obj.open = open;
 
-	if(signalEvent) {
-		Events.emit("objSetOpen", { obj, open });
-		Events.emit(open ? "objOpen" : "objClose", { obj });
-	}
+    if(signalEvent) {
+        Events.emit("objSetOpen", { obj, open });
+        Events.emit(open ? "objOpen" : "objClose", { obj });
+    }
 
-	// Animate open/closed
-	objectSingleAnim(obj, !open, function() {
-		obj.anim = null;
-		if(loot && objectIsContainer(obj) && open) {
-			// loot a container
-			uiLoot(obj);
-		}
-	});
+    // Animate open/closed
+    objectSingleAnim(obj, !open, function() {
+        obj.anim = null;
+        if(loot && objectIsContainer(obj) && open) {
+            // loot a container
+            uiLoot(obj);
+        }
+    });
 
-	return true;
+    return true;
 }
 
 // Toggle the object (door/container) open/closed; returns true if possible, false if not (e.g. locked)
 function toggleObjectOpen(obj: Obj, loot: boolean=true, signalEvent: boolean=true): boolean {
-	return setObjectOpen(obj, !obj.open, loot, signalEvent);
+    return setObjectOpen(obj, !obj.open, loot, signalEvent);
 }
 
 // Returns whether or not the object was used
 function useObject(obj: Obj, source?: Critter, useScript?: boolean): boolean {
-	if(canUseObject(obj, source) === false) {
-		console.log("can't use object");
-		return false
-	}
+    if(canUseObject(obj, source) === false) {
+        console.log("can't use object");
+        return false
+    }
 
-	if(useScript !== false && obj._script && obj._script.use_p_proc !== undefined) {
-		if(source === undefined)
-			source = player;
-		if(Scripting.use(obj, source) === true) {
-			console.log("useObject: overriden");
-			return true // script overrided us
-		}
-	}
-	else if(obj.script !== undefined && !obj._script)
-		console.log("object used has script but is not loaded: " + obj.script);
+    if(useScript !== false && obj._script && obj._script.use_p_proc !== undefined) {
+        if(source === undefined)
+            source = player;
+        if(Scripting.use(obj, source) === true) {
+            console.log("useObject: overriden");
+            return true // script overrided us
+        }
+    }
+    else if(obj.script !== undefined && !obj._script)
+        console.log("object used has script but is not loaded: " + obj.script);
 
-	if(objectIsExplosive(obj)) {
-		useExplosive(obj, source);
-		return true
-	}
+    if(objectIsExplosive(obj)) {
+        useExplosive(obj, source);
+        return true
+    }
 
-	if(objectIsDoor(obj) || objectIsContainer(obj)) {
-		toggleObjectOpen(obj, true, true);
-	}
-	else if(objectIsStairs(obj)) {
-		var destTile = fromTileNum(obj.extra.destination & 0xffff);
+    if(objectIsDoor(obj) || objectIsContainer(obj)) {
+        toggleObjectOpen(obj, true, true);
+    }
+    else if(objectIsStairs(obj)) {
+        var destTile = fromTileNum(obj.extra.destination & 0xffff);
         const destElev = ((obj.extra.destination >> 28) & 0xf) >> 1;
 
         if(obj.extra.destinationMap === -1 && obj.extra.destination !== -1) {
-			// same map, new destination
-			console.log("stairs: tile: " + destTile.x + ", " + destTile.y + ", elev: " + destElev);
+            // same map, new destination
+            console.log("stairs: tile: " + destTile.x + ", " + destTile.y + ", elev: " + destElev);
 
-			player.position = destTile;
-			gMap.changeElevation(destElev)
-		}
-		else {
-			console.log("stairs -> " + obj.extra.destinationMap + " @ " + destTile.x +
-				        ", " + destTile.y  + ", elev: " + destElev);
-			gMap.loadMapByID(obj.extra.destinationMap, destTile, destElev)
-		}
-	}
-	else if(objectIsLadder(obj)) {
+            player.position = destTile;
+            gMap.changeElevation(destElev)
+        }
+        else {
+            console.log("stairs -> " + obj.extra.destinationMap + " @ " + destTile.x +
+                ", " + destTile.y  + ", elev: " + destElev);
+            gMap.loadMapByID(obj.extra.destinationMap, destTile, destElev)
+        }
+    }
+    else if(objectIsLadder(obj)) {
         const isTop = (obj.pro.extra.subType === 4);
         const level = isTop ? currentElevation + 1 : currentElevation - 1;
         var destTile = fromTileNum(obj.extra.destination & 0xffff);
-		// TODO: destination also supposedly contains elevation and map
-		console.log("ladder (" + (isTop ? "top" : "bottom") + " -> level " + level + ")");
-		player.position = destTile;
-		gMap.changeElevation(level)
-	}
-	else
-		objectSingleAnim(obj);
+        // TODO: destination also supposedly contains elevation and map
+        console.log("ladder (" + (isTop ? "top" : "bottom") + " -> level " + level + ")");
+        player.position = destTile;
+        gMap.changeElevation(level)
+    }
+    else
+        objectSingleAnim(obj);
 
-	gMap.updateMap();
-	return true
+    gMap.updateMap();
+    return true
 }
 
 function objectFindIndex(obj: Obj): number {
-	return gMap.getObjects().findIndex(object => object === obj);
+    return gMap.getObjects().findIndex(object => object === obj);
 }
 
 function objectZCompare(a: Obj, b: Obj): number {
@@ -280,28 +280,28 @@ function objectZCompare(a: Obj, b: Obj): number {
     const bX = b.position.x;
 
     if(aY === bY) {
-		if(aX < bX) return -1;
-		else if(aX > bX) return 1;
-		else if(aX === bX) {
-			if(a.type === "wall") return -1;
-			else if(b.type === "wall") return 1;
-			else return 0
-		}
-	}
-	else if(aY < bY) return -1;
-	else if(aY > bY) return 1;
+        if(aX < bX) return -1;
+        else if(aX > bX) return 1;
+        else if(aX === bX) {
+            if(a.type === "wall") return -1;
+            else if(b.type === "wall") return 1;
+            else return 0
+        }
+    }
+    else if(aY < bY) return -1;
+    else if(aY > bY) return 1;
 
-	throw "unreachable"
+    throw "unreachable"
 }
 
 function objectZOrder(obj: Obj, index: number): void {
     const oldIdx = (index !== undefined) ? index : objectFindIndex(obj);
     if(oldIdx === -1) {
-		console.log("objectZOrder: no such object...");
-		return
-	}
+        console.log("objectZOrder: no such object...");
+        return
+    }
 
-	// TOOD: mutable/potentially unsafe usage of getObjects
+    // TOOD: mutable/potentially unsafe usage of getObjects
     const objects = gMap.getObjects();
 
     objects.splice(oldIdx, 1); // remove the object...
@@ -310,28 +310,28 @@ function objectZOrder(obj: Obj, index: number): void {
     for(let i = 0; i < objects.length; i++) {
         const zc = objectZCompare(obj, objects[i]);
         if(zc === -1) {
-			objects.splice(i, 0, obj); // insert at new index
-			inserted = true;
-			break
-		}
-	}
+            objects.splice(i, 0, obj); // insert at new index
+            inserted = true;
+            break
+        }
+    }
 
-	if(!inserted) // couldn't find a spot, just add it in
-		objects.push(obj)
+    if(!inserted) // couldn't find a spot, just add it in
+        objects.push(obj)
 }
 
 function zsort(objects: Obj[]): void {
-	objects.sort(objectZCompare)
+    objects.sort(objectZCompare)
 }
 
 function useElevator(): void {
-	// Player walked into an elevator
-	//
-	// We search for the Elevator Stub (Scenery PID 1293)
-	// in the range of 11. The original engine uses a square
-	// of size 11x11, but we don't do that.
+    // Player walked into an elevator
+    //
+    // We search for the Elevator Stub (Scenery PID 1293)
+    // in the range of 11. The original engine uses a square
+    // of size 11x11, but we don't do that.
 
-	console.log("[elevator]");
+    console.log("[elevator]");
 
     const center = player.position;
     const hexes = hexesInRadius(center, 11);
@@ -341,468 +341,468 @@ function useElevator(): void {
         for(let j = 0; j < objs.length; j++) {
             const obj = objs[j];
             if(obj.type === "scenery" && obj.pidID === 1293) {
-				console.log("elevator stub @ " + hexes[i].x +
-					        ", " + hexes[i].y);
-				elevatorStub = obj;
-				break
-			}
-		}
-	}
+                console.log("elevator stub @ " + hexes[i].x +
+                    ", " + hexes[i].y);
+                elevatorStub = obj;
+                break
+            }
+        }
+    }
 
-	if(elevatorStub === null)
-		throw "couldn't find elevator stub near " + center.x + ", " + center.y;
+    if(elevatorStub === null)
+        throw "couldn't find elevator stub near " + center.x + ", " + center.y;
 
-	console.log("elevator type: " + elevatorStub.extra.type + ", " +
-		        "level: " + elevatorStub.extra.level);
+    console.log("elevator type: " + elevatorStub.extra.type + ", " +
+        "level: " + elevatorStub.extra.level);
 
     let elevator = getElevator(elevatorStub.extra.type);
     if(!elevator)
-		throw "no elevator: " + elevatorStub.extra.type;
-	
-	uiElevator(elevator)
+        throw "no elevator: " + elevatorStub.extra.type;
+
+    uiElevator(elevator)
 }
 
 interface SerializedObj {
-	uid: number;
+    uid: number;
 
-	pid: number;
-	pidID: number;
-	type: string;
-	pro: any;
-	flags: number;
-	art: string;
-	frmPID: number;
-	orientation: number;
-	visible: boolean;
+    pid: number;
+    pidID: number;
+    type: string;
+    pro: any;
+    flags: number;
+    art: string;
+    frmPID: number;
+    orientation: number;
+    visible: boolean;
 
-	extra: any;
+    extra: any;
 
-	script: string;
-	_script: Scripting.SerializedScript|undefined;
+    script: string;
+    _script: Scripting.SerializedScript|undefined;
 
-	name: string;
-	subtype: string;
-	invArt: string;
+    name: string;
+    subtype: string;
+    invArt: string;
 
-	frame: number;
+    frame: number;
 
-	amount: number;
-	position: Point;
-	inventory: SerializedObj[];
+    amount: number;
+    position: Point;
+    inventory: SerializedObj[];
 
-	lightRadius: number;
-	lightIntensity: number;
+    lightRadius: number;
+    lightIntensity: number;
 }
 
 class Obj {
-	uid: number = -1; // Unique ID given to all objects, to distinguish objects with the same PIDs
+    uid: number = -1; // Unique ID given to all objects, to distinguish objects with the same PIDs
 
-	pid: number; // PID (Prototype IDentifier)
-	pidID: number; // ID (not type) part of the PID
-	type: string = null; // TODO: enum // Type of object (critter, item, ...)
-	pro: any = null; // TODO: pro ref // PRO Object
-	flags: number = 0; // Flags from PRO; may be overriden by map objects
-	art: string; // TODO: Path // Art path
-	frmPID: number = null; // Art FID
-	orientation: number = null; // Direction the object is facing
-	visible: boolean = true; // Is the object visible?
-	open: boolean = false; // Is the object open? (Mainly for doors)
-	locked: boolean = false; // Is the object locked? (Mainly for doors)
+    pid: number; // PID (Prototype IDentifier)
+    pidID: number; // ID (not type) part of the PID
+    type: string = null; // TODO: enum // Type of object (critter, item, ...)
+    pro: any = null; // TODO: pro ref // PRO Object
+    flags: number = 0; // Flags from PRO; may be overriden by map objects
+    art: string; // TODO: Path // Art path
+    frmPID: number = null; // Art FID
+    orientation: number = null; // Direction the object is facing
+    visible: boolean = true; // Is the object visible?
+    open: boolean = false; // Is the object open? (Mainly for doors)
+    locked: boolean = false; // Is the object locked? (Mainly for doors)
 
-	extra: any; // TODO
+    extra: any; // TODO
 
-	script: string; // Script name
-	_script: Scripting.Script|undefined; // Live script object
+    script: string; // Script name
+    _script: Scripting.Script|undefined; // Live script object
 
-	// TOOD: unify these
-	name: string; // = "<unnamed obj>"; // Only for some critters at the moment.
-	subtype: string; // Some objects, like items and scenery, have subtypes
-	invArt: string; // Art path used for in-inventory image
+    // TOOD: unify these
+    name: string; // = "<unnamed obj>"; // Only for some critters at the moment.
+    subtype: string; // Some objects, like items and scenery, have subtypes
+    invArt: string; // Art path used for in-inventory image
 
-	anim: any = null; // Current animation (TODO: Is this only a string? It should probably be an enum.)
-	animCallback: any = null; // Callback when current animation is finished playing
-	frame: number = 0; // Animation frame index
-	lastFrameTime: number = 0; // Time since last animation frame played
+    anim: any = null; // Current animation (TODO: Is this only a string? It should probably be an enum.)
+    animCallback: any = null; // Callback when current animation is finished playing
+    frame: number = 0; // Animation frame index
+    lastFrameTime: number = 0; // Time since last animation frame played
 
-	// Frame shift/offset
-	// For static animations, this is just null (effectively just the frame offset as declared in the .FRM),
-	// but for walk/run animations it is the sum of frame offsets between the last action frame
-	// and the current frame.
-	shift: Point = null;
+    // Frame shift/offset
+    // For static animations, this is just null (effectively just the frame offset as declared in the .FRM),
+    // but for walk/run animations it is the sum of frame offsets between the last action frame
+    // and the current frame.
+    shift: Point = null;
 
-	// Outline color, if outlined
-	outline: string|null = null;
+    // Outline color, if outlined
+    outline: string|null = null;
 
-	amount: number = 1; // TODO: Where does this belong? Items and misc seem to have it, or is Money an Item?
-	position: Point = {x: -1, y: -1};
-	inventory: Obj[] = [];
+    amount: number = 1; // TODO: Where does this belong? Items and misc seem to have it, or is Money an Item?
+    position: Point = {x: -1, y: -1};
+    inventory: Obj[] = [];
 
-	// TODO: verify
-	lightRadius: number = 0;
-	lightIntensity: number = 655;
+    // TODO: verify
+    lightRadius: number = 0;
+    lightIntensity: number = 655;
 
-	static fromPID(pid: number, sid?: number): Obj {
-		return Obj.fromPID_(new Obj(), pid, sid)
-	}
+    static fromPID(pid: number, sid?: number): Obj {
+        return Obj.fromPID_(new Obj(), pid, sid)
+    }
 
-	static fromPID_<T extends Obj>(obj: T, pid: number, sid?: number): T {
-		console.log(`fromPID: pid=${pid}, sid=${sid}`);
+    static fromPID_<T extends Obj>(obj: T, pid: number, sid?: number): T {
+        console.log(`fromPID: pid=${pid}, sid=${sid}`);
         const pidType = (pid >> 24) & 0xff;
         const pidID = pid & 0xffff;
 
         const pro: any = loadPRO(pid, pidID); // TODO: any
-		obj.type = getPROTypeName(pidType);
-		obj.pid = pid;
-		obj.pro = pro;
-		obj.flags = obj.pro.flags;
+        obj.type = getPROTypeName(pidType);
+        obj.pid = pid;
+        obj.pro = pro;
+        obj.flags = obj.pro.flags;
 
-		// TODO: Subclasses
-		if(pidType == 0) { // item
-			obj.subtype = getPROSubTypeName(pro.extra.subtype);
-			obj.name = getMessage("pro_item", pro.textID);
+        // TODO: Subclasses
+        if(pidType == 0) { // item
+            obj.subtype = getPROSubTypeName(pro.extra.subtype);
+            obj.name = getMessage("pro_item", pro.textID);
 
             const invPID = pro.extra.invFRM & 0xffff;
             console.log(`invPID: ${invPID}, pid=${pid}`);
-			if(invPID !== 0xffff)
-				obj.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
-		}
+            if(invPID !== 0xffff)
+                obj.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
+        }
 
-		if(obj.pro !== undefined)
-			obj.art = lookupArt(makePID(obj.pro.frmType, obj.pro.frmPID));
-		else
-			obj.art = "art/items/RESERVED";
+        if(obj.pro !== undefined)
+            obj.art = lookupArt(makePID(obj.pro.frmType, obj.pro.frmPID));
+        else
+            obj.art = "art/items/RESERVED";
 
-		obj.init();
-		obj.loadScript(sid);
-		return obj
-	}
+        obj.init();
+        obj.loadScript(sid);
+        return obj
+    }
 
-	static fromMapObject(mobj: any, deserializing: boolean=false): Obj {
-		return Obj.fromMapObject_(new Obj(), mobj, deserializing)
-	}
+    static fromMapObject(mobj: any, deserializing: boolean=false): Obj {
+        return Obj.fromMapObject_(new Obj(), mobj, deserializing)
+    }
 
-	static fromMapObject_<T extends Obj>(obj: T, mobj: any, deserializing: boolean=false): T {
-		// Load an Obj from a map object
-		//console.log("fromMapObject: %o", mobj)
-		if(mobj.uid) obj.uid = mobj.uid;
-		obj.pid = mobj.pid;
-		obj.pidID = mobj.pidID;
-		obj.frmPID = mobj.frmPID;
-		obj.orientation = mobj.orientation;
-		if(obj.type === null)
-			obj.type = mobj.type;
-		obj.art = mobj.art;
-		obj.position = mobj.position;
-		obj.lightRadius = mobj.lightRadius;
-		obj.lightIntensity = mobj.lightIntensity;
-		obj.subtype = mobj.subtype;
-		obj.amount = mobj.amount;
-		obj.inventory = mobj.inventory;
-		obj.script = mobj.script;
-		obj.extra = mobj.extra;
+    static fromMapObject_<T extends Obj>(obj: T, mobj: any, deserializing: boolean=false): T {
+        // Load an Obj from a map object
+        //console.log("fromMapObject: %o", mobj)
+        if(mobj.uid) obj.uid = mobj.uid;
+        obj.pid = mobj.pid;
+        obj.pidID = mobj.pidID;
+        obj.frmPID = mobj.frmPID;
+        obj.orientation = mobj.orientation;
+        if(obj.type === null)
+            obj.type = mobj.type;
+        obj.art = mobj.art;
+        obj.position = mobj.position;
+        obj.lightRadius = mobj.lightRadius;
+        obj.lightIntensity = mobj.lightIntensity;
+        obj.subtype = mobj.subtype;
+        obj.amount = mobj.amount;
+        obj.inventory = mobj.inventory;
+        obj.script = mobj.script;
+        obj.extra = mobj.extra;
 
-		obj.pro = mobj.pro || loadPRO(obj.pid, obj.pidID);
-		obj.flags = mobj.flags; // NOTE: Tested with two objects in Mapper, map object flags seem to inherit PROs already and should thus use them
+        obj.pro = mobj.pro || loadPRO(obj.pid, obj.pidID);
+        obj.flags = mobj.flags; // NOTE: Tested with two objects in Mapper, map object flags seem to inherit PROs already and should thus use them
 
-		// etc? TODO: check this!
+        // etc? TODO: check this!
 
-		obj.init();
+        obj.init();
 
-		if(deserializing) {
-			obj.inventory = mobj.inventory.map((obj: SerializedObj) => deserializeObj(obj));
-			obj.script = mobj.script;
+        if(deserializing) {
+            obj.inventory = mobj.inventory.map((obj: SerializedObj) => deserializeObj(obj));
+            obj.script = mobj.script;
 
-			if(mobj._script)
-				obj._script = Scripting.deserializeScript(mobj._script)
+            if(mobj._script)
+                obj._script = Scripting.deserializeScript(mobj._script)
 
-			// TODO: Should we load the script if mobj._script does not exist?
-		}
-		else if(Config.engine.doLoadScripts)
-			obj.loadScript();
+            // TODO: Should we load the script if mobj._script does not exist?
+        }
+        else if(Config.engine.doLoadScripts)
+            obj.loadScript();
 
-		return obj
-	}
+        return obj
+    }
 
-	init() {
-		if(this.uid === -1)
-			this.uid = _lastObjectUID++;
+    init() {
+        if(this.uid === -1)
+            this.uid = _lastObjectUID++;
 
-		//console.log("init: %o", this)
-		if(this.inventory !== undefined) // containers and critters
-			this.inventory = this.inventory.map(obj => objFromMapObject(obj))
-	}
+        //console.log("init: %o", this)
+        if(this.inventory !== undefined) // containers and critters
+            this.inventory = this.inventory.map(obj => objFromMapObject(obj))
+    }
 
-	loadScript(sid:number=-1): void {
+    loadScript(sid:number=-1): void {
         let scriptName = null;
 
         if(sid >= 0)
-			scriptName = lookupScriptName(sid);
-		else if(this.script)
-			scriptName = this.script;
-		else if(this.pro) {
-			if(this.pro.extra !== undefined && this.pro.extra.scriptID >= 0) {
-				// scriptName = lookupScriptName(this.pro.extra.scriptID & 0xffff)
-				console.warn(`PRO says sid is ${this.pro.extra.scriptID & 0xffff} (${scriptName}), but we're not ascribing it one (test)`)
-			}
-			else if(this.pro.scriptID >= 0) {
-				// scriptName = lookupScriptName(this.pro.scriptID & 0xffff)
-				console.warn(`PRO says sid is ${this.pro.extra.scriptID & 0xffff} (${scriptName}), but we're not ascribing it one (test)`)
-			}
-		}
+            scriptName = lookupScriptName(sid);
+        else if(this.script)
+            scriptName = this.script;
+        else if(this.pro) {
+            if(this.pro.extra !== undefined && this.pro.extra.scriptID >= 0) {
+                // scriptName = lookupScriptName(this.pro.extra.scriptID & 0xffff)
+                console.warn(`PRO says sid is ${this.pro.extra.scriptID & 0xffff} (${scriptName}), but we're not ascribing it one (test)`)
+            }
+            else if(this.pro.scriptID >= 0) {
+                // scriptName = lookupScriptName(this.pro.scriptID & 0xffff)
+                console.warn(`PRO says sid is ${this.pro.extra.scriptID & 0xffff} (${scriptName}), but we're not ascribing it one (test)`)
+            }
+        }
 
-		if(scriptName != null) {
-			if(Config.engine.doLogScriptLoads)
-				console.log("loadScript: loading %s (sid=%d)", scriptName, sid);
-			// console.trace();
+        if(scriptName != null) {
+            if(Config.engine.doLogScriptLoads)
+                console.log("loadScript: loading %s (sid=%d)", scriptName, sid);
+            // console.trace();
             let script = Scripting.loadScript(scriptName);
             if(!script) {
-				console.log("loadScript: load script failed for %s (sid=%d)", scriptName, sid)
-			} else {
-				this.script = scriptName;
-				this._script = script;
-				Scripting.initScript(this._script, this)
-			}
-		}
-	}
+                console.log("loadScript: load script failed for %s (sid=%d)", scriptName, sid)
+            } else {
+                this.script = scriptName;
+                this._script = script;
+                Scripting.initScript(this._script, this)
+            }
+        }
+    }
 
-	enterMap(): void {
-		// TODO: do we updateMap?
-		// TODO: is this correct?
-		// TODO: map objects should be a registry, and this should be activated when objects
-		// are added in. @important
-		
-		if(this._script)
-			Scripting.objectEnterMap(this, currentElevation, gMap.mapID)
-	}
+    enterMap(): void {
+        // TODO: do we updateMap?
+        // TODO: is this correct?
+        // TODO: map objects should be a registry, and this should be activated when objects
+        // are added in. @important
 
-	setAmount(amount: number): Obj {
-		this.amount = amount;
-		return this
-	}
+        if(this._script)
+            Scripting.objectEnterMap(this, currentElevation, gMap.mapID)
+    }
 
-	// Moves the object; returns `true` if successfully moved,
-	// or `false` if interrupted (such as by an exit grid).
-	move(position: Point, curIdx?: number, signalEvents: boolean=true): boolean {
-		this.position = position;
+    setAmount(amount: number): Obj {
+        this.amount = amount;
+        return this
+    }
 
-		if(signalEvents)
-			Events.emit("objMove", { obj: this, position });
+    // Moves the object; returns `true` if successfully moved,
+    // or `false` if interrupted (such as by an exit grid).
+    move(position: Point, curIdx?: number, signalEvents: boolean=true): boolean {
+        this.position = position;
 
-		// rebuild the lightmap
-		if(Config.engine.doFloorLighting)
-			Lightmap.rebuildLight();
-		
-		// give us a new z-order
-		if(Config.engine.doZOrder !== false)
-			objectZOrder(this, curIdx);
+        if(signalEvents)
+            Events.emit("objMove", { obj: this, position });
 
-		return true
-	}
+        // rebuild the lightmap
+        if(Config.engine.doFloorLighting)
+            Lightmap.rebuildLight();
 
-	updateAnim(): void {
-		if(!this.anim) return;
+        // give us a new z-order
+        if(Config.engine.doZOrder !== false)
+            objectZOrder(this, curIdx);
+
+        return true
+    }
+
+    updateAnim(): void {
+        if(!this.anim) return;
         const time = heart.timer.getTime();
         let fps = imageInfo[this.art].fps;
         if(fps === 0) fps = 10; // XXX: ?
 
-		if(time - this.lastFrameTime >= 1000/fps) {
-			if(this.anim === "reverse") this.frame--;
-			else this.frame++;
-			this.lastFrameTime = time;
+        if(time - this.lastFrameTime >= 1000/fps) {
+            if(this.anim === "reverse") this.frame--;
+            else this.frame++;
+            this.lastFrameTime = time;
 
-			if(this.frame === -1 || this.frame === imageInfo[this.art].numFrames) {
-				// animation is done
-				if(this.anim === "reverse") this.frame++;
-				else this.frame--;
-				if(this.animCallback)
-					this.animCallback()
-			}
-		}
-	}
+            if(this.frame === -1 || this.frame === imageInfo[this.art].numFrames) {
+                // animation is done
+                if(this.anim === "reverse") this.frame++;
+                else this.frame--;
+                if(this.animCallback)
+                    this.animCallback()
+            }
+        }
+    }
 
-	blocks(): boolean {
-		// TODO: We could make use of subclass polymorphism to reduce the cases here
-		// NOTE: This may be overloaded in subclasses
+    blocks(): boolean {
+        // TODO: We could make use of subclass polymorphism to reduce the cases here
+        // NOTE: This may be overloaded in subclasses
 
-		if(this.type === "misc") return false;
-		if(!this.pro) return true; // XXX: ?
-		if(this.subtype === "door") return !this.open;
-		if(this.visible === false) return false;
+        if(this.type === "misc") return false;
+        if(!this.pro) return true; // XXX: ?
+        if(this.subtype === "door") return !this.open;
+        if(this.visible === false) return false;
 
-		return !(this.pro.flags & 0x00000010 /* NoBlock */)
-	}
+        return !(this.pro.flags & 0x00000010 /* NoBlock */)
+    }
 
-	inAnim(): boolean {
-		return !!this.animCallback // TODO: find a better way
-	}
+    inAnim(): boolean {
+        return !!this.animCallback // TODO: find a better way
+    }
 
-	// Clear any animation the object has
-	clearAnim(): void {
-		this.frame = 0;
-		this.animCallback = null;
-		this.anim = null;
-		this.shift = null
-	}
+    // Clear any animation the object has
+    clearAnim(): void {
+        this.frame = 0;
+        this.animCallback = null;
+        this.anim = null;
+        this.shift = null
+    }
 
-	// Are two objects approximately (not necessarily strictly) equal?
-	approxEq(obj: Obj) {
-		return (this.pid === obj.pid)
-	}
+    // Are two objects approximately (not necessarily strictly) equal?
+    approxEq(obj: Obj) {
+        return (this.pid === obj.pid)
+    }
 
-	clone(): Obj {
-		// TODO: check this and probably fix it
+    clone(): Obj {
+        // TODO: check this and probably fix it
 
-		// If we have a script, temporarily remove it so that we may clone the
-		// object without the script, and then re-load it for a new instance.
-		if(this._script) {
-			console.log("cloning an object with a script: %o", this);
+        // If we have a script, temporarily remove it so that we may clone the
+        // object without the script, and then re-load it for a new instance.
+        if(this._script) {
+            console.log("cloning an object with a script: %o", this);
             const _script = this._script;
             this._script = null;
             const obj = deepClone(this);
             this._script = _script;
-			obj.loadScript(); // load new copy of the script
-			return obj
+            obj.loadScript(); // load new copy of the script
+            return obj
 
-		}
+        }
 
-		// no script, just deep clone the object
-		return deepClone(this)
-	}
+        // no script, just deep clone the object
+        return deepClone(this)
+    }
 
-	addInventoryItem(item: Obj, count: number=1): void {
-		for(let i = 0; i < this.inventory.length; i++) {
-			if(this.inventory[i].approxEq(item)) {
-				this.inventory[i].amount += count;
-				return
-			}
-		}
+    addInventoryItem(item: Obj, count: number=1): void {
+        for(let i = 0; i < this.inventory.length; i++) {
+            if(this.inventory[i].approxEq(item)) {
+                this.inventory[i].amount += count;
+                return
+            }
+        }
 
-		// no existing item, add new inventory object
-		this.inventory.push(item.clone().setAmount(count))
-	}
+        // no existing item, add new inventory object
+        this.inventory.push(item.clone().setAmount(count))
+    }
 
-	getMessageCategory(): string {
-		const categories: { [category: string]: string } = {
-			    "item": "pro_item",
-		        "critter": "pro_crit",
-	            "scenery": "pro_scen",
-	            "wall": "pro_wall",
-				"misc": "pro_misc"
-		};
-		return categories[this.type];
-	}
+    getMessageCategory(): string {
+        const categories: { [category: string]: string } = {
+            "item": "pro_item",
+            "critter": "pro_crit",
+            "scenery": "pro_scen",
+            "wall": "pro_wall",
+            "misc": "pro_misc"
+        };
+        return categories[this.type];
+    }
 
-	getDescription(): string {
-		if(!this.pro)
-			return null;
+    getDescription(): string {
+        if(!this.pro)
+            return null;
 
-		return getMessage(this.getMessageCategory(), this.pro.textID + 1) || null
-	}
+        return getMessage(this.getMessageCategory(), this.pro.textID + 1) || null
+    }
 
-	// TODO: override this for subclasses
-	serialize(): SerializedObj {
-		return {
-			uid: this.uid,
-			pid: this.pid,
-			pidID: this.pidID,
-			type: this.type,
-			pro: this.pro, // XXX: if pro changes in the future, this should be cloned
-			flags: this.flags,
-			art: this.art,
-			frmPID: this.frmPID,
-			orientation: this.orientation,
-			visible: this.visible,
-			extra: this.extra,
-			script: this.script,
-			_script: this._script ? this._script._serialize() : null,
-			name: this.name,
-			subtype: this.subtype,
-			invArt: this.invArt,
-			frame: this.frame,
-			amount: this.amount,
-			position: {x: this.position.x, y: this.position.y},
-			inventory: this.inventory.map(obj => obj.serialize()),
-			lightRadius: this.lightRadius,
-			lightIntensity: this.lightIntensity
-		}
-	}
+    // TODO: override this for subclasses
+    serialize(): SerializedObj {
+        return {
+            uid: this.uid,
+            pid: this.pid,
+            pidID: this.pidID,
+            type: this.type,
+            pro: this.pro, // XXX: if pro changes in the future, this should be cloned
+            flags: this.flags,
+            art: this.art,
+            frmPID: this.frmPID,
+            orientation: this.orientation,
+            visible: this.visible,
+            extra: this.extra,
+            script: this.script,
+            _script: this._script ? this._script._serialize() : null,
+            name: this.name,
+            subtype: this.subtype,
+            invArt: this.invArt,
+            frame: this.frame,
+            amount: this.amount,
+            position: {x: this.position.x, y: this.position.y},
+            inventory: this.inventory.map(obj => obj.serialize()),
+            lightRadius: this.lightRadius,
+            lightIntensity: this.lightIntensity
+        }
+    }
 }
 
 class Item extends Obj {
-	type = "item";
+    type = "item";
 
-	static fromPID(pid: number, sid?: number): Item { return Obj.fromPID_(new Item(), pid, sid) }
+    static fromPID(pid: number, sid?: number): Item { return Obj.fromPID_(new Item(), pid, sid) }
 
-	static fromMapObject(mobj: any, deserializing: boolean=false): Item {
-		return Obj.fromMapObject_(new Item(), mobj, deserializing)
-	}
+    static fromMapObject(mobj: any, deserializing: boolean=false): Item {
+        return Obj.fromMapObject_(new Item(), mobj, deserializing)
+    }
 
-	init() {
-		super.init();
+    init() {
+        super.init();
 
-		// load item inventory art
-		if(this.pro === null)
-			return;
-		this.name = getMessage("pro_item", this.pro.textID);
+        // load item inventory art
+        if(this.pro === null)
+            return;
+        this.name = getMessage("pro_item", this.pro.textID);
 
         const invPID = this.pro.extra.invFRM & 0xffff;
         if(invPID !== 0xffff)
-			this.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
-	}
+            this.invArt = "art/inven/" + getLstId("art/inven/inven", invPID).split('.')[0]
+    }
 }
 
 class WeaponObj extends Item {
-	weapon?: Weapon = null;
+    weapon?: Weapon = null;
 
-	static fromPID(pid: number, sid?: number): WeaponObj { return Obj.fromPID_(new WeaponObj(), pid, sid) }
+    static fromPID(pid: number, sid?: number): WeaponObj { return Obj.fromPID_(new WeaponObj(), pid, sid) }
 
-	static fromMapObject(mobj: any, deserializing: boolean=false): WeaponObj {
-		return Obj.fromMapObject_(new WeaponObj(), mobj, deserializing)
-	}
+    static fromMapObject(mobj: any, deserializing: boolean=false): WeaponObj {
+        return Obj.fromMapObject_(new WeaponObj(), mobj, deserializing)
+    }
 
-	init() {
-		super.init();
-		// TODO: Weapon initialization
-		//console.log("Weapon init")
-		this.weapon = new Weapon(this)
-	}
+    init() {
+        super.init();
+        // TODO: Weapon initialization
+        //console.log("Weapon init")
+        this.weapon = new Weapon(this)
+    }
 }
 
 class Scenery extends Obj {
-	type = "scenery";
+    type = "scenery";
 
-	static fromPID(pid: number, sid?: number): Scenery { return Obj.fromPID_(new Scenery(), pid, sid) }
+    static fromPID(pid: number, sid?: number): Scenery { return Obj.fromPID_(new Scenery(), pid, sid) }
 
-	static fromMapObject(mobj: any, deserializing: boolean=false): Scenery {
-		return Obj.fromMapObject_(new Scenery(), mobj, deserializing)
-	}
+    static fromMapObject(mobj: any, deserializing: boolean=false): Scenery {
+        return Obj.fromMapObject_(new Scenery(), mobj, deserializing)
+    }
 
-	init() {
-		super.init();
-		//console.log("Scenery init")
+    init() {
+        super.init();
+        //console.log("Scenery init")
 
-		if(!this.pro)
-			return;
-		
-		const subtypeMap: { [subtype: number]: string } = {
-			0: "door", 1: "stairs", 2: "elevator", 3: "ladder",
-			4: "ladder", 5: "generic"
-		};
-		this.subtype = subtypeMap[this.pro.extra.subType];
-	}
+        if(!this.pro)
+            return;
+
+        const subtypeMap: { [subtype: number]: string } = {
+            0: "door", 1: "stairs", 2: "elevator", 3: "ladder",
+            4: "ladder", 5: "generic"
+        };
+        this.subtype = subtypeMap[this.pro.extra.subType];
+    }
 }
 
 class Door extends Scenery {
-	static fromPID(pid: number, sid?: number): Door { return Obj.fromPID_(new Door(), pid, sid) }
+    static fromPID(pid: number, sid?: number): Door { return Obj.fromPID_(new Door(), pid, sid) }
 
-	static fromMapObject(mobj: any, deserializing: boolean=false): Door {
-		return Obj.fromMapObject_(new Door(), mobj, deserializing)
-	}
+    static fromMapObject(mobj: any, deserializing: boolean=false): Door {
+        return Obj.fromMapObject_(new Door(), mobj, deserializing)
+    }
 
-	init() {
-		super.init()
-		//console.log("Door init")
-	}
+    init() {
+        super.init()
+        //console.log("Door init")
+    }
 }
 
 
@@ -810,23 +810,23 @@ class Door extends Scenery {
 function createObjectWithPID(pid: number, sid?: number) {
     const pidType = (pid >> 24) & 0xff;
     if(pidType == 1) // critter
-		return Critter.fromPID(pid, sid);
-	else if(pidType == 0) { // item
-		var pro = loadPRO(pid, pid & 0xffff);
-		if(pro && pro.extra && pro.extra.subType == 3)
-			return WeaponObj.fromPID(pid, sid);
-		else
-			return Item.fromPID(pid, sid)
-	}
-	else if(pidType == 2) { // scenery
-		var pro = loadPRO(pid, pid & 0xffff);
-		if(pro && pro.extra && pro.extra.subType == 0)
-			return Door.fromPID(pid, sid);
-		else
-			return Scenery.fromPID(pid, sid)
-	}
-	else
-		return Obj.fromPID(pid, sid)
+        return Critter.fromPID(pid, sid);
+    else if(pidType == 0) { // item
+        var pro = loadPRO(pid, pid & 0xffff);
+        if(pro && pro.extra && pro.extra.subType == 3)
+            return WeaponObj.fromPID(pid, sid);
+        else
+            return Item.fromPID(pid, sid)
+    }
+    else if(pidType == 2) { // scenery
+        var pro = loadPRO(pid, pid & 0xffff);
+        if(pro && pro.extra && pro.extra.subType == 0)
+            return Door.fromPID(pid, sid);
+        else
+            return Scenery.fromPID(pid, sid)
+    }
+    else
+        return Obj.fromPID(pid, sid)
 }
 
 function objFromMapObject(mobj: any, deserializing: boolean=false) {
@@ -834,25 +834,25 @@ function objFromMapObject(mobj: any, deserializing: boolean=false) {
     const pidType = (pid >> 24) & 0xff;
 
     if(pidType == 1) // critter
-		return Critter.fromMapObject(mobj, deserializing);
-	else if(pidType == 0) { // item
-		var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
-		if(pro && pro.extra && pro.extra.subType == 3)
-			return WeaponObj.fromMapObject(mobj, deserializing);
-		else
-			return Item.fromMapObject(mobj, deserializing)
-	}
-	else if(pidType == 2) { // scenery
-		var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
-		if(pro && pro.extra && pro.extra.subType == 0)
-			return Door.fromMapObject(mobj, deserializing);
-		else
-			return Scenery.fromMapObject(mobj, deserializing)
-	}
-	else
-		return Obj.fromMapObject(mobj, deserializing)
+        return Critter.fromMapObject(mobj, deserializing);
+    else if(pidType == 0) { // item
+        var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
+        if(pro && pro.extra && pro.extra.subType == 3)
+            return WeaponObj.fromMapObject(mobj, deserializing);
+        else
+            return Item.fromMapObject(mobj, deserializing)
+    }
+    else if(pidType == 2) { // scenery
+        var pro = mobj.pro || loadPRO(pid, pid & 0xffff);
+        if(pro && pro.extra && pro.extra.subType == 0)
+            return Door.fromMapObject(mobj, deserializing);
+        else
+            return Scenery.fromMapObject(mobj, deserializing)
+    }
+    else
+        return Obj.fromMapObject(mobj, deserializing)
 }
 
 function deserializeObj(mobj: SerializedObj) {
-	return objFromMapObject(mobj, true)
+    return objFromMapObject(mobj, true)
 }

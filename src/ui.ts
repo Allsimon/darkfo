@@ -286,10 +286,10 @@ module Ui {
         }
 
         skilldexWindow = new WindowFrame("art/intrface/skldxbox.png",
-                                         { x: Config.ui.screenWidth - 185 - 5, y: Config.ui.screenHeight - 368, w: 185, h: 368 })
-                             .add(new Label(65, 13, "Skilldex"))
-                             .add(new Label(25, 85, "Lockpick").onClick(useSkill(Skills.Lockpick)))
-                             .add(new Label(25, 300, "Repair").onClick(useSkill(Skills.Repair)));
+            { x: Config.ui.screenWidth - 185 - 5, y: Config.ui.screenHeight - 368, w: 185, h: 368 })
+            .add(new Label(65, 13, "Skilldex"))
+            .add(new Label(25, 85, "Lockpick").onClick(useSkill(Skills.Lockpick)))
+            .add(new Label(25, 300, "Repair").onClick(useSkill(Skills.Repair)));
     }
 
     function initCharacterScreen() {
@@ -298,20 +298,20 @@ module Ui {
         skillList.css({fontSize: "0.75em"});
 
         characterWindow = new WindowFrame("art/intrface/edtredt.png",
-                                         { x: Config.ui.screenWidth/2 - 640/2, y: Config.ui.screenHeight/2 - 480/2, w: 640, h: 480 })
-                              .add(new SmallButton(455, 454).onClick(() => { })).add(new Label(455+18, 454, "Done"))
-                              .add(new SmallButton(552, 454).onClick(() => { characterWindow.close(); })).add(new Label(552+18, 454, "Cancel"))
-                              .add(new Label(22,  6, "Name"))
-                              .add(new Label(160, 6, "Age"))
-                              .add(new Label(242, 6, "Gender"))
-                              .add(new Label(33, 280, `Level: ${critterGetStat(player, "Level")}`).css({fontSize: "0.75em", color: "#00FF00"}))
-                              .add(new Label(33, 292, `Exp: ${critterGetStat(player, "Experience")}`).css({fontSize: "0.75em", color: "#00FF00"}))
-                              .add(new Label(380, 5, "Skill"))
-                              .add(new Label(399, 233, "Skill Points"))
-                              .add(new Label(194, 45, `Hit Points ${critterGetStat(player, "HP")}/${critterGetStat(player, "Max HP")}`)
-                                       .css({fontSize: "0.75em", color: "#00FF00"}))
-                              .add(skillList)
-                              .show();
+            { x: Config.ui.screenWidth/2 - 640/2, y: Config.ui.screenHeight/2 - 480/2, w: 640, h: 480 })
+            .add(new SmallButton(455, 454).onClick(() => { })).add(new Label(455+18, 454, "Done"))
+            .add(new SmallButton(552, 454).onClick(() => { characterWindow.close(); })).add(new Label(552+18, 454, "Cancel"))
+            .add(new Label(22,  6, "Name"))
+            .add(new Label(160, 6, "Age"))
+            .add(new Label(242, 6, "Gender"))
+            .add(new Label(33, 280, `Level: ${critterGetStat(player, "Level")}`).css({fontSize: "0.75em", color: "#00FF00"}))
+            .add(new Label(33, 292, `Exp: ${critterGetStat(player, "Experience")}`).css({fontSize: "0.75em", color: "#00FF00"}))
+            .add(new Label(380, 5, "Skill"))
+            .add(new Label(399, 233, "Skill Points"))
+            .add(new Label(194, 45, `Hit Points ${critterGetStat(player, "HP")}/${critterGetStat(player, "Max HP")}`)
+                .css({fontSize: "0.75em", color: "#00FF00"}))
+            .add(skillList)
+            .show();
 
         // TODO: Move these constants to their proper place
 
@@ -635,8 +635,8 @@ function uiContextMenu(obj: Obj, evt: any) {
 
     function button(obj: Obj, action: string, onclick: () => void) {
         return makeEl("img", { id: "context_" + action,
-                               classes: ["itemContextMenuButton"],
-                               click: () => { onclick(); uiHideContextMenu(); }
+            classes: ["itemContextMenuButton"],
+            click: () => { onclick(); uiHideContextMenu(); }
         });
     }
 
@@ -812,8 +812,8 @@ function uiInventoryScreen() {
             const invObj = objects[i];
             // 90x60 // 70x40
             const img = makeEl("img", { src: invObj.invArt+'.png',
-                                        attrs: { width: 72, height: 60, title: invObj.name },
-                                        click: clickCallback ? (e: MouseEvent) => { clickCallback(invObj, e); } : undefined });
+                attrs: { width: 72, height: 60, title: invObj.name },
+                click: clickCallback ? (e: MouseEvent) => { clickCallback(invObj, e); } : undefined });
             $el.appendChild(img);
             $el.insertAdjacentHTML("beforeend", "x" + invObj.amount);
             makeDraggable(img, "i" + i, () => { uiInventoryScreen(); });
@@ -845,11 +845,11 @@ function uiInventoryScreen() {
 
     function makeContextButton(obj: Obj, slot: keyof Player, action: "cancel"|"use"|"drop") {
         return makeEl("img", { id: "context_" + action,
-                               classes: ["itemContextMenuButton"],
-                               click: () => {
-                                    itemAction(obj, slot, action);
-                                    hidev($id("itemContextMenu"));
-                               }
+            classes: ["itemContextMenuButton"],
+            click: () => {
+                itemAction(obj, slot, action);
+                hidev($id("itemContextMenu"));
+            }
         });
     }
 
@@ -1354,7 +1354,7 @@ function uiWorldMapShowArea(area: Area) {
             // hotspot click -- travel to relevant map
             const mapName = lookupMapNameFromLookup(entrance.mapLookupName);
             console.log("hotspot -> " + mapName + " (via " +
-                        entrance.mapLookupName + ")");
+                entrance.mapLookupName + ")");
             gMap.loadMap(mapName);
             uiCloseWorldMap()
         };
@@ -1438,13 +1438,13 @@ function uiElevator(elevator: Elevator) {
             if(mapID !== gMap.mapID) {
                 // different map
                 console.log("elevator -> map " + mapID + ", level " + level + " @ " +
-                            position.x + ", " + position.y);
+                    position.x + ", " + position.y);
                 gMap.loadMapByID(mapID, position, level)
             }
             else if(level !== currentElevation) {
                 // same map, different elevation
                 console.log("elevator -> level " + level + " @ " +
-                            position.x + ", " + position.y);
+                    position.x + ", " + position.y);
                 player.move(position);
                 gMap.changeElevation(level, true)
             }
@@ -1501,32 +1501,32 @@ function uiSaveLoad(isSave: boolean): void {
     const saveInfo = new Ui.Label(404, 262, "", "#00FF00");
     // TODO: CSSBoundingBox's width and height should be optional (and default to `auto`), then Label can accept one
     Object.assign(saveInfo.elem.style, {
-         width: "154px", height: "33px",
+        width: "154px", height: "33px",
         fontSize: "8pt",
         overflow: "hidden",
     });
 
     const saveLoadWindow = new Ui.WindowFrame("art/intrface/lsgame.png", { x: 80, y: 20, w: 640, h: 480 })
-                                 .add(new Ui.Widget("art/intrface/lscover.png", { x: 340, y: 40, w: 275, h: 173 }))
-                                 .add(new Ui.Label(50, 26, isSave ? "Save Game" : "Load Game"))
-                                 .add(new Ui.SmallButton(391, 349).onClick(selected)).add(new Ui.Label(391+18, 349, "Done"))
-                                 .add(new Ui.SmallButton(495, 349).onClick(done)).add(new Ui.Label(495+18, 349, "Cancel"))
-                                 .add(saveInfo)
-                                 .add(saveList)
-                                 .show();
+        .add(new Ui.Widget("art/intrface/lscover.png", { x: 340, y: 40, w: 275, h: 173 }))
+        .add(new Ui.Label(50, 26, isSave ? "Save Game" : "Load Game"))
+        .add(new Ui.SmallButton(391, 349).onClick(selected)).add(new Ui.Label(391+18, 349, "Done"))
+        .add(new Ui.SmallButton(495, 349).onClick(done)).add(new Ui.Label(495+18, 349, "Cancel"))
+        .add(saveInfo)
+        .add(saveList)
+        .show();
 
     if(isSave) {
         saveList.select(saveList.addItem({ text: "<New Slot>", id: -1, onSelected: () => {
-            saveInfo.setText("New save");
-        } }));
+                saveInfo.setText("New save");
+            } }));
     }
 
     // List saves, and write them to the UI list
     SaveLoad.saveList((saves: SaveLoad.SaveGame[]) => {
         for(const save of saves) {
             saveList.addItem({ text: save.name, id: save.id, onSelected: () => {
-                saveInfo.setText(SaveLoad.formatSaveDate(save) + "<br>" + save.currentMap);
-            } });
+                    saveInfo.setText(SaveLoad.formatSaveDate(save) + "<br>" + save.currentMap);
+                } });
         }
     });
 
