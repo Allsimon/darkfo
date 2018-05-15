@@ -1,7 +1,12 @@
 *.json
 !tsconfig.json
+!lut/*.json
+!maps/nullmap.json
+!maps/nullmap.images.json
 *.images.txt
 *.map
 *.pyc
 data/
 art/
+.idea/
+js/
