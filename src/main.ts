@@ -401,12 +401,11 @@ function playerUse() {
                     throw "subtraction issue: has AP: " + player.AP.getAvailableMoveAP() +
                     " needs AP:"+player.path.path.length+" and maxDist was:"+maxWalkingDist;
             }
+        } else {
+            // Walking out of combat
+            if (!player.walkTo(mouseHex, Config.engine.doAlwaysRun))
+                console.log("Cannot walk there");
         }
-
-        // Walking out of combat
-        if(!player.walkTo(mouseHex, Config.engine.doAlwaysRun))
-            console.log("Cannot walk there");
-
         return;
     }
 
