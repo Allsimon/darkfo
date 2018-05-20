@@ -29,13 +29,13 @@ interface HeartImage {
     getHeight(): number;
 }
 
-let gMap: GameMap | null = null;
+let gMap: GameMap|null = null;
 const images: { [name: string]: HeartImage } = {}; // Image cache
 let imageInfo: any = null; // Metadata about images (Number of frames, FPS, etc)
 let currentElevation = 0; // current map elevation
-let hexOverlay: HeartImage | null = null;
-let tempCanvas: HTMLCanvasElement | null = null; // temporary canvas used for detecting single pixels
-let tempCanvasCtx: CanvasRenderingContext2D | null = null; // and the context for it
+let hexOverlay: HeartImage|null = null;
+let tempCanvas: HTMLCanvasElement|null = null; // temporary canvas used for detecting single pixels
+let tempCanvasCtx: CanvasRenderingContext2D|null = null; // and the context for it
 
 // position of viewport camera (will be overriden by map starts or scripts)
 let cameraX: number = 3580;
@@ -46,7 +46,7 @@ const SCREEN_HEIGHT: number = Config.ui.screenHeight;
 
 let gameTickTime: number = 0; // in Fallout 2 ticks (elapsed seconds * 10)
 let lastGameTick: number = 0; // real time of the last game tick
-let combat: Combat | null = null; // combat object
+let combat: Combat|null = null; // combat object
 let inCombat: boolean = false; // are we currently in combat?
 let gameHasFocus: boolean = false; // do we have input focus?
 let lastMousePickTime: number = 0; // time when we last checked what's under the mouse cursor
@@ -65,7 +65,7 @@ let isWaitingOnRemote: boolean = false; // are we waiting on the remote server t
 let isInitializing: boolean = true; // are we initializing the engine?
 let loadingAssetsLoaded: number = 0; // how many images we've loaded
 let loadingAssetsTotal: number = 0; // out of this total
-let loadingLoadedCallback: (() => void) | null = null; // loaded callback
+let loadingLoadedCallback: (() => void)|null = null; // loaded callback
 let lazyAssetLoadingQueue: { [name: string]: ((img: any) => void)[] } = {}; // set of lazily-loaded assets being loaded
 
 interface FloatMessage {
@@ -78,10 +78,10 @@ interface FloatMessage {
 const floatMessages: FloatMessage[] = [];
 
 // the global player object
-let player: Player | null = null;
+let player: Player|null = null;
 
-let renderer: Renderer | null = null;
-let audioEngine: AudioEngine | null = null;
+let renderer: Renderer|null = null;
+let audioEngine: AudioEngine|null = null;
 
 let $fpsOverlay: HTMLElement|null = null;
 

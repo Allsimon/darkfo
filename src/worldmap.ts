@@ -79,7 +79,7 @@ module Worldmap {
     }
 
     export interface EncounterRef {
-        type: "ambush" | "fighting";
+        type: "ambush"|"fighting";
         target?: "player";
         party: EncounterParty;
         firstParty?: EncounterParty;
@@ -95,7 +95,7 @@ module Worldmap {
     export interface EncounterGroup {
         critters: EncounterCritter[];
         position: EncounterPosition;
-        target?: "player" | number;
+        target?: "player"|number;
     }
 
     interface Range {

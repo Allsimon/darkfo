@@ -16,13 +16,13 @@ limitations under the License.
 
 "use strict";
 
-let mapAreas: AreaMap | null = null;
+let mapAreas: AreaMap|null = null;
 
 let proMap: any = null; // TODO: type
 const lstFiles: { [lsgFile: string]: string[] } = {};
 const messageFiles: { [msgFile: string]: { [msgID: string]: string } } = {};
-let mapInfo: { [mapID: number]: MapInfo } | null = null;
-let elevatorInfo: { elevators: Elevator[] } | null = null;
+let mapInfo: { [mapID: number]: MapInfo }|null = null;
+let elevatorInfo: { elevators: Elevator[] }|null = null;
 let dirtyMapCache: { [mapName: string]: SerializedMap } = {};
 
 interface AreaMap {

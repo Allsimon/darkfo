@@ -34,7 +34,7 @@ module Encounters {
     interface VarNode { type: "var", name: string }
     interface IntNode { type: "int", value: number }
 
-    export type Node = IfNode | OpNode | CallNode | VarNode | IntNode;
+    export type Node = IfNode|OpNode|CallNode|VarNode|IntNode;
 
     function tokenizeCond(data: string): Token[] {
         const tokensRe: { [re: string]: number } = {
@@ -203,7 +203,7 @@ module Encounters {
             case "op":
                 const lhs = evalCond(node.lhs);
                 const rhs = evalCond(node.rhs);
-                const op: { [op: string]: (l: boolean | number, r: boolean | number) => boolean | number } = {
+                const op: { [op: string]: (l: boolean|number, r: boolean|number) => boolean|number } = {
                     "<": (l, r) => l < r,
                     ">": (l, r) => l > r,
                     "and": (l, r) => l && r
@@ -317,7 +317,7 @@ module Encounters {
         groups.forEach(function(group) {
             let dir = getRandomInt(0, 5);
             const formation = group.position.type;
-            let pos: Point | null = null;
+            let pos: Point|null = null;
 
             if(formation === "surrounding")
                 pos = {x: playerPos.x, y: playerPos.y};

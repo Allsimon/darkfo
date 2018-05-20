@@ -19,7 +19,7 @@ Scripting system/engine for DarkFO
 "use strict";
 
 module Scripting {
-    let gameObjects: Obj[] | null = null;
+    let gameObjects: Obj[]|null = null;
     let mapVars: any = null;
     const globalVars: any = {
         0: 50, // GVAR_PLAYER_REPUTATION
@@ -32,12 +32,12 @@ module Scripting {
         345: 16, // GVAR_NEW_RENO_FLAG_2 (16 = know_mordino_bit)
         357: 2, // GVAR_NEW_RENO_LIL_JESUS_REFERS (lil_jesus_refers_yes)
     };
-    let currentMapID: number | null = null;
-    let currentMapObject: Script | null = null;
+    let currentMapID: number|null = null;
+    let currentMapObject: Script|null = null;
     let mapFirstRun = true;
     const scriptMessages: { [scriptName: string]: { [msgID: number]: string } } = {};
     let dialogueOptionProcs: (() => void)[] = []; // Maps dialogue options to handler callbacks
-    let currentDialogueObject: Obj | null = null;
+    let currentDialogueObject: Obj|null = null;
     export var timeEventList: TimedEvent[] = [];
     let overrideStartPos: StartPos|null = null;
 
@@ -279,7 +279,7 @@ module Scripting {
         action_being_used: number;
         game_time_hour: number;
 
-        combat_is_initialized: 0 | 1;
+        combat_is_initialized: 0|1;
         game_time: number;
 
         // Script procedure prototypes
