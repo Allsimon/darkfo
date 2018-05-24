@@ -83,7 +83,7 @@ module Ui {
         }
     }
 
-    export class NumberWidget extends Widget {
+    class NumberWidget extends Widget {
         static readonly CHAR_WIDTH = 9;
         static readonly CHAR_WIDTH_PADDING = 1;
         static readonly CHAR_HEIGHT = 17;
@@ -91,8 +91,7 @@ module Ui {
 
         constructor() {
             super("art/intrface/numbers.png");
-            this.css({flex: '1', height: '17px'})
-                .onClick(() => this.toggleVisibility());
+            this.css({flex: '1', height: '17px'});
         }
     }
 

@@ -6,6 +6,7 @@ module Ui {
     export let characterWindow: CharacterScreen|null = null;
     export let hpNumber: NumberContainer;
     export let acNumber: NumberContainer;
+    export let apBar: ApBar;
 
     export function init() {
         $uiContainer = document.getElementById("game-container");
@@ -14,6 +15,10 @@ module Ui {
         characterWindow = new CharacterScreen();
         hpNumber = new HpNumber().show();
         acNumber = new AcNumber().show();
+        apBar = new ApBar().show();
+        // fixme: hook me in the combat system ========>
+        apBar.setAmount(6, 2, State.IN_COMBAT);
+        // fixme: hook me in the combat system ========<
 
         // initCharacterScreen();
 
@@ -45,8 +50,10 @@ module Ui {
                 top: `${bbox.y}px`,
                 width: `${bbox.w}px`,
                 height: `${bbox.h}px`,
-                backgroundImage: `url('${background}')`,
             });
+            if (background) {
+                this.elem.style.backgroundImage = `url('${background}')`;
+            }
 
             if (children) {
                 for (const child of children)
@@ -96,13 +103,19 @@ module Ui {
                     height: `${bbox.h}px`,
                 });
             }
-            if (background) {
+            this.setBackgroundUrl(background);
+        }
+
+        setBackgroundUrl(background?: string) {
+            if (!!background) {
                 this.elem.style.backgroundImage = `url('${background}')`;
+            } else {
+                delete this.elem.style.backgroundImage;
             }
         }
 
         onClick(fn: (widget?: Widget) => void): this {
-            this.elem.onclick = () => { fn(this); };
+            this.elem.onclick = () => fn(this);
             return this;
         }
 
@@ -111,12 +124,8 @@ module Ui {
 
             if (!this.elem.onmouseenter) {
                 // Set up events for hovering/not hovering
-                this.elem.onmouseenter = () => {
-                    this.elem.style.backgroundImage = `url('${this.hoverBackground}')`;
-                };
-                this.elem.onmouseleave = () => {
-                    this.elem.style.backgroundImage = `url('${this.background}')`;
-                };
+                this.elem.onmouseenter = () => this.setBackgroundUrl(this.hoverBackground);
+                this.elem.onmouseleave = () => this.setBackgroundUrl(this.background);
             }
 
             return this;
@@ -127,12 +136,8 @@ module Ui {
 
             if (!this.elem.onmousedown) {
                 // Set up events for mouse down/up
-                this.elem.onmousedown = () => {
-                    this.elem.style.backgroundImage = `url('${this.mouseDownBackground}')`;
-                };
-                this.elem.onmouseup = () => {
-                    this.elem.style.backgroundImage = `url('${this.background}')`;
-                };
+                this.elem.onmousedown = () => this.setBackgroundUrl(this.mouseDownBackground);
+                this.elem.onmouseup = () => this.setBackgroundUrl(this.background);
             }
 
             return this;
