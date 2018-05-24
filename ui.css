@@ -270,33 +270,6 @@ body {
   width: 150px; height: 190px;
 }
 
-.number {
-  position: absolute;
-  /* 0 1 2 3 4 5 6 7 8 9 turn1 turn2 - */
-  background-image: url("art/intrface/numbers.png");
-  width: 9px; height: 17px;
-}
-
-#hpNumber {
-  position: absolute;
-  left: 472px; top: 40px;
-}
-
-#acNumber {
-position: absolute;
-left: 472px; top: 75px;
-}
-
-#hpDigit1 { left: 0px; }
-#hpDigit2 { left: 9px; }
-#hpDigit3 { left: 18px; }
-#hpDigit4 { left: 27px; }
-
-#acDigit1 { left: 0px; }
-#acDigit2 { left: 9px; }
-#acDigit3 { left: 18px; }
-#acDigit4 { left: 27px; }
-
 #itemContextMenu {
   position: absolute;
   width: 40px; height: 260px; /* height? */
