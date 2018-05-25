@@ -13,7 +13,14 @@ namespace Ui {
       }
     }
 
-    setAmount(combatAp: number, moveAp: number, state = State.OUT_OF_COMBAT) {
+    setAmount(combatAp: number, moveAp: number) {
+      let state = State.OUT_OF_COMBAT;
+      if (combat) {
+        state = combat.inPlayerTurn
+          ? State.IN_COMBAT
+          : State.IN_COMBAT_ENEMY_TURN;
+      }
+
       for (let i = 0; i < this.MAX_AP; i++) {
         let currentIconState = State.OUT_OF_COMBAT;
 

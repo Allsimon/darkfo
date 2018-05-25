@@ -16,9 +16,6 @@ namespace Ui {
     hpNumber = new HpNumber().show();
     acNumber = new AcNumber().show();
     apBar = new ApBar().show();
-    // fixme: hook me in the combat system ========>
-    apBar.setAmount(6, 2, State.IN_COMBAT);
-    // fixme: hook me in the combat system ========<
 
     // initCharacterScreen();
 
@@ -116,7 +113,7 @@ namespace Ui {
       if (!!background) {
         this.elem.style.backgroundImage = `url('${background}')`;
       } else {
-        delete this.elem.style.backgroundImage;
+        this.elem.style.backgroundImage = null;
       }
     }
 
