@@ -8,13 +8,25 @@ namespace Ui {
         h: 368
       });
 
-      this.add(new Label(65, 13, "Skilldex"))
-        .add(
-          new Label(25, 85, "Lockpick").onClick(this.useSkill(Skills.Lockpick))
-        )
-        .add(
-          new Label(25, 300, "Repair").onClick(this.useSkill(Skills.Repair))
-        );
+      this.add(new Label(65, 13, "Skilldex"));
+
+      const sortedSkills = [
+        Skills.Sneak,
+        Skills.Lockpick,
+        Skills.Steal,
+        Skills.Traps,
+        Skills.FirstAid,
+        Skills.Doctor,
+        Skills.Science,
+        Skills.Repair
+      ];
+
+      // First skill is at 50 pixels, then 18px top-bottom margin
+      let y = 14;
+      for (let skill of sortedSkills) {
+        y = y + 36;
+        this.add(new Label(25, y, skill).onClick(this.useSkill(skill)));
+      }
     }
 
     useSkill(skill: Skills) {

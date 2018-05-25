@@ -53,9 +53,15 @@ let lastMousePickTime: number = 0; // time when we last checked what's under the
 let _lastFPSTime: number = 0; // Time since FPS counter was last updated
 
 enum Skills {
-    None = 0,
-    Lockpick,
-    Repair
+    None = "None",
+    Sneak = "Sneak",
+    Lockpick = "Lockpick",
+    Steal = "Steal",
+    Traps = "Traps",
+    FirstAid = "First aid",
+    Doctor = "Doctor",
+    Science = "Science",
+    Repair = "Repair"
 }
 
 let skillMode: Skills = Skills.None;
